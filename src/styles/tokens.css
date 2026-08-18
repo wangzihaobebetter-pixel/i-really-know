@@ -1,0 +1,119 @@
+/* ============================================================
+   I Really Know v2 — Design tokens · "The Marked Script"
+   Spec §5.2 Palette · §5.4 Spacing/Radius/Elevation
+   Color is meaning: three meaning-inks (owned/shaky/borrowed),
+   one divergence-ink (illusion), one action-ink (fountain blue).
+   ============================================================ */
+
+:root {
+  /* --- Paper (light) surfaces --- */
+  --paper: #F5F2EA;
+  --paper-2: #ECE7DB;
+  --sheet: #FBF9F4;
+  --hairline: #D9D2C2;
+
+  /* --- Ink --- */
+  --ink: #17150F;
+  --ink-2: #4A463C;
+  --ink-3: #8A8578;
+
+  /* --- Action --- */
+  --action: #1E3FBF;
+  --action-ink: #FFFFFF;
+  --action-wash: rgba(30, 63, 191, 0.10);
+
+  /* --- Verdict inks --- */
+  --owned: #1F6F50;
+  --shaky: #B8791A;
+  --borrowed: #C4381D;
+  --illusion: #8A1E5C;
+  --danger: #C4381D;
+
+  /* --- Verdict washes (highlights on the Painted Page) --- */
+  --owned-wash: rgba(31, 111, 80, 0.14);
+  --shaky-wash: rgba(184, 121, 26, 0.14);
+  --borrowed-wash: rgba(196, 56, 29, 0.14);
+  --illusion-wash: rgba(138, 30, 92, 0.14);
+
+  /* --- Focus --- */
+  --focus-ring: #1E3FBF;
+  --focus-inner: var(--paper);
+
+  /* --- Radius --- */
+  --r-mark: 2px;
+  --r-control: 6px;
+  --r-sheet: 10px;
+  --r-pill: 999px;
+
+  /* --- Space scale --- */
+  --space-1: 2px;
+  --space-2: 4px;
+  --space-3: 8px;
+  --space-4: 12px;
+  --space-5: 16px;
+  --space-6: 24px;
+  --space-7: 32px;
+  --space-8: 48px;
+  --space-9: 64px;
+  --space-10: 96px;
+
+  /* --- Elevation (paper is flat; structure comes from hairlines) --- */
+  --e0: 0 0 0 1px var(--hairline);
+  --e1: 0 1px 0 rgba(23, 21, 15, 0.06), 0 1px 2px rgba(23, 21, 15, 0.06);
+  --e2: 0 12px 32px -12px rgba(23, 21, 15, 0.28), 0 0 0 1px var(--hairline);
+
+  /* --- Layout --- */
+  --rail-w: 72px;
+  --tabbar-h: 56px;
+  --col-read: 720px;
+  --col-data: 1120px;
+  --gutter: 24px;
+  --gutter-mobile: 16px;
+
+  /* --- Type families --- */
+  --font-display: "Fraunces", Georgia, "Songti SC", "Times New Roman", serif;
+  --font-ui: "Inter", system-ui, -apple-system, "PingFang SC", "Noto Sans SC", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  /* --- Motion (§5.5): motion is a pen, not a party --- */
+  --ease: cubic-bezier(.2, .7, .2, 1);
+  --dur-fast: 120ms;
+  --dur: 180ms;
+  --dur-slow: 260ms;
+
+  color-scheme: light;
+}
+
+[data-theme="slate"] {
+  --paper: #141518;
+  --paper-2: #1B1D22;
+  --sheet: #1F2228;
+  --hairline: #2C3037;
+
+  --ink: #ECE7DA;
+  --ink-2: #B8B2A4;
+  --ink-3: #7C7768;
+
+  --action: #7B96FF;
+  --action-ink: #0F1530;
+  --action-wash: rgba(123, 150, 255, 0.14);
+
+  --owned: #4FB58C;
+  --shaky: #E0A845;
+  --borrowed: #F0674A;
+  --illusion: #E36FB2;
+  --danger: #F0674A;
+
+  --owned-wash: rgba(79, 181, 140, 0.22);
+  --shaky-wash: rgba(224, 168, 69, 0.22);
+  --borrowed-wash: rgba(240, 103, 74, 0.22);
+  --illusion-wash: rgba(227, 111, 178, 0.22);
+
+  --focus-ring: #7B96FF;
+  --focus-inner: var(--paper);
+
+  --e1: 0 0 0 1px #3A3F48;
+  --e2: 0 16px 40px -16px rgba(0, 0, 0, 0.7), 0 0 0 1px #3A3F48;
+
+  color-scheme: dark;
+}
