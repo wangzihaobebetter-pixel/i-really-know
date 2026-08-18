@@ -8,7 +8,7 @@
  *    new deploy is never hidden behind a stale cache. Falling back to the cached
  *    index.html keeps deep links working with no connection.
  */
-const CACHE = 'irk-v2';
+const CACHE = 'irk-v3';
 const CORE = ['./', './index.html', './manifest.webmanifest'];
 
 const isImmutable = (url) =>
@@ -42,8 +42,13 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(
       caches.match(req).then((hit) =>
         hit || fetch(req).then((res) => {
-          const copy = res.clone();
-          caches.open(CACHE).then((c) => c.put(req, copy));
+          // Only ever store a success. A 404 is a *successful* fetch as far as JS is
+          // concerned, so caching one here would pin a dead asset forever under
+          // cache-first — which is exactly how a deploy-window 404 bricked the app.
+          if (res.ok) {
+            const copy = res.clone();
+            caches.open(CACHE).then((c) => c.put(req, copy));
+          }
           return res;
         })),
     );
@@ -53,8 +58,10 @@ self.addEventListener('fetch', (event) => {
   event.respondWith(
     fetch(req)
       .then((res) => {
-        const copy = res.clone();
-        caches.open(CACHE).then((c) => c.put(req, copy));
+        if (res.ok) {
+          const copy = res.clone();
+          caches.open(CACHE).then((c) => c.put(req, copy));
+        }
         return res;
       })
       .catch(() => caches.match(req).then((m) => m || caches.match('./index.html'))),
