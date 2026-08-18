@@ -79,7 +79,9 @@ const paper = (page) => page.evaluate(() => { document.documentElement.dataset.t
   await click(page, ['Write the summary', '生成总评']);
   await new Promise((r) => setTimeout(r, 1500));
   await paper(page);
-  await page.screenshot({ path: 'shot-illusion-paper.png', fullPage: true });
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await new Promise((r) => setTimeout(r, 400));
+  await page.screenshot({ path: 'shot-illusion-paper.png' });
 
   await page.setViewport({ width: 390, height: 844, deviceScaleFactor: 3 });
   await new Promise((r) => setTimeout(r, 500));

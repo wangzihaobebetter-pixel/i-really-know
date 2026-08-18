@@ -110,7 +110,9 @@ export default function MapScreen() {
       <Sheet elevation={1}>
         <div className="stack-tight">
           <OwnershipBar counts={counts} showLegend />
-          <div className="row wrap" style={{ gap: 'var(--space-6)' }}>
+          {/* .row centres its children; these two blocks have different heights,
+              so their labels would not share a baseline. */}
+          <div className="row wrap" style={{ gap: 'var(--space-6)', alignItems: 'flex-start' }}>
             <div className="stack-tight">
               <span className="t-micro ink-3">{t('map.index')}</span>
               <span className="t-display-2 t-num">{session.ownershipIndex ?? '—'}</span>
