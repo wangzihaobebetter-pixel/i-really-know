@@ -264,3 +264,15 @@ table.dt tbody tr:hover td { background: var(--paper-2); }
   border-top: 1px solid var(--hairline);
 }
 .dim-poles p { margin: 0; }
+.viva-leave {
+  background: none;
+  border: 0;
+  padding: 2px 6px 2px 0;
+  font: inherit;
+  font-size: .8125rem;
+  color: var(--ink-3);
+  cursor: pointer;
+  border-radius: var(--r-control);
+}
+.viva-leave:hover { color: var(--ink); }
+.viva-leave:focus-visible { outline: 2px solid var(--action); outline-offset: 2px; }

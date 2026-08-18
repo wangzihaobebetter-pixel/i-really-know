@@ -72,6 +72,8 @@ registerStrings('import', {
 
 registerStrings('viva', {
   en: {
+    leave: '← Leave',
+    fromSubmission: 'from your submission',
     commit: 'Commit answer',
     committing: 'Scoring…',
     skip: 'I cannot answer this',
@@ -94,6 +96,8 @@ registerStrings('viva', {
     scoreFailed: 'Scoring failed. Your answer is saved; you can retry or carry on self-graded.',
   },
   'zh-CN': {
+    leave: '← 退出',
+    fromSubmission: '来自你的原文',
     commit: '提交回答',
     committing: '评分中…',
     skip: '我答不上来',

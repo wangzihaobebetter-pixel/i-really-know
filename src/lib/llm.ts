@@ -13,6 +13,7 @@ import {
   buildScorePrompt, buildVariantPrompt,
 } from './prompts';
 import { getPack } from '../packs';
+import { translate } from '../i18n';
 import { asScore, placeAnchor } from './analysis';
 
 const JSON_MODE_PROVIDERS = new Set(['openai', 'deepseek', 'moonshot', 'siliconflow', 'openrouter']);
@@ -318,15 +319,20 @@ export async function ping(settings: Settings, opts: CallOpts = {}): Promise<str
   }, opts);
 }
 
+/**
+ * User-facing failure text. Goes through i18n like everything else — these are
+ * the messages a user is most likely to see, so they must not be the one part
+ * of the UI stuck in English.
+ */
 export function describeError(e: unknown): string {
   if (e instanceof LlmError) {
     switch (e.kind) {
-      case 'auth': return 'Your provider rejected the API key. Check it in Settings.';
-      case 'rate': return 'The provider is rate-limiting or unavailable. Try again in a moment.';
-      case 'parse': return 'The model returned something this app could not read. Retry usually fixes it.';
-      case 'aborted': return 'Cancelled.';
-      default: return e.message;
+      case 'auth': return translate('common.error.auth');
+      case 'rate': return translate('common.error.rate');
+      case 'parse': return translate('common.error.parse');
+      case 'aborted': return translate('common.error.aborted');
+      default: return e.message || translate('common.error.network');
     }
   }
-  return e instanceof Error ? e.message : 'Something went wrong.';
+  return e instanceof Error && e.message ? e.message : translate('common.error.network');
 }

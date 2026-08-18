@@ -41,6 +41,11 @@ registerStrings('common', {
     'state.notfound.title': 'Nothing here.',
     'state.notfound.action': 'Back to Verify',
     'state.error.title': 'That screen failed to load.',
+    'error.auth': 'Your provider rejected the API key. Check it in Settings.',
+    'error.rate': 'The provider is rate-limiting or unavailable. Try again in a moment.',
+    'error.parse': 'The model returned something this app could not read. Retrying usually fixes it.',
+    'error.aborted': 'Cancelled.',
+    'error.network': 'The request could not reach the provider. Check the API base URL and your connection.',
     'soon': 'Coming in this build',
   },
   'zh-CN': {
@@ -83,6 +88,11 @@ registerStrings('common', {
     'state.notfound.title': '这里什么都没有。',
     'state.notfound.action': '回到检验',
     'state.error.title': '这个页面加载失败。',
+    'error.auth': '提供方拒绝了这个 API key。去设置里检查一下。',
+    'error.rate': '提供方正在限流或暂时不可用。过一会儿再试。',
+    'error.parse': '模型返回了这个应用读不了的内容。重试一次通常就好了。',
+    'error.aborted': '已取消。',
+    'error.network': '请求没能到达提供方。检查一下 API 地址和网络。',
     'soon': '本版本正在构建',
   },
 });

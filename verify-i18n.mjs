@@ -10,12 +10,26 @@ const files = execSync("find src -name '*.tsx' -o -name '*.ts'", { encoding: 'ut
   .trim().split('\n');
 
 const registered = new Set();
+const perLang = { en: new Set(), 'zh-CN': new Set() };
 for (const f of files.filter((x) => x.includes('/i18n/'))) {
   const src = readFileSync(f, 'utf8');
   for (const block of src.matchAll(/registerStrings\('([\w-]+)',\s*\{([\s\S]*?)\n\}\);/g)) {
     const pkg = block[1];
-    for (const k of block[2].matchAll(/^\s{4}'?([\w.]+)'?:/gm)) {
-      registered.add(k[1].startsWith(pkg + '.') ? k[1] : `${pkg}.${k[1]}`);
+    const body = block[2];
+    // Split the two language tables so parity can be checked; translate()
+    // falls back to en and then to the raw key, so en-missing ships visibly.
+    const enStart = body.indexOf('en: {');
+    const zhStart = body.indexOf("'zh-CN': {");
+    const sections = [
+      ['en', enStart >= 0 ? body.slice(enStart, zhStart > enStart ? zhStart : undefined) : ''],
+      ['zh-CN', zhStart >= 0 ? body.slice(zhStart) : ''],
+    ];
+    for (const [lang, section] of sections) {
+      for (const k of section.matchAll(/^\s{4}'?([\w.]+)'?:/gm)) {
+        const full = k[1].startsWith(pkg + '.') ? k[1] : `${pkg}.${k[1]}`;
+        registered.add(full);
+        perLang[lang].add(full);
+      }
     }
   }
 }
@@ -43,7 +57,12 @@ for (const [key, file] of used) {
   }
 }
 
-console.log(`verify-i18n: ${registered.size} keys registered, ${used.size} used`);
+const onlyZh = [...perLang['zh-CN']].filter((k) => !perLang.en.has(k));
+const onlyEn = [...perLang.en].filter((k) => !perLang['zh-CN'].has(k));
+for (const k of onlyZh) missing.push([`${k} (missing in en — would render as the raw key)`, 'src/i18n']);
+for (const k of onlyEn) missing.push([`${k} (missing in zh-CN)`, 'src/i18n']);
+
+console.log(`verify-i18n: ${registered.size} keys registered (en ${perLang.en.size}, zh-CN ${perLang['zh-CN'].size}), ${used.size} used`);
 if (missing.length) {
   console.error(`verify-i18n: ${missing.length} MISSING keys`);
   missing.forEach(([k, f]) => console.error(`  ✗ ${k}  (${f})`));

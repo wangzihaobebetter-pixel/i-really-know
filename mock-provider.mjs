@@ -11,6 +11,16 @@ import { createServer } from 'node:http';
 const PORT = Number(process.env.MOCK_PORT || 4188);
 const seen = [];
 
+/**
+ * Fault injection, driven by the model name so a test can ask for a specific
+ * failure without a side channel:
+ *   fault-401        → always 401 (rejected key)
+ *   fault-429-once   → 429 on the first call, then normal (backoff path)
+ *   fault-badjson    → prose instead of JSON on the first call (repair path)
+ */
+const faultState = new Map();
+let lastGenerateUser = '';
+
 function classify(system, user) {
   if (/repair malformed JSON/i.test(system)) return 'REPAIR';
   if (/Reply with the single word/i.test(system)) return 'PING';
@@ -37,6 +47,9 @@ const DIMS = ['design', 'invariants', 'complexity', 'edges', 'testing', 'provena
 function body(kind, user) {
   switch (kind) {
     case 'PING': return 'ok';
+    // A real repair call returns the same content, corrected. Reuse the last
+    // GENERATE input so the anchors still refer to the student's material.
+    case 'REPAIR': return body('GENERATE', lastGenerateUser);
     case 'GENERATE': {
       const count = Number(user.match(/produce exactly (\d+) probes/)?.[1] || 6);
       const quotes = anchorsFrom(user, count + 1);
@@ -106,6 +119,12 @@ function body(kind, user) {
 }
 
 const server = createServer((req, res) => {
+  if (req.method === 'GET' && req.url === '/__reset') {
+    seen.length = 0;
+    faultState.clear();
+    res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+    return res.end('{"ok":true}');
+  }
   if (req.method === 'GET' && req.url === '/__seen') {
     res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
     return res.end(JSON.stringify(seen, null, 2));
@@ -125,6 +144,7 @@ const server = createServer((req, res) => {
     const system = payload.messages?.[0]?.content ?? '';
     const user = payload.messages?.[1]?.content ?? '';
     const kind = classify(system, user);
+    if (kind === 'GENERATE') lastGenerateUser = user;
 
     const violations = [];
     if (!/^Bearer .+/.test(req.headers.authorization || '')) violations.push('missing bearer token');
@@ -138,7 +158,23 @@ const server = createServer((req, res) => {
     if (kind === 'GENERATE' && !/NEVER help complete/.test(system)) violations.push('invariants missing from system prompt');
     seen.push({ kind, model: payload.model, temperature: payload.temperature, violations });
 
-    const content = body(kind, user);
+    const model = String(payload.model || '');
+    const nth = (faultState.get(model) || 0) + 1;
+    faultState.set(model, nth);
+
+    if (model.includes('fault-401')) {
+      res.writeHead(401, { 'Content-Type': 'application/json', ...cors });
+      return res.end(JSON.stringify({ error: { message: 'Invalid API key' } }));
+    }
+    if (model.includes('fault-429-once') && nth === 1) {
+      res.writeHead(429, { 'Content-Type': 'application/json', ...cors });
+      return res.end(JSON.stringify({ error: { message: 'Rate limited' } }));
+    }
+
+    let content = body(kind, user);
+    if (model.includes('fault-badjson') && kind !== 'REPAIR' && nth === 1) {
+      content = 'Sure! Here is the JSON you asked for:\n\nOops, actually I forgot to include it.';
+    }
     res.writeHead(200, { 'Content-Type': 'application/json', ...cors });
     res.end(JSON.stringify({
       id: 'mock', object: 'chat.completion', model: payload.model,

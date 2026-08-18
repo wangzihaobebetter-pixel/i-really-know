@@ -14,7 +14,9 @@
     "verify:pwa": "node verify-pwa.mjs",
     "verify:contrast": "node verify-contrast.cjs",
     "verify:keyed": "node verify-keyed.cjs",
-    "mock": "node mock-provider.mjs"
+    "mock": "node mock-provider.mjs",
+    "verify:errors": "node verify-errors.cjs",
+    "verify:all": "npm run build && npm run verify:e2e && npm run verify:keyed && npm run verify:errors && npm run verify:contrast"
   },
   "dependencies": {
     "idb-keyval": "^6.2.1",

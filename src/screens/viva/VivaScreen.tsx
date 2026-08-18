@@ -133,7 +133,12 @@ export default function VivaScreen() {
     <div className="col-read stack viva">
       <div className="stack-tight">
         <div className="row-between wrap" style={{ gap: 'var(--space-3)' }}>
-          <span className="t-small ink-3">{t('viva.of', { n: index + 1, total })}</span>
+          <div className="row" style={{ gap: 'var(--space-3)' }}>
+            <button type="button" className="viva-leave" onClick={() => nav('home')}>
+              {t('viva.leave')}
+            </button>
+            <span className="t-small ink-3">{t('viva.of', { n: index + 1, total })}</span>
+          </div>
           <div className="row" style={{ gap: 'var(--space-3)' }}>
             <Tag mono>{pack.shortName}</Tag>
             {dimension && <Tag>{dimension.label}</Tag>}
@@ -143,22 +148,30 @@ export default function VivaScreen() {
         <SegmentStrip total={total} current={index} states={states} />
       </div>
 
-      {probe.anchor.placed && probe.anchor.start !== undefined && (
-        <Sheet elevation={0} padding="var(--space-4) var(--space-5)">
-          <span className="t-micro ink-3">from your submission</span>
-          <AnchoredText
-            text={session.material.slice(
-              Math.max(0, (probe.anchor.start ?? 0) - 260),
-              Math.min(session.material.length, (probe.anchor.end ?? 0) + 260),
-            )}
-            mode={session.materialKind === 'code' ? 'code' : 'prose'}
-            anchors={[]}
-          />
-        </Sheet>
-      )}
+      {probe.anchor.placed && probe.anchor.start !== undefined && (() => {
+        // Show the anchor in context, and mark it — otherwise the reader has to
+        // guess which sentence the probe is actually about.
+        const from = Math.max(0, probe.anchor.start! - 260);
+        const to = Math.min(session.material.length, (probe.anchor.end ?? probe.anchor.start!) + 260);
+        return (
+          <Sheet elevation={0} padding="var(--space-4) var(--space-5)">
+            <span className="t-micro ink-3">{t('viva.fromSubmission')}</span>
+            <AnchoredText
+              text={`${from > 0 ? '…' : ''}${session.material.slice(from, to)}${to < session.material.length ? '…' : ''}`}
+              mode={session.materialKind === 'code' ? 'code' : 'prose'}
+              anchors={[{
+                id: probe.id,
+                start: (from > 0 ? 1 : 0) + probe.anchor.start! - from,
+                end: (from > 0 ? 1 : 0) + (probe.anchor.end ?? probe.anchor.start!) - from,
+                verdict: 'none',
+              }]}
+            />
+          </Sheet>
+        );
+      })()}
       {!probe.anchor.placed && probe.anchor.quote && (
         <Sheet elevation={0} padding="var(--space-4) var(--space-5)">
-          <span className="t-micro ink-3">from your submission</span>
+          <span className="t-micro ink-3">{t('viva.fromSubmission')}</span>
           <p className="t-mono t-small">{probe.anchor.quote}</p>
         </Sheet>
       )}

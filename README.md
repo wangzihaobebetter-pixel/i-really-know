@@ -62,12 +62,25 @@ requests go straight from your machine to the provider you choose. Exports never
 
 ```bash
 npm install
-npm run dev            # http://localhost:4173
-npm run build          # tsc + sample-anchor check + i18n key check + vite build
-npm run verify:samples # every sample anchor is a verbatim substring of its material
-npm run verify:i18n    # every t() key resolves — a missing one renders as the raw key
-npm run verify:e2e     # drives a real Chrome through a full keyless run (needs a preview server)
+npm run dev              # http://localhost:4173
+npm run build            # tsc + sample anchors + i18n parity + PWA assets + vite build
+
+# Static checks (run inside the build):
+npm run verify:samples   # every sample anchor is a verbatim substring of its material
+npm run verify:i18n      # every t() key resolves, in BOTH languages
+npm run verify:pwa       # every declared icon exists at its declared size
+
+# Browser checks (need `npm run preview` on :4177, and `npm run mock` on :4188):
+npm run verify:e2e       # a full keyless run, the Painted Page, 390px, every route
+npm run verify:keyed     # the keyed path against a mock provider — all five calls
+npm run verify:errors    # rejected key, rate-limit backoff, malformed-JSON repair
+npm run verify:contrast  # WCAG AA on real computed colours, both themes
 ```
+
+`mock-provider.mjs` is a local OpenAI-compatible server used by the keyed and
+error tests. It asserts the request contract too — bearer token, model,
+temperature, exactly system+user, and the material wrapped in its untrusted
+delimiters — so the client cannot quietly drift out of shape.
 
 Stack: React 18 · TypeScript · Vite · Zustand (persisted to IndexedDB) · hash routing · PWA.
 No backend, no analytics, no accounts.
