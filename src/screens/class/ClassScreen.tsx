@@ -1,4 +1,94 @@
-import { Placeholder } from '../../app/Placeholder';
+import React, { useState } from 'react';
+import { useStore, selectHasKey } from '../../store';
+import { PACKS, getPack } from '../../packs';
+import { useNavigate } from '../../router';
+import { useT, useLang } from '../../i18n';
+import { Button, Callout, EmptyState, Input, Select, Sheet, Tag } from '../../ui';
+import { formatDate } from '../../lib/session-ops';
+import { id, now } from '../../lib/ids';
+import type { Cohort, PackId } from '../../types';
+
 export default function ClassScreen() {
-  return <Placeholder screen="Class" owner="WP7" does="Cohorts for instructors and TAs. Everything stays on this machine." />;
+  const t = useT();
+  const lang = useLang();
+  const nav = useNavigate();
+  const cohorts = useStore((s) => s.cohorts);
+  const settings = useStore((s) => s.settings);
+  const hasKey = useStore(selectHasKey);
+  const upsertCohort = useStore((s) => s.upsertCohort);
+
+  const [name, setName] = useState('');
+  const [packId, setPackId] = useState<PackId>('cs');
+
+  function create() {
+    if (!name.trim()) return;
+    const cohort: Cohort = {
+      id: id('c'),
+      name: name.trim(),
+      packId,
+      preset: settings.preset,
+      difficulty: settings.difficulty,
+      createdAt: now(),
+      submissions: [],
+    };
+    upsertCohort(cohort);
+    setName('');
+    nav('cohort', { cohortId: cohort.id });
+  }
+
+  return (
+    <div className="col-read stack">
+      <header className="stack-tight">
+        <h1 className="t-display-2">{t('class.title')}</h1>
+        <p className="t-body ink-2 measure">{t('class.subtitle')}</p>
+      </header>
+
+      {!hasKey && <Callout tone="action">{t('class.needKey')}</Callout>}
+
+      <Sheet elevation={1}>
+        <div className="stack-tight">
+          <Input
+            label={t('class.name')}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="CS 621 · Problem Set 3"
+          />
+          <Select
+            label={t('import.detected')}
+            value={packId}
+            onChange={(e) => setPackId(e.target.value as PackId)}
+            options={PACKS.map((p) => ({ value: p.id, label: p.name }))}
+          />
+          <div className="row">
+            <Button variant="primary" onClick={create} disabled={!name.trim()}>{t('class.newCohort')}</Button>
+          </div>
+        </div>
+      </Sheet>
+
+      {cohorts.length === 0 ? (
+        <EmptyState title={t('class.empty')} />
+      ) : (
+        <div className="stack-tight">
+          {cohorts.map((c) => (
+            <Sheet key={c.id} elevation={1} padding="var(--space-4) var(--space-5)">
+              <div className="row-between wrap" style={{ gap: 'var(--space-3)' }}>
+                <div className="stack-tight">
+                  <div className="row wrap" style={{ gap: 'var(--space-2)' }}>
+                    <span className="t-body-strong">{c.name}</span>
+                    <Tag mono>{getPack(c.packId).shortName}</Tag>
+                  </div>
+                  <span className="t-small ink-3">
+                    {formatDate(c.createdAt, lang)} · {c.submissions.length} {t('class.submissions').toLowerCase()}
+                  </span>
+                </div>
+                <Button size="sm" variant="secondary" onClick={() => nav('cohort', { cohortId: c.id })}>
+                  {t('class.openSheet')}
+                </Button>
+              </div>
+            </Sheet>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 }

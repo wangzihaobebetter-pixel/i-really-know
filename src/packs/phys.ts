@@ -1,0 +1,55 @@
+import { definePack, detect, dim } from './kit';
+
+/** Spec §3.3.9 — Physics & Engineering. */
+export const physPack = definePack({
+  id: 'phys',
+  name: 'Physics & Engineering',
+  shortName: 'Phys',
+  glyph: 'glyph-phys',
+  tagline: 'Set the mass to zero. Is the result physical?',
+  materialKinds: ['problem sets', 'lab reports', 'derivations', 'design calculations', 'simulations'],
+  detect: detect(
+    [['free body', 4], ['torque', 4], ['boundary condition', 4], ['Ohm', 3], ['stress', 3], ['strain', 3],
+     ['Laplace', 3], ['damping', 3], ['uncertainty', 3], ['Newton', 3], ['voltage', 3], ['steady-state', 3],
+     ['idealis', 3], ['idealiz', 3], ['propagat', 2]],
+    [['\\bm/s\\^?2\\b', 3], ['\\b\\d+(\\.\\d+)?\\s*(kg|N|J|W|Hz|Ω|V|A)\\b', 3], ['±\\s*\\d', 3]],
+  ),
+  dimensions: [
+    dim('model', 'Model / idealisation choice', 'Why frictionless, lumped, linear, steady-state.',
+      ['Which idealisation is doing the most work here, and when does it stop being safe?'],
+      'Names the idealisation and its validity range.', 'Applies the idealisation without noticing it.'),
+    dim('governing', 'Governing equation provenance', 'Where the equation comes from; which term is which.',
+      ['Which law is this, and what does each term physically represent?'],
+      'Derives or attributes each term.', 'Quotes the formula sheet.'),
+    dim('limits', 'Units & limiting cases', 'Dimensional sanity; m→0, t→∞, R→0.',
+      ['Set the mass to zero in your final expression — is the result physical?'],
+      'Uses a limit as a live check on their own algebra.', 'Has not tried a limit.'),
+    dim('failure', 'Assumption failure', 'When the model breaks and what the first symptom is.',
+      ['What is the first thing you would measure that tells you the model has failed?'],
+      'Names an observable symptom.', 'Says the model is "an approximation".'),
+    dim('numeric', 'Numeric provenance', 'This constant, boundary condition, sign convention.',
+      ['Where did that boundary condition come from, and what fixes the sign?'],
+      'Justifies the convention and the value.', 'Says it was "given".'),
+    dim('perturbation', 'Perturbation', 'Change one parameter → direction and rough magnitude.',
+      ['Double the damping — which way does the response go, and roughly how much?'],
+      'Gives direction and order of magnitude.', 'Gives direction only, or guesses.'),
+    dim('uncertainty', 'Measurement & uncertainty', 'Which measured quantity dominates the error.',
+      ['Which measured quantity dominates your ±, and by how much?'],
+      'Identifies the dominant term with a rough share.', 'Propagates uncertainty mechanically.'),
+  ],
+  counterfactualLevers: [
+    'remove an idealisation', 'take an extreme parameter limit', 'flip a sign convention', 'add friction or damping',
+  ],
+  tells: [
+    'a derivation with all steps but the wrong idealisation for the setup',
+    'uncertainties propagated perfectly from unstated measurements',
+    'simulation results with no sanity check against a hand estimate',
+  ],
+  vocabularyTraps: ['negligible', 'ideal', 'linear', 'steady-state', 'conserved'],
+  languageNote: 'Quote equations and numbers with their units exactly as written. Ask for limit checks rather than supplying the corrected derivation.',
+  sampleProbes: [
+    'Set the mass to zero in your final expression — is the result physical? What does that tell you about your derivation?',
+    'Where in your free-body diagram did you decide the normal force is perpendicular, and what changes if the incline is accelerating?',
+    'Your uncertainty is ±0.02 m/s². Which measured quantity dominates it, and by how much?',
+  ],
+});

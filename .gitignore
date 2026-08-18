@@ -3,3 +3,4 @@ dist/
 .DS_Store
 *.log
 verify-shots/
+shot-*.png

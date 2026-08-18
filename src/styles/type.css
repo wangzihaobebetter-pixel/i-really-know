@@ -18,3 +18,6 @@
   .t-display-1 { font-size: 2.125rem; }
   .t-display-2 { font-size: 1.625rem; }
 }
+
+.t-body-strong { font: var(--t-body, inherit); font-weight: 600; color: var(--ink); }
+.t-mono-small { font-family: var(--font-mono); font-size: 0.78rem; letter-spacing: 0.01em; }

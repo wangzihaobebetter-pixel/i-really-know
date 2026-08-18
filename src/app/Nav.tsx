@@ -62,7 +62,7 @@ export function NavRail({ route }: { route: Route }) {
         display: 'flex', flexDirection: 'column', gap: 2, padding: 'var(--space-5) 4px', zIndex: 30,
       }}
     >
-      <div style={{ display: 'grid', gap: 2, flex: 1 }}>{ITEMS.map(item)}</div>
+      <div style={{ display: 'grid', gap: 2, flex: 1, alignContent: 'start' }}>{ITEMS.map(item)}</div>
       {item(SETTINGS_ITEM)}
     </nav>
   );

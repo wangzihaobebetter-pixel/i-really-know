@@ -1,48 +1,73 @@
-# 我真会 · I Really Know
+# I Really Know · 我真会
 
-> 检验你是真懂，还是 AI 替你懂了。
+A learning-**verification** tool. You submit work you have already written; it does not help you
+finish it. It generates an oral-examination style interrogation aimed at what *you* wrote, and
+returns a map of what you can actually defend versus what the AI understood on your behalf.
 
-你交一份作业 / 报告 / 代码，它**不帮你做**。它根据你交的这份东西，生成一场
-**只有你真懂才答得上来的检验**——针对你写的那几行、你选的那个方法、你没选的那些方法。
-几分钟，出一张「你哪部分是真懂、哪部分是 AI 替你懂了」的地图。
+**Live:** https://wangzihaobebetter-pixel.github.io/i-really-know/
 
-## 为什么做这个
+## The three refusals
 
-- 整个教育 AI 赛道都在做同一件事：**帮你更快完成**。没人做「检验你是否真的会」。
-- 学校和教授已经知道作业失去信号了，正在被迫转向口试、答辩、课堂验证——他们没有工具。
-- 「分数很高但心里发虚」的人需要知道自己到底空在哪。这个工具就是那面镜子。
+1. It never helps complete, fix or improve the submitted work.
+2. It never asks anything answerable by copying from the material — every probe demands a
+   justification, an origin, a perturbation, a weakness, or a restatement with a boundary case.
+3. It never accuses. Stylistic patterns aim the questions; the app never claims your work was
+   written by anyone else. The vocabulary is *owned / working / surface / absent*.
 
-## 核心交互
+## How a run works
 
-1. **提交材料**：粘贴作业 / 报告 / 代码 / 笔记（至少 20 字）。
-2. **生成检验**：AI 基于你的材料生成 N 道题（题数、难度可选），题型覆盖：
-   概念解释 / 方法选择 / 细节追问 / 反事实 / 盲点探测。
-3. **逐题作答**：写答案（或心里答）→ 看参考答案对照 → 自评三档：
-   `✓ 我真懂` / `~ 有点模糊` / `✗ 其实是 AI 替懂的`。
-4. **真懂地图**：按三档聚合，一眼看出哪里是真懂、哪里经不起追问。
-   可选让 AI 生成一段针对性的诊断。
+Paste your work → the discipline is detected locally → probes are generated, each anchored to a
+verbatim span of your own text → you answer → **you self-grade before any score is shown** → then
+the AI score is revealed.
 
-## 运行方式
+That ordering is the product. If the score comes first, self-assessment anchors on it and the
+divergence signal is destroyed. The interesting output is not the score, it is the gap:
 
-- **电脑**：双击 `Start I Really Know.command`（自动起服务并打开浏览器），
-  或 `npm install && npx vite preview --port 4174 --host`。
-- **手机 App 版（PWA）**：同一 Wi-Fi 下用手机打开启动脚本打印的 `Network:` 地址，
-  用浏览器菜单「添加到主屏幕 / Add to Home Screen」——之后全屏运行、支持离线，像原生 App。
-- **开发**：`npm run dev`。
+| Class | Meaning |
+|---|---|
+| **Illusion** | You said you owned it. You could not defend it. |
+| **Undersold** | You sold yourself short. |
+| **Owned** | Both agree. |
+| **Borrowed** | An honest gap. |
+| **Half-held** | Everything else. |
 
-## 配置
+It ends on the **Painted Page**: your own submission, rendered as a page, with each examined span
+inked in its verdict colour.
 
-- 设置页填 API Key（OpenAI 兼容接口，支持 OpenAI / DeepSeek / OpenRouter / Moonshot /
-  SiliconFlow 等，一键切换预设）。
-- **Key 只存在你自己的浏览器 localStorage 里**，请求直接从你的浏览器发往模型服务商，
-  不经过任何中转服务器——零后端、零账号、数据不出你的设备。
+## Discipline packs
 
-## 数据
+A generic template produces questions a fluent parrot can answer. Eleven packs encode what a real
+examiner in each field actually attacks:
 
-- 所有检验记录存在浏览器 localStorage。
-- 设置页可导出 / 导入完整 JSON 备份（换设备时手动搬）。
+CS/Software · Biology · Medicine/Clinical · Mathematics & Proof · Statistics · Machine Learning ·
+Chemistry · Clinical Research & Epidemiology · Physics & Engineering · Argument & Essay · General
 
-## 技术栈
+Each carries its own dimensions, examiner moves, counterfactual levers, vocabulary traps and 0–3
+rubric. A CS examiner asks about the invariant on line 23; a clinician asks which finding moved PE
+below pneumonia; a statistician asks you to reconstruct df = 47.
 
-React 18 + TypeScript + Vite + Zustand（persist）。PWA（manifest + Service Worker + 图标），
-桌面 / 手机自适应，移动端触控优化（44px 目标、16px 表单防缩放、100dvh、safe-area）。
+## Works with no API key
+
+Eight pre-baked sample runs ship with the app — real submissions across CS, medicine, biology, ML,
+statistics, chemistry, policy evaluation and nursing, each with a hand-written examiner set. The
+whole product, including the Painted Page and self-grading, is usable offline on first open.
+
+## Your own work needs a key
+
+Bring your own OpenAI-compatible key (OpenAI, DeepSeek, OpenRouter, Moonshot, SiliconFlow, or any
+custom base URL). **There is no server in this product.** The key is stored in your browser and
+requests go straight from your machine to the provider you choose. Exports never include the key.
+
+## Develop
+
+```bash
+npm install
+npm run dev            # http://localhost:4173
+npm run build          # tsc + sample-anchor check + i18n key check + vite build
+npm run verify:samples # every sample anchor is a verbatim substring of its material
+npm run verify:i18n    # every t() key resolves — a missing one renders as the raw key
+npm run verify:e2e     # drives a real Chrome through a full keyless run (needs a preview server)
+```
+
+Stack: React 18 · TypeScript · Vite · Zustand (persisted to IndexedDB) · hash routing · PWA.
+No backend, no analytics, no accounts.

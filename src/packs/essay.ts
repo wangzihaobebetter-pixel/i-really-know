@@ -1,0 +1,56 @@
+import { definePack, detect, dim } from './kit';
+
+/** Spec §3.3.10 — Argument & Essay (humanities / social science). */
+export const essayPack = definePack({
+  id: 'essay',
+  name: 'Argument & Essay',
+  shortName: 'Essay',
+  glyph: 'glyph-essay',
+  tagline: 'State the strongest objection. Is it in your essay?',
+  materialKinds: ['argumentative essays', 'literature reviews', 'policy memos', 'response papers'],
+  detect: detect(
+    [['thesis', 3], ['argue', 2], ['scholars', 3], ['however', 1], ['ibid', 4], ['discourse', 3],
+     ['critique', 2], ['literature review', 3], ['paragraph', 1], ['counterargument', 3]],
+    [['\\([A-Z][a-z]+,\\s*\\d{4}\\)', 4], ['\\b[A-Z][a-z]+\\s+\\(\\d{4}\\)', 3], ['"[^"]{20,}"', 2]],
+  ),
+  dimensions: [
+    dim('thesis', 'Thesis in own words', 'And what it rules out.',
+      ['State your thesis in one sentence, then name a position it excludes.'],
+      'Restates crisply and names what it denies.', 'Repeats the introduction verbatim.'),
+    dim('evidence', 'Evidence provenance', 'Why this source; the exact passage relied on; what it actually says.',
+      ['Which sentence in that source are you relying on — and what would its author say about your next paragraph?'],
+      'Quotes the load-bearing passage and handles the author’s likely objection.', 'Cites the source as a name only.'),
+    dim('objection', 'Strongest objection', 'The best opposing view in one sentence.',
+      ['State the strongest version of the opposing view. Is that version in your essay?'],
+      'Steel-mans the opposition and locates the gap honestly.', 'Attacks a weak version.'),
+    dim('definition', 'Concept definition & boundary', 'Key term restated; a case at its edge.',
+      ['Give me a case that only just counts as this term.'],
+      'Produces a boundary case and explains the edge.', 'Recycles the essay’s own phrasing.'),
+    dim('structure', 'Structure rationale', 'Why this order; what survives a word cap.',
+      ['Capped at 500 words — which paragraph goes first, and why does the argument survive?'],
+      'Identifies the load-bearing paragraph.', 'Defends the five-paragraph shape as such.'),
+    dim('counterfactual', 'Counterfactual', 'If evidence X were false, what changes.',
+      ['Suppose that study were retracted. What in your conclusion changes?'],
+      'Traces the dependency through the argument.', 'Says the argument would "still hold".'),
+    dim('retractable', 'Retractable claims', 'The sentence they would defend least.',
+      ['Which sentence in this essay would you defend last?'],
+      'Names a real weak point and why.', 'Claims all of it is well supported.'),
+  ],
+  counterfactualLevers: [
+    'remove a source', 'a counterexample from the same corpus', 'halve the length', 'flip the audience',
+  ],
+  tells: [
+    'five-paragraph symmetry', '"it is important to note"',
+    'smooth quotations from sources not on the syllabus',
+    'every paragraph ending in restatement',
+    'abstract nouns with no concrete instance',
+    'stacked hedges ("arguably it could be suggested")',
+  ],
+  vocabularyTraps: ['problematic', 'nuanced', 'explores', 'sheds light on', 'discourse'],
+  languageNote: 'Quote the student’s own sentence verbatim, including citations. Never rewrite or improve their prose.',
+  sampleProbes: [
+    'Paragraph 3 cites Foucault. What is the sentence in his text you are relying on — and what would he say about your paragraph 4?',
+    'State the strongest version of the opposing view in one sentence. Is that version in your essay?',
+    'If I capped you at 500 words, which paragraph goes first, and why does the argument survive without it?',
+  ],
+});

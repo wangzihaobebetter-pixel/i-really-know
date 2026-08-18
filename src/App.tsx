@@ -9,6 +9,7 @@ import { useRoute, navigate } from './router';
 import { Button, EmptyState } from './ui';
 import { useT } from './i18n';
 import './i18n/common';
+import './i18n/screens';
 
 const HomeScreen         = lazy(() => import('./screens/home/HomeScreen'));
 const VivaScreen         = lazy(() => import('./screens/viva/VivaScreen'));
