@@ -5,12 +5,14 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host",
-    "build": "tsc --noEmit && node verify-samples.mjs && node verify-i18n.mjs && vite build",
+    "build": "tsc --noEmit && node verify-samples.mjs && node verify-i18n.mjs && node verify-pwa.mjs && vite build",
     "preview": "vite preview --host",
     "start": "vite --port 4173 --host",
     "verify:samples": "node verify-samples.mjs",
     "verify:i18n": "node verify-i18n.mjs",
-    "verify:e2e": "node verify-e2e.cjs"
+    "verify:e2e": "node verify-e2e.cjs",
+    "verify:pwa": "node verify-pwa.mjs",
+    "verify:contrast": "node verify-contrast.cjs"
   },
   "dependencies": {
     "idb-keyval": "^6.2.1",
