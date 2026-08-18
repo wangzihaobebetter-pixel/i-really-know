@@ -11,7 +11,14 @@ export const csPack = definePack({
   detect: detect(
     [['def ', 3], ['class ', 2], ['import ', 2], ['return ', 2], ['#include', 3], ['public static', 3],
      ['function', 2], ['const ', 1], ['async ', 2], ['O(n', 3], ['complexity', 2], ['runtime', 1],
-     ['algorithm', 2], ['refactor', 2], ['unit test', 2], ['pull request', 2]],
+     ['algorithm', 2], ['refactor', 2], ['unit test', 2], ['pull request', 2],
+     // Prose engineering write-ups: the pack claims design docs, so detection
+     // must find one that contains no code at all.
+     ['data structure', 3], ['time complexity', 3], ['edge case', 2], ['API', 2], ['endpoint', 3],
+     ['cache', 3], ['latency', 3], ['throughput', 3], ['concurrency', 3], ['race condition', 4],
+     ['idempoten', 4], ['retry', 2], ['timeout', 2], ['database', 2], ['schema', 2], ['query', 2],
+     ['deploy', 2], ['scalab', 3], ['bottleneck', 3], ['thread', 2], ['atomic', 3], ['stack trace', 4],
+     ['big-O', 4], ['linked list', 4], ['hash map', 4], ['recursi', 3], ['compiler', 3], ['runtime error', 3]],
     [['\\bfor\\s*\\(', 2], ['\\bwhile\\s*\\(', 2], ['=>\\s*\\{', 2], ['\\b[a-z_]+\\.[a-z_]+\\(', 1]],
     ['.py', '.js', '.ts', '.tsx', '.java', '.cpp', '.c', '.go', '.rs', '.rb', '.cs'],
     ['python', 'js', 'javascript', 'ts', 'typescript', 'java', 'cpp', 'c', 'go', 'rust', 'sql'],

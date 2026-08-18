@@ -12,7 +12,9 @@
     "verify:i18n": "node verify-i18n.mjs",
     "verify:e2e": "node verify-e2e.cjs",
     "verify:pwa": "node verify-pwa.mjs",
-    "verify:contrast": "node verify-contrast.cjs"
+    "verify:contrast": "node verify-contrast.cjs",
+    "verify:keyed": "node verify-keyed.cjs",
+    "mock": "node mock-provider.mjs"
   },
   "dependencies": {
     "idb-keyval": "^6.2.1",
