@@ -92,7 +92,7 @@ export default function UiGallery() {
         <TimerRing totalSec={90} remainingSec={22} />
         <TimerRing totalSec={90} remainingSec={9} />
         <div style={{ width: 320 }}>
-          <OwnershipBar counts={{ owned: 3, shaky: 1, borrowed: 1, illusion: 1, none: 0, total: 6 }} showLegend />
+          <OwnershipBar counts={{ owned: 3, shaky: 1, borrowed: 1, illusion: 1, none: 0, total: 6, undersold: 0 }} showLegend />
         </div>
         <div style={{ width: 360 }}>
           <DimensionLedger

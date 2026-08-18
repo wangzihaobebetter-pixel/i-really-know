@@ -6,7 +6,7 @@ html, body, #root { height: 100%; }
 
 body {
   margin: 0;
-  background: var(--paper);
+  background: var(--app);
   color: var(--ink);
   font-family: var(--font-ui);
   font-size: 16px;
@@ -41,6 +41,7 @@ a:hover { text-decoration: underline; text-underline-offset: 2px; }
 /* ---- Layout helpers ---- */
 .col-read { width: 100%; max-width: var(--col-read); margin-inline: auto; }
 .col-data { width: 100%; max-width: var(--col-data); margin-inline: auto; }
+.col-doc { width: 100%; max-width: var(--col-doc); margin-inline: auto; }
 .hairline { border: 0; border-top: 1px solid var(--hairline); }
 .stack > * + * { margin-top: var(--space-5); }
 .row { display: flex; align-items: center; gap: var(--space-3); }
@@ -53,11 +54,16 @@ a:hover { text-decoration: underline; text-underline-offset: 2px; }
   overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
 }
 
-/* Verdict ink helpers — always paired with a glyph + word, never color alone */
-.ink-owned { color: var(--owned); }
-.ink-shaky { color: var(--shaky); }
-.ink-borrowed { color: var(--borrowed); }
-.ink-illusion { color: var(--illusion); }
+/* State ink helpers. P3 §2.2: the palette is deliberately isoluminant between
+   state pairs, so colour is NEVER the only cue — every use is paired with a
+   glyph, a word, or an underline style. */
+.ink-defended    { color: var(--defended); }
+.ink-partial     { color: var(--partial); }
+.ink-undefended  { color: var(--undefended); }
+.ink-underclaimed{ color: var(--underclaimed); }
+.ink-over        { color: var(--over); }
+.ink-under       { color: var(--under); }
+.ink-action      { color: var(--action); }
 .ink-2 { color: var(--ink-2); }
 .ink-3 { color: var(--ink-3); }
 

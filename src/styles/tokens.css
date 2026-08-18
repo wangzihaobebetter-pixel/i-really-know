@@ -1,119 +1,193 @@
 /* ============================================================
-   I Really Know v2 — Design tokens · "The Marked Script"
-   Spec §5.2 Palette · §5.4 Spacing/Radius/Elevation
-   Color is meaning: three meaning-inks (owned/shaky/borrowed),
-   one divergence-ink (illusion), one action-ink (fountain blue).
+   I Really Know v3 — design tokens
+   Authority: memory/ireallyknow-v3/P3-DESIGN.md §2.
+
+   Two colour axes, kept apart on purpose (P3 §2.2):
+     Axis A — demonstrated : defended / partial / undefended / underclaimed
+     Axis B — divergence   : over / under / (ink for accurate)
+   `--danger` is reserved for SYSTEM errors. Nothing a student did is ever red.
+
+   Themes: `paper` = the default light app, `slate` = the default dark app,
+   `script` = "The Marked Script", v2's cream document theme, now opt-in only
+   (P3 §1: EVOLVE — paper is demoted from a theme to a material).
+
+   Every wash below is a PRE-COMPOSITED OPAQUE hex, not an rgba() over an
+   unknown parent, so verify-contrast.cjs can actually measure it (P3 §2.5.2).
+   Generated and checked by verify-contrast.cjs --tokens; worst ratio 4.65:1.
    ============================================================ */
 
 :root {
-  /* --- Paper (light) surfaces --- */
-  --paper: #F5F2EA;
-  --paper-2: #ECE7DB;
-  --sheet: #FBF9F4;
-  --hairline: #D9D2C2;
+  /* --- Surfaces: neutral app behind a true-white document sheet --- */
+  --app: #F7F7F5;
+  --app-2: #EEEEEB;
+  --sheet: #FFFFFF;
+  --hairline: #DEDEDA;
+  /* v2 compatibility alias — `--paper` is still read by a few primitives. */
+  --paper: var(--app);
+  --paper-2: var(--app-2);
 
   /* --- Ink --- */
-  --ink: #17150F;
-  --ink-2: #4A463C;
-  --ink-3: #6B6659;
+  --ink: #16181D;
+  --ink-2: #4C5158;
+  --ink-3: #6B7078;
 
-  /* --- Action --- */
-  --action: #1E3FBF;
+  /* --- Axis A · demonstrated --- */
+  --defended: #10704B;
+  --partial: #8A5A06;
+  --undefended: #4C4E7A;
+  /* Axis A's fifth state is drawn in Axis B's `under` hue: the student
+     demonstrated more than they claimed on that span (P3 §3.4c). */
+  --underclaimed: #0B6079;
+
+  /* --- Axis B · divergence --- */
+  --over: #9C1458;
+  --under: #0B6079;
+
+  /* --- Non-state --- */
+  --action: #2340C8;
   --action-ink: #FFFFFF;
-  --action-wash: rgba(30, 63, 191, 0.10);
+  --danger: #B3261E;
 
-  /* --- Verdict inks --- */
-  --owned: #1F6F50;
-  --shaky: #B8791A;
-  --borrowed: #C4381D;
-  --illusion: #8A1E5C;
-  --danger: #C4381D;
+  /* --- Pre-composited opaque washes (focused span only) --- */
+  --defended-wash: #DEEBE6;
+  --partial-wash: #EFE8DC;
+  --undefended-wash: #E6E6EC;
+  --underclaimed-wash: #DDE9EC;
+  --over-wash: #F1DEE8;
+  --under-wash: #DDE9EC;
+  --action-wash: #E0E4F7;
+  --danger-wash: #F4E1DF;
 
-  /* --- Verdict washes (highlights on the Painted Page) --- */
-  --owned-wash: rgba(31, 111, 80, 0.14);
-  --shaky-wash: rgba(184, 121, 26, 0.14);
-  --borrowed-wash: rgba(196, 56, 29, 0.14);
-  --illusion-wash: rgba(138, 30, 92, 0.14);
+  /* --- Glass (chrome only; never over the student's text — P3 §2.5.3) --- */
+  --glass: rgba(255, 255, 255, 0.88);
+  --glass-solid: #FBFBFA;
+  --glass-hairline: rgba(22, 24, 29, 0.10);
 
-  /* --- Focus --- */
-  --focus-ring: #1E3FBF;
-  --focus-inner: var(--paper);
+  --focus-ring: #2340C8;
 
-  /* --- Radius --- */
-  --r-mark: 2px;
-  --r-control: 6px;
-  --r-sheet: 10px;
+  /* --- Radius (P3 §2.3: up) --- */
+  --r-mark: 3px;
+  --r-control: 12px;
+  --r-sheet: 16px;
   --r-pill: 999px;
 
-  /* --- Space scale --- */
-  --space-1: 2px;
-  --space-2: 4px;
-  --space-3: 8px;
-  --space-4: 12px;
-  --space-5: 16px;
-  --space-6: 24px;
-  --space-7: 32px;
-  --space-8: 48px;
-  --space-9: 64px;
-  --space-10: 96px;
+  /* --- Space scale (v2's was already right — kept) --- */
+  --space-1: 2px;  --space-2: 4px;  --space-3: 8px;  --space-4: 12px;
+  --space-5: 16px; --space-6: 24px; --space-7: 32px; --space-8: 48px;
+  --space-9: 64px; --space-10: 96px;
 
-  /* --- Elevation (paper is flat; structure comes from hairlines) --- */
+  /* --- Elevation: chrome gets real depth, the document sheet stays flat --- */
   --e0: 0 0 0 1px var(--hairline);
-  --e1: 0 1px 0 rgba(23, 21, 15, 0.06), 0 1px 2px rgba(23, 21, 15, 0.06);
-  --e2: 0 12px 32px -12px rgba(23, 21, 15, 0.28), 0 0 0 1px var(--hairline);
+  --e1: 0 1px 2px rgba(22, 24, 29, 0.05), 0 0 0 1px var(--hairline);
+  --e2: 0 16px 40px -16px rgba(22, 24, 29, 0.30), 0 0 0 1px var(--hairline);
+  --e-chrome: 0 8px 24px -12px rgba(22, 24, 29, 0.24);
 
   /* --- Layout --- */
   --rail-w: 72px;
   --tabbar-h: 56px;
   --col-read: 720px;
   --col-data: 1120px;
+  --col-doc: 760px;
   --gutter: 24px;
   --gutter-mobile: 16px;
 
-  /* --- Type families --- */
-  --font-display: "Fraunces", Georgia, "Songti SC", "Times New Roman", serif;
-  --font-ui: "Inter", system-ui, -apple-system, "PingFang SC", "Noto Sans SC", sans-serif;
+  /* --- Type families (P3 §2.1). Self-hosted; see fonts.css. --- */
+  --font-display: "Nunito Variable", "PingFang SC", "Noto Sans SC", system-ui, sans-serif;
+  --font-ui: "Inter Variable", system-ui, -apple-system, "PingFang SC", "Noto Sans SC", sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 
-  /* --- Motion (§5.5): motion is a pen, not a party --- */
+  /* --- Type scale (P3 §2.1): size is the hierarchy, not weight --- */
+  --t-hero: clamp(4.5rem, 22vw, 9rem);
+  --t-display: clamp(1.75rem, 6vw, 2.5rem);
+  --t-title: 1.5rem;
+  --t-body-lg: 1.0625rem;
+  --t-body: 1rem;
+  --t-small: 0.875rem;
+  --t-micro: 0.75rem;
+
+  /* --- Motion (P3 §2.4): springs for the student's material, eases for chrome --- */
   --ease: cubic-bezier(.2, .7, .2, 1);
+  --spring: linear(
+    0, 0.128 3.1%, 0.478 7.9%, 0.827 13%, 1.036 16.9%, 1.096 19%, 1.117 21.1%,
+    1.101 23.6%, 1.031 29%, 0.994 34.2%, 0.99 38.3%, 1.002 47.4%, 1.004 60.5%, 1
+  );
   --dur-fast: 120ms;
   --dur: 180ms;
   --dur-slow: 260ms;
+  --dur-spring: 620ms;
+  --dur-ink: 420ms;
 
   color-scheme: light;
 }
 
 [data-theme="slate"] {
-  --paper: #141518;
-  --paper-2: #1B1D22;
-  --sheet: #1F2228;
-  --hairline: #2C3037;
+  --app: #16181C;
+  --app-2: #1A1D22;
+  --sheet: #1E2126;
+  --hairline: #31353C;
 
-  --ink: #ECE7DA;
-  --ink-2: #B8B2A4;
-  --ink-3: #96907F;
+  --ink: #E8E9EC;
+  --ink-2: #B0B4BB;
+  --ink-3: #8A8F98;
 
-  --action: #7B96FF;
-  --action-ink: #0F1530;
-  --action-wash: rgba(123, 150, 255, 0.14);
+  --defended: #4FC08A;
+  --partial: #E3A84A;
+  --undefended: #A0A2E0;
+  --underclaimed: #5FC8E8;
 
-  --owned: #4FB58C;
-  --shaky: #E0A845;
-  --borrowed: #F0674A;
-  --illusion: #E36FB2;
-  --danger: #F0674A;
+  --over: #F07AB4;
+  --under: #5FC8E8;
 
-  --owned-wash: rgba(79, 181, 140, 0.22);
-  --shaky-wash: rgba(224, 168, 69, 0.22);
-  --borrowed-wash: rgba(240, 103, 74, 0.22);
-  --illusion-wash: rgba(227, 111, 178, 0.22);
+  --action: #8AA0FF;
+  --action-ink: #131A33;
+  --danger: #F2836F;
 
-  --focus-ring: #7B96FF;
-  --focus-inner: var(--paper);
+  --defended-wash: #28413A;
+  --partial-wash: #453C2D;
+  --undefended-wash: #383B4B;
+  --underclaimed-wash: #2B424D;
+  --over-wash: #483342;
+  --under-wash: #2B424D;
+  --action-wash: #343A51;
+  --danger-wash: #483535;
 
-  --e1: 0 0 0 1px #3A3F48;
-  --e2: 0 16px 40px -16px rgba(0, 0, 0, 0.7), 0 0 0 1px #3A3F48;
+  --glass: rgba(30, 33, 38, 0.88);
+  --glass-solid: #23272D;
+  --glass-hairline: rgba(232, 233, 236, 0.12);
+
+  --focus-ring: #8AA0FF;
+
+  --e1: 0 0 0 1px #31353C;
+  --e2: 0 20px 48px -20px rgba(0, 0, 0, 0.75), 0 0 0 1px #31353C;
+  --e-chrome: 0 12px 32px -14px rgba(0, 0, 0, 0.7);
 
   color-scheme: dark;
+}
+
+/* "The Marked Script" — v2's cream document theme, retained opt-in (P3 §1).
+   It re-tints surfaces only; the two state axes keep their verified values. */
+[data-theme="script"] {
+  --app: #F1EDE3;
+  --app-2: #E8E2D4;
+  --sheet: #FCFAF5;
+  --hairline: #D6CEBC;
+
+  --ink: #17150F;
+  --ink-2: #494438;
+  --ink-3: #635E50;
+
+  --glass: rgba(252, 250, 245, 0.90);
+  --glass-solid: #F6F2E9;
+  --glass-hairline: rgba(23, 21, 15, 0.12);
+
+  --defended-wash: #DBE7DD;
+  --partial-wash: #ECE4D4;
+  --undefended-wash: #E3E2E4;
+  --underclaimed-wash: #DAE4E4;
+  --over-wash: #EFDADF;
+  --under-wash: #DAE4E4;
+  --action-wash: #DEE0EF;
+  --danger-wash: #F2DCD7;
+
+  color-scheme: light;
 }

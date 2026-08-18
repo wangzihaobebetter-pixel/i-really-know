@@ -13,7 +13,20 @@ export type ProbeKind =
 export type Difficulty = 'foundations' | 'standard' | 'defense';
 export type RunPreset = 'quick' | 'standard' | 'defense';
 export type SelfGrade = 'owned' | 'shaky' | 'notmine';
-export type Verdict = 'owned' | 'shaky' | 'borrowed' | 'illusion' | 'none';
+
+/**
+ * AXIS A — demonstrated (P3 §2.2). What the student could actually defend.
+ * This is the ink on the Painted Page.
+ *
+ * `underclaimed` is the state v2 did not have: the student marked a span shaky
+ * or not-mine and then defended it. `analysis.ts` used to map it to `owned`,
+ * so the 46% plurality who underestimate (Knof 2024, N=426) saw the identical
+ * green as the students who were right, and learned nothing.
+ */
+export type Verdict = 'defended' | 'partial' | 'undefended' | 'underclaimed' | 'none';
+
+/** AXIS B — divergence direction (P3 §2.2). Belief minus demonstrated. */
+export type DivergenceDirection = 'over' | 'under' | 'accurate' | 'unknown';
 export type DivergenceClass =
   | 'illusion' | 'undersold' | 'owned' | 'borrowed' | 'halfheld' | 'unscored';
 export type SessionStatus = 'generating' | 'ready' | 'running' | 'complete' | 'abandoned';

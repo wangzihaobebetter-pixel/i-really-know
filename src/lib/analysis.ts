@@ -62,11 +62,23 @@ export function withDivergence(probes: Probe[]): Probe[] {
 
 export interface OwnershipCounts {
   owned: number; shaky: number; borrowed: number; illusion: number; none: number; total: number;
+  /**
+   * Self ≤ 1.5 AND AI = 3 — student undersold themselves (Knof 2024: 46% of students do this,
+   * making it the plurality case, not a corner). Kept DISTINCT from `owned` so the underconfident
+   * student is no longer silently folded into the confident bucket. P3 §9 item 3 first half.
+   * The `Verdict` mapping still collapses undersold→owned for surfaces that show one mark per
+   * span; this count is the door for P4 to split them visually.
+   */
+  undersold: number;
 }
 
 export function countVerdicts(probes: Probe[]): OwnershipCounts {
-  const c: OwnershipCounts = { owned: 0, shaky: 0, borrowed: 0, illusion: 0, none: 0, total: probes.length };
-  for (const p of probes) c[verdictOf(p)]++;
+  const c: OwnershipCounts = { owned: 0, shaky: 0, borrowed: 0, illusion: 0, none: 0, total: probes.length, undersold: 0 };
+  for (const p of probes) {
+    const div = p.divergence ?? classifyDivergence(p);
+    if (div === 'undersold') { c.undersold++; continue; }
+    c[verdictOf(p)]++;
+  }
   return c;
 }
 
