@@ -23,28 +23,21 @@ export function selfGradeAsScore(g: SelfGrade | undefined): number | undefined {
  */
 export function classifyDivergence(probe: Probe): DivergenceClass {
   const ai = probe.ai?.score;
-  const self = probe.selfGrade;
+  const self = probe.selfGrade ? SELF_AS_SCORE[probe.selfGrade] : undefined;
 
   if (ai === undefined) {
-    if (!self) return 'unscored';
-    // Keyless run: self-grade alone carries the verdict.
-    return self === 'owned' ? 'owned' : self === 'shaky' ? 'halfheld' : 'borrowed';
+    if (self === undefined) return 'unscored';
+    // Keyless run: the self-grade alone carries the verdict.
+    return self >= 2.5 ? 'owned' : self >= 1 ? 'halfheld' : 'borrowed';
   }
-  if (!self) return ai >= 2 ? 'owned' : ai === 1 ? 'halfheld' : 'borrowed';
+  if (self === undefined) return ai >= 2 ? 'owned' : ai === 1 ? 'halfheld' : 'borrowed';
 
-  if (self === 'owned') {
-    if (ai >= 2) return 'owned';
-    return 'illusion';               // claimed it, could not defend it
-  }
-  if (self === 'shaky') {
-    if (ai === 3) return 'undersold';
-    if (ai === 2) return 'owned';
-    if (ai === 1) return 'halfheld';
-    return 'borrowed';
-  }
-  // self === 'notmine'
-  if (ai >= 2) return 'undersold';   // knew more than they gave themselves credit for
-  return 'borrowed';
+  // Spec §4.4, in the spec's own order — Illusion wins, then Undersold, then the honest cases.
+  if (self >= 2.5 && ai <= 1) return 'illusion';
+  if (self <= 1.5 && ai === 3) return 'undersold';
+  if (self >= 2 && ai >= 2) return 'owned';
+  if (self <= 1 && ai <= 1) return 'borrowed';
+  return 'halfheld';
 }
 
 const DIVERGENCE_VERDICT: Record<DivergenceClass, Verdict> = {
