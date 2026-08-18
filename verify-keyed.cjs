@@ -136,13 +136,17 @@ async function clickByText(page, texts) {
 
   /* ---- map: divergence + diagnosis ---- */
   await page.waitForSelector('.anchored', { timeout: 15000 }).catch(() => problems.push('map never rendered'));
-  const calib = await page.evaluate(() => /Calibration|自我认知准确度/.test(document.body.innerText));
-  note(`map: calibration section present = ${calib}`);
-  if (!calib) problems.push('calibration missing — AI and self scores did not both land');
-
-  const illusion = await page.evaluate(() =>
-    /Where you thought you were solid|你以为自己稳的地方/.test(document.body.innerText));
-  note(`map: illusion section present = ${illusion}`);
+  /* v3: the headline is a signed span count, not an unsigned 0-100
+     "calibration" readout. Both tracks landing is what makes a hero appear at
+     all, so assert the hero and its claim line rather than v2's label. */
+  const hero = await page.$eval('.t-hero', (n) => n.textContent.trim()).catch(() => '');
+  const claimLine = await page.$eval('.divergence-claim', (n) => n.textContent.trim()).catch(() => '');
+  note(`map: divergence hero "${hero}" · claim "${claimLine}"`);
+  if (!hero) problems.push('no divergence hero — AI and self scores did not both land');
+  if (!/defend|辩护/.test(claimLine)) problems.push('the claim line did not state claimed vs defended');
+  const slope = await page.$$eval('.slope-line', (n) => n.length).catch(() => 0);
+  note(`map: ${slope} slopegraph lines`);
+  if (!slope) problems.push('the calibration curve rendered no lines');
 
   await clickByText(page, ['Write the summary', '生成总评']);
   await page.waitForFunction(() => /borrowed|You own the data-structure/.test(document.body.innerText), { timeout: 15000 })
@@ -180,15 +184,21 @@ async function clickByText(page, texts) {
     await new Promise((r) => setTimeout(r, 300));
   }
   await page.waitForSelector('.anchored', { timeout: 15000 }).catch(() => {});
-  const illusion2 = await page.evaluate(() =>
-    /Where you thought you were solid|你以为自己稳的地方/.test(document.body.innerText));
-  const illusionMark = await page.$$eval('.anchor-illusion', (n) => n.length).catch(() => 0);
-  note(`illusion run: ${done2} probes self-graded Owned → illusion section=${illusion2}, ${illusionMark} spans inked as illusion`);
-  if (!illusion2) problems.push('illusion class never triggered even when Owned was claimed against a 0/1 score');
-  if (!illusionMark) problems.push('no span inked with the illusion colour on the Painted Page');
+  /* v3 splits the axes: claiming a span and failing to defend it is Axis A
+     `undefended` PLUS a negative Axis B delta. There is no `illusion` colour
+     any more — that collapse is the defect P3 §2.2 fixed — so the check is
+     that the overclaim shows up on BOTH axes. */
+  const overclaimSection = await page.evaluate(() =>
+    /You could not defend these|这些你没能辩护下来/.test(document.body.innerText));
+  const undefendedMark = await page.$$eval('.anchor-undefended', (n) => n.length).catch(() => 0);
+  const heroAfter = await page.$eval('.t-hero', (n) => n.textContent.trim()).catch(() => '');
+  note(`overclaim run: ${done2} probes self-graded Owned → section=${overclaimSection}, ${undefendedMark} spans inked undefended, hero "${heroAfter}"`);
+  if (!overclaimSection) problems.push('the could-not-defend section never appeared even when Owned was claimed against a 0/1 score');
+  if (!undefendedMark) problems.push('no span inked as could-not-defend on the Painted Page');
+  if (!/^[−-]/.test(heroAfter)) problems.push(`overclaiming everything did not produce a negative delta (hero "${heroAfter}")`);
 
   /* ---- retraining: VARIANT ---- */
-  await clickByText(page, ['Add the weak ones to retraining', '把薄弱项加入重练']);
+  await clickByText(page, ['Bring the weak ones back', 'Add the weak ones to retraining', '把薄弱的地方叫回来', '把薄弱项加入重练']);
   await new Promise((r) => setTimeout(r, 400));
   await page.goto(`${BASE}/#/queue`, { waitUntil: 'networkidle0' });
   await new Promise((r) => setTimeout(r, 400));

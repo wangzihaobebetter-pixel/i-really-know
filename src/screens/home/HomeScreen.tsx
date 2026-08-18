@@ -113,7 +113,7 @@ export default function HomeScreen() {
           </Button>
           {DEMO_SAMPLES.length > 1 && (
             <Button variant="ghost" onClick={() => setDemoIndex((i) => i + 1)}>
-              {t('common.action.retry')}
+              {t('home.demoNext')}
             </Button>
           )}
         </div>

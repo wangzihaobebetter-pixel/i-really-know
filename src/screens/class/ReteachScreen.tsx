@@ -5,7 +5,7 @@ import { useRoute, useNavigate } from '../../router';
 import { useT } from '../../i18n';
 import { Button, Callout } from '../../ui';
 import { divergence, verdictOf } from '../../lib/analysis';
-import type { Session } from '../../types';
+import type { PackId, Session } from '../../types';
 
 /**
  * THE RETEACH MAP (P3 §5.4). The artefact with no competitor equivalent, and
@@ -48,18 +48,26 @@ export default function ReteachScreen() {
   /* Group by dimension: the closest thing to a "concept" this data model has.
      Each row counts DISTINCT STUDENTS who could not defend a passage in it. */
   const rows = useMemo(() => {
-    const byDim = new Map<string, { students: Set<string>; spans: { who: string; quote: string; line?: string }[] }>();
+    /* Keyed by pack AND dimension: a cohort can hold submissions from more
+       than one discipline, and labelling them all with the cohort's pack
+       printed raw dimension ids on the instructor's document. */
+    const byDim = new Map<string, {
+      packId: PackId; dimensionId: string;
+      students: Set<string>; spans: { who: string; quote: string; line?: string }[];
+    }>();
     for (const { label, session } of runs) {
       for (const p of session.probes) {
         if (verdictOf(p) !== 'undefended') continue;
-        const entry = byDim.get(p.dimensionId) ?? { students: new Set<string>(), spans: [] };
+        const key = `${session.packId}::${p.dimensionId}`;
+        const entry = byDim.get(key)
+          ?? { packId: session.packId, dimensionId: p.dimensionId, students: new Set<string>(), spans: [] };
         entry.students.add(label);
         entry.spans.push({ who: label, quote: p.anchor.quote, line: p.ai?.verdictLine });
-        byDim.set(p.dimensionId, entry);
+        byDim.set(key, entry);
       }
     }
     return [...byDim.entries()]
-      .map(([dimensionId, v]) => ({ dimensionId, count: v.students.size, spans: v.spans }))
+      .map(([key, v]) => ({ key, packId: v.packId, dimensionId: v.dimensionId, count: v.students.size, spans: v.spans }))
       .sort((a, b) => b.count - a.count);
   }, [runs]);
 
@@ -108,6 +116,12 @@ export default function ReteachScreen() {
           <p className="t-small ink-2 measure" style={{ marginTop: 'var(--space-3)' }}>{t('reteach.subtitle')}</p>
         </header>
 
+        {cohort.isDemo && (
+          <p className="doc-method t-small" style={{ marginBottom: 'var(--space-5)' }}>
+            {t('sheet.illustrative')}
+          </p>
+        )}
+
         {totalStudents === 0 || rows.length === 0 ? (
           <p className="t-body ink-2">{t('reteach.empty')}</p>
         ) : (
@@ -118,10 +132,10 @@ export default function ReteachScreen() {
               <p className="t-small ink-2" style={{ marginTop: 'var(--space-2)' }}>{t('reteach.noPeople')}</p>
               <div className="stack-tight" style={{ marginTop: 'var(--space-5)' }}>
                 {rows.map((r) => {
-                  const open = expanded === r.dimensionId;
-                  const showNames = named.has(r.dimensionId);
+                  const open = expanded === r.key;
+                  const showNames = named.has(r.key);
                   return (
-                    <div key={r.dimensionId}>
+                    <div key={r.key}>
                       <div className="reteach-row">
                         <div className="reteach-track">
                           <div className="reteach-bar t-small"
@@ -129,14 +143,14 @@ export default function ReteachScreen() {
                             {r.count}
                           </div>
                         </div>
-                        <span className="t-small">{dimensionLabel(cohort.packId, r.dimensionId)}</span>
+                        <span className="t-small">{dimensionLabel(r.packId, r.dimensionId)}</span>
                       </div>
                       <div className="row wrap" style={{ gap: 'var(--space-4)', marginTop: 'var(--space-2)' }}>
                         <span className="t-small ink-2">
                           {t('reteach.countLine', { n: r.count, m: totalStudents })}
                         </span>
                         <button type="button" className="viva-leave no-print"
-                                onClick={() => setExpanded(open ? null : r.dimensionId)}>
+                                onClick={() => setExpanded(open ? null : r.key)}>
                           {open ? t('reteach.collapse') : t('reteach.expand')}
                         </button>
                       </div>
@@ -151,8 +165,8 @@ export default function ReteachScreen() {
                             <button type="button" className="viva-leave no-print"
                                     onClick={() => setNamed((prev) => {
                                       const next = new Set(prev);
-                                      if (next.has(r.dimensionId)) next.delete(r.dimensionId);
-                                      else next.add(r.dimensionId);
+                                      if (next.has(r.key)) next.delete(r.key);
+                                      else next.add(r.key);
                                       return next;
                                     })}>
                               {showNames ? t('reteach.hideNames') : t('reteach.showNames')}

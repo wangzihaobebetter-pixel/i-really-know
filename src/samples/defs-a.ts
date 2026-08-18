@@ -128,8 +128,8 @@ export const antepartumSample: SampleDef = {
   worked: [
     { selfGrade: 'owned', score: 1, verdictLine: 'Named iron deficiency, but read the value against a non-pregnant threshold and did not reach plasma volume expansion.' },
     { selfGrade: 'owned', score: 0, verdictLine: 'Restated the definition of scleroderma. No management consequence was reached.' },
-    { selfGrade: 'shaky', score: 3, verdictLine: 'Named BMI-stratified twin guidance unprompted and flagged the underweight starting point as raising the target.' },
-    { selfGrade: 'shaky', score: 2, verdictLine: 'Conceded the sentence adds nothing and said what should have followed it: the screening window.' },
+    { selfGrade: 'notmine', score: 3, verdictLine: 'Named BMI-stratified twin guidance unprompted and flagged the underweight starting point as raising the target.' },
+    { selfGrade: 'owned', score: 1, verdictLine: 'Defended the sentence as plain language for the reader, but did not say what should have followed it.' },
     { selfGrade: 'owned', score: 1, verdictLine: 'Correct on postpartum vaccination; did not address what happens during the pregnancy.' },
   ],
 };

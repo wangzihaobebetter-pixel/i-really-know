@@ -456,10 +456,13 @@ table.dt tbody tr:hover td { background: var(--paper-2); }
 .reteach-row { display: grid; grid-template-columns: 1fr auto; gap: var(--space-3); align-items: center; }
 .reteach-bar { height: 26px; border-radius: var(--r-mark); display: flex; align-items: center; padding: 0 var(--space-3); color: #FFFFFF; font-variant-numeric: tabular-nums; min-width: 3rem; }
 .reteach-track { background: #EFEFEC; border-radius: var(--r-mark); }
-.histogram { display: grid; grid-auto-flow: column; align-items: end; gap: 3px; height: 120px; }
-.histogram-col { display: grid; align-content: end; justify-items: center; gap: 2px; }
-.histogram-bar { width: 100%; min-height: 2px; border-radius: 2px 2px 0 0; }
-.histogram-zero { border-left: 2px dashed #14161A; }
+.histogram { display: flex; align-items: flex-end; gap: 4px; height: 160px; }
+.histogram-col { flex: 1 1 0; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 4px; height: 100%; }
+/* The bar is a flex child of a fixed-height column, so a percentage height
+   resolves. As a grid item inside `align-content: end` it did not, and the
+   whole distribution rendered as invisible slivers. */
+.histogram-bar { width: 100%; min-height: 3px; border-radius: 3px 3px 0 0; }
+.histogram-zero { border-left: 2px dashed #14161A; padding-left: 4px; }
 
 /* --- the retraining queue on home (P3 / P2 §3.5) --- */
 .queue-strip { display: flex; gap: var(--space-3); overflow-x: auto; padding-bottom: var(--space-2); scrollbar-width: none; }

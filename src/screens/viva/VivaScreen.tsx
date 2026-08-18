@@ -233,7 +233,7 @@ export default function VivaScreen() {
       <Sheet elevation={1}>
         <div className="stack-tight">
           <div className="row-between">
-            <span className="t-micro ink-3">{t('viva.reveal')}</span>
+            <span className="t-micro ink-3">{t('viva.probeLabel')}</span>
             {settings.timersEnabled && phase === 'answering' && (
               <button
                 type="button"
@@ -295,7 +295,7 @@ export default function VivaScreen() {
             id="viva-answer"
             ref={answerRef}
             className="control viva-answer"
-            rows={5}
+            rows={3}
             value={answer}
             onChange={(e) => setAnswer(e.target.value)}
             placeholder="…"

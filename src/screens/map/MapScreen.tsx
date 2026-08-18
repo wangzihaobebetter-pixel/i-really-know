@@ -6,7 +6,7 @@ import { useT, useLang } from '../../i18n';
 import {
   AnchoredText, Button, Callout, DimensionLedger, Mark, MarginNote,
   Sheet, Spinner, Tag, useToast,
-  DivergenceHero, SlopeGraph, CalibrationTrend,
+  DivergenceHero, ClaimedHero, SlopeGraph, CalibrationTrend,
 } from '../../ui';
 import type { TextAnchor } from '../../ui';
 import {
@@ -134,14 +134,11 @@ export default function MapScreen() {
       {div ? (
         <DivergenceHero divergence={div} />
       ) : (
-        <Callout tone="action" title={t('map.noDivergence')}>
-          <div className="stack-tight">
-            <p className="t-small ink-2 measure">{t('map.selfReported')}</p>
-            <div className="row">
-              <Button size="sm" onClick={() => nav('settings')}>{t('map.noDivergenceAction')}</Button>
-            </div>
-          </div>
-        </Callout>
+        <ClaimedHero
+          claimed={session.probes.filter((p) => p.selfGrade === 'owned').length}
+          scored={session.probes.filter((p) => p.selfGrade).length}
+          onSetup={() => nav('settings')}
+        />
       )}
 
       {/* ---- The curve, below the fold on purpose. ---- */}
@@ -165,9 +162,12 @@ export default function MapScreen() {
             staggered
             onAnchorClick={(anchorId) => setActiveId(anchorId === activeId ? undefined : anchorId)}
           />
-          {undefended.slice(0, 2).map((p) => (
+          {/* The examiner's remark, in the margin, beside the span it is about
+              — a marked script carries the specific note, not a slogan repeated
+              once per failure. */}
+          {undefended.filter((p) => p.ai?.verdictLine).slice(0, 3).map((p) => (
             <MarginNote key={p.id} tone="undefended" anchorId={p.id}>
-              {t('map.divergenceLine.over')}
+              {p.ai!.verdictLine}
             </MarginNote>
           ))}
         </Sheet>
@@ -292,9 +292,16 @@ export default function MapScreen() {
               )}
             </div>
           </Sheet>
-        ) : hasKey ? (
+        ) : hasKey && !scoredByAi ? (
           <div className="row">
             <Button variant="secondary" onClick={writeDiagnosis} disabled={diagnosing}>
+              {diagnosing ? t('map.diagnosing') : t('map.diagnose')}
+            </Button>
+            {diagnosing && <Spinner />}
+          </div>
+        ) : scoredByAi ? (
+          <div className="row">
+            <Button variant="secondary" onClick={writeDiagnosis} disabled={diagnosing || !hasKey}>
               {diagnosing ? t('map.diagnosing') : t('map.diagnose')}
             </Button>
             {diagnosing && <Spinner />}
@@ -302,7 +309,7 @@ export default function MapScreen() {
         ) : (
           <p className="t-small ink-3">{t('map.selfReported')}</p>
         )}
-        {error && <Callout tone="undefended">{error}</Callout>}
+        {error && <Callout tone="danger">{error}</Callout>}
       </section>
 
       <div className="row wrap">

@@ -25,7 +25,11 @@ export const DEFAULT_SETTINGS: Settings = {
   theme: 'system',
   language: 'auto',
   voiceEnabled: true,
-  timersEnabled: true,
+  /* P3 §6 and corpus 05 §2.1: silence is thinking time. v2 shipped a visible
+     countdown at 1:30 on the viva screen; a student watching a ring drain is
+     being pressured, not examined. The timer stays available in Settings for
+     anyone rehearsing a real timed viva, but it is OFF by default. */
+  timersEnabled: false,
   scoreOnCommit: true,
 };
 

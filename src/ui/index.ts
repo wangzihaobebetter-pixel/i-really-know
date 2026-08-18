@@ -10,7 +10,7 @@ export { Sheet, Callout, EmptyState, Skeleton, Spinner, Kbd, VisuallyHidden, Too
 export { Dialog, BottomSheet, ToastHost, useToast } from './Overlay';
 export { SegmentStrip, TimerRing, OwnershipBar, DimensionLedger } from './Meters';
 export { AnchoredText, MarginNote } from './AnchoredText';
-export { DivergenceHero, SlopeGraph, CalibrationTrend } from './Divergence';
+export { DivergenceHero, ClaimedHero, SlopeGraph, CalibrationTrend } from './Divergence';
 export type { TextAnchor } from './AnchoredText';
 export { DataTable } from './DataTable';
 export type { Column } from './DataTable';

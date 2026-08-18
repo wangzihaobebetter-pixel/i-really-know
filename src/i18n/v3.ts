@@ -32,6 +32,7 @@ registerStrings('home', {
     demoExcerpt: 'Excerpt, quoted for analysis. Follow the link for the full artifact.',
     ctaTry: 'Try it with a real sample',
     ctaOwnV3: 'Use my own work',
+    demoNext: 'Show another',
     queueTitle: 'Waiting for you',
     queueLede: 'You fell over on these. They came back.',
     queueOne: '{n} span is due',
@@ -55,6 +56,7 @@ registerStrings('home', {
     demoExcerpt: '节选，用于分析。完整原件见链接。',
     ctaTry: '拿一份真作业试试',
     ctaOwnV3: '用我自己的作业',
+    demoNext: '换一份',
     queueTitle: '还等着你',
     queueLede: '你在这些地方栽过。它们回来了。',
     queueOne: '有 {n} 处到期',
@@ -82,6 +84,8 @@ registerStrings('map', {
     'divergenceLine.accurate': 'Your judgement of yourself was accurate. In a study of 426 students, only 18.5% manage that.',
     'divergenceLine.unknown': 'Nothing is graded on both tracks yet.',
     divergenceUnit: 'spans',
+    claimedOnly: 'You said you could defend {claimed} of the {scored} you graded.',
+    claimedPending: 'The other half of the number is an examiner\u2019s. Nothing here guesses it for you.',
     noDivergence: 'A divergence needs both tracks: your own estimate, and an examiner’s. This run has your estimate only.',
     noDivergenceAction: 'Set up scoring',
 
@@ -136,6 +140,8 @@ registerStrings('map', {
     'divergenceLine.accurate': '你对自己的判断是准的。426 人的研究里，只有 18.5% 做得到。',
     'divergenceLine.unknown': '还没有哪一处同时有你的自评和考官的判断。',
     divergenceUnit: '处',
+    claimedOnly: '你评过的 {scored} 处里，你说有 {claimed} 处你能辩护。',
+    claimedPending: '这个数的另一半，得由考官给。这里不会替你猜。',
     noDivergence: '差值需要两条线：你自己的估计，和考官的判断。这次只有你的估计。',
     noDivergenceAction: '去配置评分',
 
@@ -179,6 +185,7 @@ registerStrings('map', {
 
 registerStrings('viva', {
   en: {
+    probeLabel: 'The question',
     sourceLabel: 'From your submission',
     sourceMore: 'Show more',
     sourceLess: 'Show less',
@@ -194,6 +201,7 @@ registerStrings('viva', {
     selfCommit: 'Lock it in',
   },
   'zh-CN': {
+    probeLabel: '问题',
     sourceLabel: '来自你的原文',
     sourceMore: '展开',
     sourceLess: '收起',
@@ -256,6 +264,7 @@ registerStrings('sheet', {
     signDate: 'Date',
     signNote: 'This sheet is not published until an instructor signs it. Nothing here is released automatically.',
     print: 'Print or save as PDF',
+    illustrative: 'Worked example. The submissions, their sources and the questions are real and cited; the recorded outcomes are illustrative, because no student has sat this examination. Nothing here describes a real person.',
     noPercentage: 'This document carries no percentage on purpose. A number is disputed on appeal; an evidence row is read.',
   },
   'zh-CN': {
@@ -285,6 +294,7 @@ registerStrings('sheet', {
     signDate: '日期',
     signNote: '未经教师签署，本材料不予发布。此处没有任何内容会自动对外发出。',
     print: '打印或存为 PDF',
+    illustrative: '示例材料。其中的作业、来源和题目都是真实且注明出处的；记录下来的结果是示意性的，因为没有学生真的参加过这场口试。这里的任何内容都不描述任何真实的人。',
     noPercentage: '这份文件刻意不给百分比。数字会在申诉里被争论，证据条目则会被阅读。',
   },
 });

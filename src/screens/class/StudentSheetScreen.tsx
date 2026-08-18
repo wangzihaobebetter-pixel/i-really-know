@@ -47,10 +47,15 @@ export default function StudentSheetScreen() {
   const probed = session.probes.filter((p) => p.committedAt || p.selfGrade || p.ai);
   const total = session.probes.length;
 
+  /* "Declined to answer" is a claim about what the student did, so it is only
+     used when they actually committed an empty answer through the viva — not
+     merely because no transcript is attached. Saying both "no response
+     recorded" and "declined to answer" about the same row, as an earlier build
+     did, is two different claims about the same student. */
   const outcomeOf = (p: typeof session.probes[number]): string => {
-    if (!p.committedAt && !p.ai) return t('sheet.noAnswer');
-    if (p.committedAt && !p.answer?.trim()) return t('sheet.declined');
-    return t(`common.verdict.${verdictOf(p)}`);
+    if (p.ai || p.selfGrade) return t(`common.verdict.${verdictOf(p)}`);
+    if (p.committedAt && p.answerMode && !p.answer?.trim()) return t('sheet.declined');
+    return t('sheet.noAnswer');
   };
 
   const claimOf = (p: typeof session.probes[number]): string =>
@@ -79,6 +84,12 @@ export default function StudentSheetScreen() {
             <dt className="t-micro">{t('sheet.date')}</dt><dd>{formatDate(session.completedAt ?? session.createdAt, lang)}</dd>
           </dl>
         </header>
+
+        {cohort.isDemo && (
+          <p className="doc-method t-small" style={{ marginBottom: 'var(--space-5)' }}>
+            {t('sheet.illustrative')}
+          </p>
+        )}
 
         {/* 2 — The method statement. Always present. This paragraph is what
                makes the sheet survive an appeal, and it is the document's most

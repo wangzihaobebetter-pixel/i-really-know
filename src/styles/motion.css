@@ -9,7 +9,11 @@
 
 @keyframes page-turn-out { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-12px); } }
 @keyframes page-turn-in  { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
-@keyframes ink-draw      { from { background-size: 0% 100%; } to { background-size: 100% 100%; } }
+/* Draws the underline left-to-right. The HEIGHT must stay at the underline's
+   3px: animating to `100% 100%` filled the whole span with the state colour,
+   which turned the Painted Page back into the highlighted-selection look P3
+   §4.2 replaced. */
+@keyframes ink-draw      { from { background-size: 0 3px; } to { background-size: 100% 3px; } }
 @keyframes ink-wipe      { from { background-size: 0% 100%; } to { background-size: 100% 100%; } }
 @keyframes span-lift     { from { transform: translateY(0); } to { transform: translateY(-2px); } }
 @keyframes ring-close    { from { stroke-dashoffset: var(--ring-c, 200); } to { stroke-dashoffset: 0; } }

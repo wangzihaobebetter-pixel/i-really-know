@@ -42,6 +42,8 @@ const note = (m) => console.log('  ' + m);
   await page.screenshot({ path: 'shot-home-desktop.png' });
 
   /* ---------- 2. run a whole sample, keyless ---------- */
+  /* v3's home leads with the live demo, so the first sample card is reached
+     below it. Clicking a card still opens that sample's viva. */
   await page.click('.sample-card');
   await page.waitForSelector('#viva-answer', { timeout: 15000 });
 
@@ -50,7 +52,9 @@ const note = (m) => console.log('  ' + m);
     const onViva = await page.$('#viva-answer');
     if (!onViva) break;
 
-    const question = await page.$eval('.t-body-lg', (n) => n.textContent.trim().slice(0, 60));
+    /* P3 §6: the probe question is the largest text on screen and has its own
+       class now. In v2 it was body text and this selector was `.t-body-lg`. */
+    const question = await page.$eval('.probe-question', (n) => n.textContent.trim().slice(0, 60));
     await page.type('#viva-answer', 'A deliberately mediocre answer that restates the submission without giving a mechanism.');
 
     // commit
@@ -58,7 +62,13 @@ const note = (m) => console.log('  ' + m);
     if (!committed) { problems.push(`probe ${i + 1}: no commit button`); break; }
 
     // self-grade must appear BEFORE any score — that ordering is the product
-    await page.waitForSelector('.seg', { timeout: 5000 }).catch(() => {});
+    await page.waitForSelector('.selfgrade-opt', { timeout: 5000 }).catch(() => {});
+    /* The self-grade must appear BEFORE any verdict is on screen. Reversing
+       that ordering destroys the only signal this product has, so assert it
+       rather than trusting it. */
+    const verdictLeaked = await page.evaluate(() =>
+      !!document.querySelector('.divergence-numeral, .mark'));
+    if (verdictLeaked) problems.push(`probe ${i + 1}: a verdict was on screen before the self-grade`);
     const graded = await clickByText(page, 'button', ['Shaky', '有点虚']);
     if (!graded) { problems.push(`probe ${i + 1}: no self-grade control`); break; }
 
@@ -78,14 +88,24 @@ const note = (m) => console.log('  ' + m);
   });
   const spans = await page.$$eval('.anchor-span', (n) => n.length).catch(() => 0);
   const marked = await page.$$eval('.anchor-span', (ns) =>
-    ns.filter((n) => /anchor-(owned|shaky|borrowed|illusion)/.test(n.className)).length).catch(() => 0);
+    ns.filter((n) => /anchor-(defended|partial|undefended|underclaimed)/.test(n.className)).length).catch(() => 0);
   note(`map: ${spans} anchored spans, ${marked} carrying a verdict colour`);
   if (spans === 0) problems.push('map: no anchor spans — anchors did not place');
   if (marked === 0) problems.push('map: anchors placed but none coloured by verdict');
 
-  const idx = await page.$$eval('.t-num', (ns) => ns.map((n) => n.textContent.trim())).catch(() => []);
-  note(`map: numeric readouts ${JSON.stringify(idx.slice(0, 3))}`);
-  if (!idx.length || idx[0] === '—') problems.push('map: ownership index not computed');
+  /* v3's headline is a signed span count, not an unsigned 0-100 index, and
+     there must be exactly ONE hero on the screen (P3 §2.1). */
+  const heroes = await page.$$eval('.t-hero', (ns) => ns.map((n) => n.textContent.trim())).catch(() => []);
+  note(`map: ${heroes.length} hero numeral(s) ${JSON.stringify(heroes)}`);
+  if (heroes.length === 0) problems.push('map: no divergence hero rendered');
+  if (heroes.length > 1) problems.push(`map: ${heroes.length} hero numerals on one screen — the rule is one`);
+  if (heroes[0] && !/^[+−-]?\d+$/.test(heroes[0].replace(/\s/g, ''))) {
+    problems.push(`map: hero is not a signed count ("${heroes[0]}")`);
+  }
+
+  const claim = await page.$eval('.divergence-claim', (n) => n.textContent.trim()).catch(() => '');
+  note(`map: claim line "${claim}"`);
+  if (!claim) problems.push('map: the divergence claim line is missing — the number would be a bare score');
 
   await page.screenshot({ path: 'shot-map-desktop.png', fullPage: false });
 

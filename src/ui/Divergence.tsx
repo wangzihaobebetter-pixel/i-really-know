@@ -94,6 +94,43 @@ export function DivergenceHero({ divergence: d, animate = true }: {
 }
 
 /**
+ * THE HALF-OBJECT. A keyless run has a claimed count and no demonstrated count,
+ * and `divergence()` deliberately returns undefined rather than inventing one.
+ *
+ * The first version of this screen answered that with a callout, which meant
+ * the product's headline metric was INVISIBLE to every first-time user — the
+ * exact burying that v3 exists to undo, reintroduced through the back door and
+ * caught by verify-e2e.
+ *
+ * So the claimed half is shown at full hero treatment, in `--ink` with no
+ * state hue, and the demonstrated half is shown as explicitly absent. Nothing
+ * is fabricated: the number on screen is the student's own estimate, labelled
+ * as their own estimate. It also sets up P3 §3.2's continuity — when a verdict
+ * does arrive, the reveal continues an object the student has already seen
+ * rather than introducing a new one.
+ */
+export function ClaimedHero({ claimed, scored, onSetup }: {
+  claimed: number; scored: number; onSetup?: () => void;
+}) {
+  return (
+    <div className="divergence-hero">
+      <p className="t-body ink-2 divergence-claim">
+        {translate('map.claimedOnly', { claimed, scored })}
+      </p>
+      <div className="t-hero divergence-numeral ink-2" aria-hidden>
+        <span>{claimed}</span>
+      </div>
+      <p className="t-body-lg divergence-verdict measure">{translate('map.claimedPending')}</p>
+      {onSetup && (
+        <button type="button" className="viva-leave" onClick={onSetup}>
+          {translate('map.noDivergenceAction')}
+        </button>
+      )}
+    </div>
+  );
+}
+
+/**
  * THE CALIBRATION CURVE — a paired-slope chart (P3 §3.3).
  *
  * Deliberately NOT a Dunning-Kruger quartile plot. Corpus `03` §A3: the classic
