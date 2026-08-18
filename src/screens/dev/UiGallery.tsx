@@ -9,7 +9,7 @@ import {
 import type { Verdict } from '../../types';
 import { useStore } from '../../store';
 
-const VERDICTS: Verdict[] = ['owned', 'shaky', 'borrowed', 'illusion', 'none'];
+const VERDICTS: Verdict[] = ['defended', 'partial', 'undefended', 'underclaimed', 'none'];
 
 function Row({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -80,19 +80,19 @@ export default function UiGallery() {
 
       <Row title="Marks, tags, scores">
         {VERDICTS.map((v) => <Mark key={v} verdict={v} />)}
-        {(['neutral', 'action', 'owned', 'shaky', 'borrowed', 'illusion'] as const).map((t) => <Tag key={t} tone={t}>{t}</Tag>)}
+        {(['neutral', 'action', 'defended', 'partial', 'undefended', 'underclaimed'] as const).map((t) => <Tag key={t} tone={t}>{t}</Tag>)}
         <Tag mono tone="neutral">provenance</Tag>
         {[0, 1, 2, 3].map((s) => <ScorePip key={s} score={s as 0} />)}
         <ScorePip score={null} />
       </Row>
 
       <Row title="Meters">
-        <div style={{ width: 260 }}><SegmentStrip total={6} current={2} states={['owned', 'illusion', 'none', 'none', 'none', 'none']} /></div>
+        <div style={{ width: 260 }}><SegmentStrip total={6} current={2} states={['defended', 'underclaimed', 'none', 'none', 'none', 'none']} /></div>
         <TimerRing totalSec={90} remainingSec={62} />
         <TimerRing totalSec={90} remainingSec={22} />
         <TimerRing totalSec={90} remainingSec={9} />
         <div style={{ width: 320 }}>
-          <OwnershipBar counts={{ owned: 3, shaky: 1, borrowed: 1, illusion: 1, none: 0, total: 6, undersold: 0 }} showLegend />
+          <OwnershipBar counts={{ defended: 3, partial: 1, undefended: 1, underclaimed: 1, none: 0, total: 6 }} showLegend />
         </div>
         <div style={{ width: 360 }}>
           <DimensionLedger
@@ -120,7 +120,7 @@ export default function UiGallery() {
         <Spinner label="Composing probes…" />
         <span className="row"><Kbd>1</Kbd><Kbd>?</Kbd></span>
         <Button variant="secondary" onClick={() => setOpen(true)}>Open dialog</Button>
-        <Button variant="secondary" onClick={() => toast.push('Added 3 items to the retraining queue.', { tone: 'owned' })}>Toast</Button>
+        <Button variant="secondary" onClick={() => toast.push('Added 3 items to the retraining queue.', { tone: 'defended' })}>Toast</Button>
       </Row>
 
       <Row title="Painted page">
@@ -130,14 +130,14 @@ export default function UiGallery() {
             text={SAMPLE}
             staggered
             anchors={[
-              { id: 'a1', start: SAMPLE.indexOf('seen = {start}'), end: SAMPLE.indexOf('seen = {start}') + 14, verdict: 'owned' },
-              { id: 'a2', start: SAMPLE.indexOf('q.popleft()'), end: SAMPLE.indexOf('q.popleft()') + 11, verdict: 'illusion' },
-              { id: 'a3', start: SAMPLE.indexOf('seen.add(nxt)'), end: SAMPLE.indexOf('seen.add(nxt)') + 13, verdict: 'borrowed' },
+              { id: 'a1', start: SAMPLE.indexOf('seen = {start}'), end: SAMPLE.indexOf('seen = {start}') + 14, verdict: 'defended' },
+              { id: 'a2', start: SAMPLE.indexOf('q.popleft()'), end: SAMPLE.indexOf('q.popleft()') + 11, verdict: 'underclaimed' },
+              { id: 'a3', start: SAMPLE.indexOf('seen.add(nxt)'), end: SAMPLE.indexOf('seen.add(nxt)') + 13, verdict: 'undefended' },
             ]}
           />
         </div>
         <div style={{ maxWidth: 260 }}>
-          <MarginNote tone="illusion">You marked this Owned. It isn't yet.</MarginNote>
+          <MarginNote tone="underclaimed">You marked this Owned. It isn't yet.</MarginNote>
         </div>
       </Row>
 

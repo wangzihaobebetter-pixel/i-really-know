@@ -18,7 +18,7 @@ export default function StudentSheetScreen() {
   if (!cohort || !submission || !session) {
     return (
       <div className="col-read stack">
-        <Callout tone="borrowed" title={t('common.state.notfound.title')}>
+        <Callout tone="danger" title={t('common.state.notfound.title')}>
           <Button size="sm" onClick={() => nav('class')}>{t('common.action.back')}</Button>
         </Callout>
       </div>

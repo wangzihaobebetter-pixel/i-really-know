@@ -5,8 +5,9 @@ import { Mark } from './Marks';
 import { translate } from '../i18n';
 
 const VERDICT_VAR: Record<Verdict, string> = {
-  owned: 'var(--owned)', shaky: 'var(--shaky)', borrowed: 'var(--borrowed)',
-  illusion: 'var(--illusion)', none: 'var(--hairline)',
+  defended: 'var(--defended)', partial: 'var(--partial)',
+  undefended: 'var(--undefended)', underclaimed: 'var(--underclaimed)',
+  none: 'var(--hairline)',
 };
 
 /** Probe progress: one segment per probe, inked by verdict as the run proceeds. */
@@ -30,7 +31,10 @@ export function TimerRing({ totalSec, remainingSec, paused, size = 34 }: {
   const r = (size - 4) / 2;
   const c = 2 * Math.PI * r;
   const frac = totalSec > 0 ? Math.max(0, Math.min(1, remainingSec / totalSec)) : 0;
-  const color = frac <= 0.15 ? 'var(--borrowed)' : frac <= 0.3 ? 'var(--shaky)' : 'var(--ink-3)';
+  /* P3 §6: no countdown ring pressuring the student. The stroke drains and
+     that is all — it never turns red, because red is the system-error colour
+     and an alarm on a student's thinking time is an accusation. */
+  const color = frac <= 0.3 ? 'var(--ink-2)' : 'var(--ink-3)';
   const mm = Math.floor(Math.max(0, remainingSec) / 60);
   const ss = Math.floor(Math.max(0, remainingSec) % 60);
   return (
@@ -52,11 +56,11 @@ export function TimerRing({ totalSec, remainingSec, paused, size = 34 }: {
 }
 
 export function OwnershipBar({ counts, showLegend }: { counts: OwnershipCounts; showLegend?: boolean }) {
-  const order: Verdict[] = ['owned', 'shaky', 'illusion', 'borrowed', 'none'];
+  const order: Verdict[] = ['defended', 'underclaimed', 'partial', 'undefended', 'none'];
   const total = Math.max(1, counts.total);
   return (
     <div>
-      <div className="ownbar" role="img" aria-label={`Owned ${counts.owned}, shaky ${counts.shaky}, illusion ${counts.illusion}, borrowed ${counts.borrowed} of ${counts.total}`}>
+      <div className="ownbar" role="img" aria-label={`Defended ${counts.defended}, defended-but-not-claimed ${counts.underclaimed}, partial ${counts.partial}, could not defend ${counts.undefended}, of ${counts.total}`}>
         {order.map((v) => counts[v] > 0 && (
           <span key={v} className="ownbar-part" style={{ width: `${(counts[v] / total) * 100}%`, background: VERDICT_VAR[v] }} />
         ))}
@@ -85,7 +89,7 @@ export function DimensionLedger({ rows, labelFor, compareSelf }: {
     <div className="ledger">
       {rows.map((r) => {
         const pct = (r.mean / 3) * 100;
-        const color = r.mean >= 2 ? 'var(--owned)' : r.mean >= 1 ? 'var(--shaky)' : 'var(--borrowed)';
+        const color = r.mean >= 2 ? 'var(--defended)' : r.mean >= 1 ? 'var(--partial)' : 'var(--undefended)';
         return (
           <div className="ledger-row" key={r.dimensionId}>
             <span className="t-small">{labelFor?.(r.dimensionId) ?? r.dimensionId}</span>

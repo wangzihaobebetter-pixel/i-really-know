@@ -48,7 +48,7 @@ function V1MigrationGate() {
   useEffect(() => {
     if (migrated) return;
     const n = runV1Migration();
-    if (n > 0) toast.push(`Imported ${n} session${n === 1 ? '' : 's'} from v1.`, { tone: 'owned' });
+    if (n > 0) toast.push(`Imported ${n} session${n === 1 ? '' : 's'} from v1.`, { tone: 'defended' });
   }, [migrated, runV1Migration, toast]);
   return null;
 }

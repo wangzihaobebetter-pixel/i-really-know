@@ -1,19 +1,29 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useStore, selectSession, selectHasKey } from '../../store';
 import { getPack, dimensionLabel } from '../../packs';
 import { useRoute, useNavigate } from '../../router';
 import { useT, useLang } from '../../i18n';
 import {
   AnchoredText, Button, Callout, DimensionLedger, Mark, MarginNote,
-  OwnershipBar, Sheet, Spinner, Tag, useToast,
+  Sheet, Spinner, Tag, useToast,
+  DivergenceHero, SlopeGraph, CalibrationTrend,
 } from '../../ui';
 import type { TextAnchor } from '../../ui';
 import {
-  countVerdicts, dimensionLedger, ownershipInWords, verdictOf,
+  dimensionLedger, divergence, underclaimedProbes, undefendedProbes, verdictOf,
 } from '../../lib/analysis';
 import { diagnose, describeError } from '../../lib/llm';
 import { targetsFromSession } from '../../lib/session-ops';
 
+/**
+ * The divergence screen. P3 §3.
+ *
+ * v2 called this "the map" and led with two numbers of identical size sitting
+ * side by side — `掌握度 56` and `自我认知准确度 56` — which gave the eye nothing
+ * to land on and buried the only metric no competitor ships. v3 inverts it:
+ * ONE hero numeral, the signed span count, and nothing else on that first
+ * screen above body scale.
+ */
 export default function MapScreen() {
   const t = useT();
   const lang = useLang();
@@ -22,6 +32,7 @@ export default function MapScreen() {
   const sessionId = useRoute().params.sessionId;
 
   const session = useStore(selectSession(sessionId));
+  const allSessions = useStore((s) => s.sessions);
   const settings = useStore((s) => s.settings);
   const hasKey = useStore(selectHasKey);
   const updateSession = useStore((s) => s.updateSession);
@@ -30,37 +41,64 @@ export default function MapScreen() {
   const [diagnosing, setDiagnosing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeId, setActiveId] = useState<string | undefined>();
+  const pageRef = useRef<HTMLDivElement>(null);
 
   const anchors: TextAnchor[] = useMemo(() => {
     if (!session) return [];
     return session.probes
       .filter((p) => p.anchor.placed && p.anchor.start !== undefined && p.anchor.end !== undefined)
-      .map((p) => ({
-        id: p.id,
-        start: p.anchor.start!,
-        end: p.anchor.end!,
-        verdict: verdictOf(p),
-      }))
+      .map((p) => ({ id: p.id, start: p.anchor.start!, end: p.anchor.end!, verdict: verdictOf(p) }))
       .sort((a, b) => a.start - b.start);
   }, [session]);
+
+  const div = useMemo(() => (session ? divergence(session.probes) : undefined), [session]);
+
+  /** The trend needs the zero line and at least two points to mean anything. */
+  const trend = useMemo(() => {
+    return allSessions
+      .filter((s) => s.status === 'complete')
+      .map((s) => ({ at: s.completedAt ?? s.createdAt, d: divergence(s.probes) }))
+      .filter((x): x is { at: number; d: NonNullable<ReturnType<typeof divergence>> } => !!x.d)
+      .sort((a, b) => a.at - b.at)
+      .map((x) => ({ at: x.at, delta: x.d.delta }));
+  }, [allSessions]);
+
+  /* Tapping a line on the curve jumps to that span on the Painted Page —
+     the chart is an index into the evidence, not an ornament (P3 §3.3). */
+  useEffect(() => {
+    if (!activeId) return;
+    pageRef.current
+      ?.querySelector(`[data-anchor-id="${CSS.escape(activeId)}"]`)
+      ?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  }, [activeId]);
 
   if (!session) {
     return (
       <div className="col-read stack">
-        <Callout tone="borrowed" title={t('common.state.notfound.title')}>
+        <Callout tone="undefended" title={t('common.state.notfound.title')}>
           <Button size="sm" onClick={() => nav('home')}>{t('common.state.notfound.action')}</Button>
         </Callout>
       </div>
     );
   }
 
-  const counts = countVerdicts(session.probes);
   const graded = session.probes.filter((p) => p.ai || p.selfGrade);
+  if (!graded.length) {
+    return (
+      <div className="col-read stack">
+        <Callout tone="neutral" title={t('map.empty')}>
+          <Button size="sm" onClick={() => nav('run', { sessionId: session.id })}>{t('home.resume')}</Button>
+        </Callout>
+      </div>
+    );
+  }
+
+  const pack = getPack(session.packId);
   const ledger = dimensionLedger(session.probes);
-  const illusions = session.probes.filter((p) => verdictOf(p) === 'illusion');
+  const underclaimed = underclaimedProbes(session.probes);
+  const undefended = undefendedProbes(session.probes);
   const unplaced = session.probes.filter((p) => !p.anchor.placed);
   const scoredByAi = session.probes.some((p) => p.ai);
-  const pack = getPack(session.packId);
   const activeProbe = session.probes.find((p) => p.id === activeId);
 
   async function writeDiagnosis() {
@@ -68,8 +106,7 @@ export default function MapScreen() {
     setDiagnosing(true);
     setError(null);
     try {
-      const d = await diagnose(settings, session, lang);
-      updateSession(session.id, { diagnosis: d });
+      updateSession(session.id, { diagnosis: await diagnose(settings, session, lang) });
     } catch (err) {
       setError(describeError(err));
     } finally {
@@ -84,71 +121,41 @@ export default function MapScreen() {
     toast.push(t('map.added', { n: targets.length }), { tone: 'neutral' });
   }
 
-  if (!graded.length) {
-    return (
-      <div className="col-read stack">
-        <Callout tone="neutral" title={t('map.empty')}>
-          <Button size="sm" onClick={() => nav('run', { sessionId: session.id })}>{t('home.resume')}</Button>
-        </Callout>
-      </div>
-    );
-  }
-
   return (
     <div className="col-read stack">
+      {/* ---- THE HERO. One per screen. Nothing else here is above body scale. ---- */}
       <header className="stack-tight">
         <div className="row wrap" style={{ gap: 'var(--space-3)' }}>
-          <h1 className="t-display-2">{t('map.title')}</h1>
+          <span className="t-micro ink-3">{t('map.divergenceTitle')}</span>
           <Tag mono>{pack.shortName}</Tag>
         </div>
-        <p className="t-serif-it t-body-lg measure">
-          {ownershipInWords(session.ownershipIndex, lang)}
-        </p>
-        {!scoredByAi && <p className="t-small ink-3">{t('map.selfReported')}</p>}
       </header>
 
-      <Sheet elevation={1}>
-        <div className="stack-tight">
-          <OwnershipBar counts={counts} showLegend />
-          {/* .row centres its children; these two blocks have different heights,
-              so their labels would not share a baseline. */}
-          <div className="row wrap" style={{ gap: 'var(--space-6)', alignItems: 'flex-start' }}>
-            <div className="stack-tight">
-              <span className="t-micro ink-3">{t('map.index')}</span>
-              <span className="t-display-2 t-num">{session.ownershipIndex ?? '—'}</span>
+      {div ? (
+        <DivergenceHero divergence={div} />
+      ) : (
+        <Callout tone="action" title={t('map.noDivergence')}>
+          <div className="stack-tight">
+            <p className="t-small ink-2 measure">{t('map.selfReported')}</p>
+            <div className="row">
+              <Button size="sm" onClick={() => nav('settings')}>{t('map.noDivergenceAction')}</Button>
             </div>
-            {session.calibration !== undefined && (
-              <div className="stack-tight">
-                <span className="t-micro ink-3">{t('map.calibration')}</span>
-                <span className="t-display-2 t-num">{session.calibration}</span>
-                <span className="t-micro ink-3 measure">{t('map.calibrationHint')}</span>
-              </div>
-            )}
           </div>
-        </div>
-      </Sheet>
+        </Callout>
+      )}
 
-      {illusions.length > 0 && (
+      {/* ---- The curve, below the fold on purpose. ---- */}
+      {div && div.pairs.length > 1 && (
         <section className="stack-tight">
-          <h2 className="t-title">{t('map.illusions')}</h2>
-          {illusions.map((p) => (
-            <Sheet key={p.id} elevation={1} padding="var(--space-4) var(--space-5)">
-              <div className="stack-tight">
-                <div className="row" style={{ gap: 'var(--space-3)' }}>
-                  <Mark verdict="illusion" />
-                  <span className="t-small ink-3">{dimensionLabel(session.packId, p.dimensionId)}</span>
-                </div>
-                <p className="t-body measure">{p.question}</p>
-                {p.ai && <p className="t-small ink-2">{p.ai.verdictLine}</p>}
-              </div>
-            </Sheet>
-          ))}
+          <h2 className="t-title">{t('map.curveTitle')}</h2>
+          <SlopeGraph pairs={div.pairs} onSelect={setActiveId} activeId={activeId} />
         </section>
       )}
 
-      <section className="stack-tight">
+      {/* ---- The Painted Page: one contained surface, a true document. ---- */}
+      <section className="stack-tight" ref={pageRef}>
         <h2 className="t-title">{t('map.painted')}</h2>
-        <p className="t-small ink-3">{t('map.paintedHint')}</p>
+        <p className="t-small ink-3 measure">{t('map.paintedHint')}</p>
         <Sheet elevation={0} padding="var(--space-6)">
           <AnchoredText
             text={session.material}
@@ -158,12 +165,18 @@ export default function MapScreen() {
             staggered
             onAnchorClick={(anchorId) => setActiveId(anchorId === activeId ? undefined : anchorId)}
           />
-          {illusions.map((p) => (
-            <MarginNote key={p.id} tone="illusion" anchorId={p.id}>
-              {lang === 'en' ? 'You marked this Owned. It isn’t yet.' : '你标了"我掌握了"。目前还不是。'}
+          {undefended.slice(0, 2).map((p) => (
+            <MarginNote key={p.id} tone="undefended" anchorId={p.id}>
+              {t('map.divergenceLine.over')}
             </MarginNote>
           ))}
         </Sheet>
+        <div className="doc-key t-small ink-2">
+          <span className="doc-chip ink-defended">{t('map.keyDefended')}</span>
+          <span className="doc-chip ink-partial">{t('map.keyPartial')}</span>
+          <span className="doc-chip ink-undefended">{t('map.keyUndefended')}</span>
+          <span className="doc-chip ink-underclaimed">{t('map.keyUnderclaimed')}</span>
+        </div>
         {activeProbe && (
           <Sheet elevation={1}>
             <div className="stack-tight">
@@ -178,11 +191,59 @@ export default function MapScreen() {
           </Sheet>
         )}
         {unplaced.length > 0 && (
-          <p className="t-small ink-3">
-            {t('map.unplaced')}: {unplaced.length}
-          </p>
+          <p className="t-small ink-3">{t('map.unplaced')}: {unplaced.length}</p>
         )}
       </section>
+
+      {/* ---- THE UNDERCONFIDENT STATE. First-class, and the largest cohort.
+             v2 computed this and threw it away (analysis.ts mapped undersold
+             straight to owned), so 46% of students saw the same green as the
+             students who were right. It goes ABOVE the failures deliberately:
+             this is a correction of a false belief, not praise, and it is the
+             one return reason that is not shame. ---- */}
+      {underclaimed.length > 0 && (
+        <section className="stack-tight">
+          <h2 className="t-title">{t('map.underclaimedTitle')}</h2>
+          <p className="t-small ink-3 measure">{t('map.underclaimedHint')}</p>
+          {underclaimed.map((p) => (
+            <Sheet key={p.id} elevation={1} padding="var(--space-4) var(--space-5)">
+              <div className="stack-tight">
+                <div className="row" style={{ gap: 'var(--space-3)' }}>
+                  <Mark verdict="underclaimed" />
+                  <span className="t-small ink-3">{dimensionLabel(session.packId, p.dimensionId)}</span>
+                </div>
+                <blockquote className="doc-quote t-small ink-2">{p.anchor.quote}</blockquote>
+                {p.ai && <p className="t-small">{p.ai.verdictLine}</p>}
+              </div>
+            </Sheet>
+          ))}
+        </section>
+      )}
+
+      {undefended.length > 0 && (
+        <section className="stack-tight">
+          <h2 className="t-title">{t('map.undefendedTitle')}</h2>
+          {undefended.map((p) => (
+            <Sheet key={p.id} elevation={1} padding="var(--space-4) var(--space-5)">
+              <div className="stack-tight">
+                <div className="row" style={{ gap: 'var(--space-3)' }}>
+                  <Mark verdict="undefended" />
+                  <span className="t-small ink-3">{dimensionLabel(session.packId, p.dimensionId)}</span>
+                </div>
+                <p className="t-body measure">{p.question}</p>
+                {p.ai && <p className="t-small ink-2">{p.ai.verdictLine}</p>}
+              </div>
+            </Sheet>
+          ))}
+        </section>
+      )}
+
+      {trend.length > 1 && (
+        <section className="stack-tight">
+          <h2 className="t-title">{t('map.trendTitle')}</h2>
+          <CalibrationTrend deltas={trend} />
+        </section>
+      )}
 
       <section className="stack-tight">
         <h2 className="t-title">{t('map.ledger')}</h2>
@@ -241,7 +302,7 @@ export default function MapScreen() {
         ) : (
           <p className="t-small ink-3">{t('map.selfReported')}</p>
         )}
-        {error && <Callout tone="borrowed">{error}</Callout>}
+        {error && <Callout tone="undefended">{error}</Callout>}
       </section>
 
       <div className="row wrap">

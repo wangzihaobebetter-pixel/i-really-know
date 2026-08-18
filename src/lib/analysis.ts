@@ -4,7 +4,7 @@
  * WP0 owns this file; every screen reads it rather than recomputing.
  */
 import type {
-  Anchor, DivergenceClass, Probe, SelfGrade, Session, Verdict, Score,
+  Anchor, DivergenceClass, DivergenceDirection, Probe, SelfGrade, Session, Verdict, Score,
 } from '../types';
 
 /* ---------- self-grade ↔ score bridge ---------- */
@@ -40,12 +40,25 @@ export function classifyDivergence(probe: Probe): DivergenceClass {
   return 'halfheld';
 }
 
+/**
+ * AXIS A — demonstrated (P3 §2.2, §9.3).
+ *
+ * v2 shipped `undersold: 'owned'` on this table. That one line is why the 46%
+ * plurality who underestimate themselves (Knof 2024, N=426, corpus `03` §A2)
+ * rendered in exactly the same green as the students who were right, and
+ * learned nothing. `undersold` now has its own Axis-A state and its own mark
+ * on the Painted Page.
+ *
+ * `illusion` maps to `undefended` here because Axis A answers ONLY "could you
+ * defend it?". That they also claimed it is Axis B's job, and collapsing the
+ * two axes into one is the mistake this table exists to fix.
+ */
 const DIVERGENCE_VERDICT: Record<DivergenceClass, Verdict> = {
-  owned: 'owned',
-  undersold: 'owned',
-  halfheld: 'shaky',
-  borrowed: 'borrowed',
-  illusion: 'illusion',
+  owned: 'defended',
+  undersold: 'underclaimed',
+  halfheld: 'partial',
+  borrowed: 'undefended',
+  illusion: 'undefended',
   unscored: 'none',
 };
 
@@ -61,25 +74,124 @@ export function withDivergence(probes: Probe[]): Probe[] {
 /* ---------- ownership index & calibration ---------- */
 
 export interface OwnershipCounts {
-  owned: number; shaky: number; borrowed: number; illusion: number; none: number; total: number;
-  /**
-   * Self ≤ 1.5 AND AI = 3 — student undersold themselves (Knof 2024: 46% of students do this,
-   * making it the plurality case, not a corner). Kept DISTINCT from `owned` so the underconfident
-   * student is no longer silently folded into the confident bucket. P3 §9 item 3 first half.
-   * The `Verdict` mapping still collapses undersold→owned for surfaces that show one mark per
-   * span; this count is the door for P4 to split them visually.
-   */
-  undersold: number;
+  defended: number; partial: number; undefended: number; underclaimed: number;
+  none: number; total: number;
 }
 
 export function countVerdicts(probes: Probe[]): OwnershipCounts {
-  const c: OwnershipCounts = { owned: 0, shaky: 0, borrowed: 0, illusion: 0, none: 0, total: probes.length, undersold: 0 };
-  for (const p of probes) {
-    const div = p.divergence ?? classifyDivergence(p);
-    if (div === 'undersold') { c.undersold++; continue; }
-    c[verdictOf(p)]++;
-  }
+  const c: OwnershipCounts = {
+    defended: 0, partial: 0, undefended: 0, underclaimed: 0, none: 0, total: probes.length,
+  };
+  for (const p of probes) c[verdictOf(p)]++;
   return c;
+}
+
+/* ---------- AXIS B · divergence, the headline metric (P3 §3) ---------- */
+
+/** A span the student claimed: they self-graded it "I own this" (3/3). */
+const CLAIMED_THRESHOLD = 2.5;
+/** A span the student defended: the examiner scored it 2 or 3 out of 3. */
+const DEFENDED_THRESHOLD = 2;
+
+export interface SlopePair {
+  probeId: string;
+  dimensionId: string;
+  /** 0–3, from the self-grade collected BEFORE any verdict. */
+  claimed: number;
+  /** 0–3, from the examiner. */
+  demonstrated: number;
+  /** demonstrated − claimed, for this one span. */
+  delta: number;
+  direction: DivergenceDirection;
+}
+
+export interface Divergence {
+  /** Spans the student said they could defend. */
+  claimed: number;
+  /** Spans they actually defended. */
+  defended: number;
+  /** THE headline number. A signed count of spans: defended − claimed. */
+  delta: number;
+  /** Which of P3 §3.4's three states this run is in. */
+  direction: DivergenceDirection;
+  /** Probes carrying both tracks — the only ones Δ can be computed from. */
+  scored: number;
+  total: number;
+  /** One line per probed span, for the paired-slope chart (P3 §3.3). */
+  pairs: SlopePair[];
+}
+
+function directionOf(delta: number): DivergenceDirection {
+  if (delta > 0.5) return 'under';
+  if (delta < -0.5) return 'over';
+  return 'accurate';
+}
+
+/**
+ * P3 §3.4a: well calibrated is Δ ∈ {−1, 0, +1}. The band is deliberately
+ * narrow — only 18.5% of students land in it (Knof 2024, N=426), and the
+ * product's whole claim is that most people are outside it.
+ */
+export function calibrationBand(delta: number): DivergenceDirection {
+  if (delta >= -1 && delta <= 1) return 'accurate';
+  return delta > 0 ? 'under' : 'over';
+}
+
+/**
+ * Δ = (spans defended) − (spans claimed), signed. P3 §3.1.
+ *
+ * NOT a percentage. v2 showed `自我认知准确度 56`, which is wrong twice:
+ * unsigned erases direction — the entire finding of corpus `03` §A2 — and
+ * score-shaped invites "is 56 good?", the question `05` §3.1 records
+ * OralExam.ai deliberately refusing to answer by shipping no percentage at all.
+ *
+ * A span count is countable, auditable, and is the SAME UNIT the instructor's
+ * evidence sheet uses, so the student's number and the professor's document are
+ * the same object. A percentage invites disputing the number; a count invites
+ * asking WHICH THREE — which is the action this product wants.
+ *
+ * Returns undefined when no probe carries both tracks. A keyless run has a
+ * claimed count and no demonstrated count; inventing one would fake the only
+ * signal this product has.
+ */
+export function divergence(probes: Probe[]): Divergence | undefined {
+  const pairs: SlopePair[] = [];
+  for (const p of probes) {
+    const self = selfGradeAsScore(p.selfGrade);
+    const ai = p.ai?.score;
+    if (self === undefined || ai === undefined) continue;
+    const delta = ai - self;
+    pairs.push({
+      probeId: p.id,
+      dimensionId: p.dimensionId,
+      claimed: self,
+      demonstrated: ai,
+      delta,
+      direction: directionOf(delta),
+    });
+  }
+  if (!pairs.length) return undefined;
+
+  const claimed = pairs.filter((x) => x.claimed >= CLAIMED_THRESHOLD).length;
+  const defended = pairs.filter((x) => x.demonstrated >= DEFENDED_THRESHOLD).length;
+  const delta = defended - claimed;
+  return {
+    claimed, defended, delta,
+    direction: calibrationBand(delta),
+    scored: pairs.length,
+    total: probes.length,
+    pairs,
+  };
+}
+
+/** Spans the student could not defend — the rows an evidence sheet is made of. */
+export function undefendedProbes(probes: Probe[]): Probe[] {
+  return probes.filter((p) => verdictOf(p) === 'undefended');
+}
+
+/** Spans they own more than they thought. The actionable output for the 46%. */
+export function underclaimedProbes(probes: Probe[]): Probe[] {
+  return probes.filter((p) => verdictOf(p) === 'underclaimed');
 }
 
 /**

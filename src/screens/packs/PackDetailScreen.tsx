@@ -22,7 +22,7 @@ export default function PackDetailScreen() {
         <p className="t-small ink-3">{pack.materialKinds.join(' · ')}</p>
       </header>
 
-      {pack.id === 'med' && <Callout tone="shaky">{MED_SAFETY_NOTE}</Callout>}
+      {pack.id === 'med' && <Callout tone="partial">{MED_SAFETY_NOTE}</Callout>}
 
       <section className="stack-tight">
         <h2 className="t-title">{t('packs.dimensions')}</h2>
@@ -56,7 +56,7 @@ export default function PackDetailScreen() {
       <section className="stack-tight">
         <h2 className="t-title">{t('packs.traps')}</h2>
         <div className="row wrap" style={{ gap: 'var(--space-2)' }}>
-          {pack.vocabularyTraps.map((v) => <Tag key={v} mono tone="shaky">{v}</Tag>)}
+          {pack.vocabularyTraps.map((v) => <Tag key={v} mono tone="partial">{v}</Tag>)}
         </div>
       </section>
 

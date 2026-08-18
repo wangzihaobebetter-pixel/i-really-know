@@ -68,8 +68,12 @@ export async function generateFor(
 export function targetsFromSession(session: Session): RetrainTarget[] {
   return session.probes
     .filter((p) => {
+      /* Axis A only. A span you could not fully defend comes back — including
+         the ones you *had* claimed. `underclaimed` deliberately does NOT queue:
+         you already defended it, and sending it back would teach the 46% who
+         underestimate themselves that being right is a reason to be retested. */
       const v = verdictOf(p);
-      return v === 'borrowed' || v === 'illusion' || v === 'shaky';
+      return v === 'undefended' || v === 'partial';
     })
     .map((p) => ({
       id: id('t'),

@@ -45,7 +45,7 @@ export default function RecordScreen() {
       value: (r) => r.status,
       render: (r) =>
         r.status === 'complete'
-          ? <Mark verdict="owned" showWord={false} size={14} />
+          ? <Mark verdict='defended' showWord={false} size={14} />
           : <span className="t-small ink-3">{r.status}</span>,
     },
   ];

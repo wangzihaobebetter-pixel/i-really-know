@@ -34,7 +34,7 @@ export default function CohortScreen() {
   if (!cohort) {
     return (
       <div className="col-read stack">
-        <Callout tone="borrowed" title={t('common.state.notfound.title')}>
+        <Callout tone="danger" title={t('common.state.notfound.title')}>
           <Button size="sm" onClick={() => nav('class')}>{t('common.action.back')}</Button>
         </Callout>
       </div>
@@ -162,7 +162,7 @@ export default function CohortScreen() {
           </div>
         </div>
         {busy && <Spinner label={t('common.state.loading')} />}
-        {error && <Callout tone="borrowed">{error}</Callout>}
+        {error && <Callout tone="danger">{error}</Callout>}
 
         {cohort.submissions.map((sub) => {
           const s = sessions.find((x) => x.id === sub.sessionId);

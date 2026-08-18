@@ -12,7 +12,7 @@ export function Sheet({ elevation = 0, padding = 'var(--space-6)', as: As = 'div
 }
 
 export function Callout({ tone = 'neutral', title, action, children }: {
-  tone?: 'neutral' | 'action' | 'shaky' | 'borrowed';
+  tone?: 'neutral' | 'action' | 'partial' | 'undefended' | 'danger';
   title?: string; action?: React.ReactNode; children?: React.ReactNode;
 }) {
   return (

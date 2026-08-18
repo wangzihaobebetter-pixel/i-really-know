@@ -1,0 +1,1 @@
+The ability of a species to compete for limited resources is often central to its ability to survive in a given environment. Different species possess differential competitive abilities, which are often dependent upon environmental conditions.

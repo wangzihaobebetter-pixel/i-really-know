@@ -110,7 +110,7 @@ export default function VivaScreen() {
   if (!session) {
     return (
       <div className="col-read stack">
-        <Callout tone="borrowed" title={t('common.state.notfound.title')}>
+        <Callout tone="danger" title={t('common.state.notfound.title')}>
           <Button size="sm" onClick={() => nav('home')}>{t('common.state.notfound.action')}</Button>
         </Callout>
       </div>
@@ -253,7 +253,7 @@ export default function VivaScreen() {
               </div>
 
               {scoring && <Spinner label={t('viva.committing')} />}
-              {scoreError && <Callout tone="shaky">{t('viva.scoreFailed')}</Callout>}
+              {scoreError && <Callout tone="danger">{t('viva.scoreFailed')}</Callout>}
               {!hasKey && <p className="t-small ink-3">{t('viva.noScore')}</p>}
 
               {committed.ai && (

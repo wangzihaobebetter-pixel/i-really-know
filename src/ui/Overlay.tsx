@@ -66,7 +66,7 @@ export const BottomSheet = Dialog;
 
 /* ---------- Toast ---------- */
 
-export type ToastTone = 'neutral' | 'owned' | 'borrowed';
+export type ToastTone = 'neutral' | 'defended' | 'undefended';
 export interface ToastItem { id: string; tone: ToastTone; message: string; action?: { label: string; onClick: () => void } }
 
 interface ToastApi { push: (message: string, opts?: { tone?: ToastTone; action?: ToastItem['action']; ms?: number }) => void }

@@ -59,7 +59,7 @@ export default function ImportScreen() {
       nav('run', { sessionId: ready.id });
     } catch (err) {
       setError(describeError(err));
-      toast.push(describeError(err), { tone: 'borrowed' });
+      toast.push(describeError(err), { tone: 'undefended' });
     } finally {
       setBusy(false);
     }
@@ -112,7 +112,7 @@ export default function ImportScreen() {
         onFiles={onFiles}
       />
 
-      {material.length > MATERIAL_CAP && <Callout tone="shaky">{t('import.capped')}</Callout>}
+      {material.length > MATERIAL_CAP && <Callout tone="partial">{t('import.capped')}</Callout>}
 
       {detection && (
         <Sheet elevation={1}>
@@ -127,7 +127,7 @@ export default function ImportScreen() {
                 {Math.round((detection.confidence || 0) * 100)}%
               </span>
             </div>
-            {unsure && <Callout tone="shaky">{t('import.lowConfidence')}</Callout>}
+            {unsure && <Callout tone="partial">{t('import.lowConfidence')}</Callout>}
             <Select
               label={t('import.override')}
               value={packId}
@@ -153,7 +153,7 @@ export default function ImportScreen() {
         />
       </div>
 
-      {error && <Callout tone="borrowed" title={t('common.state.error.title')}>{error}</Callout>}
+      {error && <Callout tone="danger" title={t('common.state.error.title')}>{error}</Callout>}
       {tooShort && material.length > 0 && <p className="t-small ink-3">{t('import.tooShort')}</p>}
 
       <div className="row">

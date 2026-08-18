@@ -1,0 +1,3 @@
+Ashley is a 29 year old, African-American, Gravida 1. She is 13 + 0/7 weeks pregnant with di – di twins. She also has scleroderma with contracted elbow and fingers. She presents to the clinic with a routine 4 week return visit. Her previous labs include: Hgb 10 g/dl, Hct 32%, O+, ABS -, Negative pap, VDRL, GC and Chlamydia. She is rubella equivocal. […] BMI= 18.4. This visit data: BP: 110/60, weight 120lbs, (a gain of 5 lbs), Urine is negative for glucose, nitrates and leukocytes, trace for protein.
+
+Ashley presents to the high-risk clinic for her first pregnancy or primigravida. She is 13 + 0/7 weeks pregnant, which means she is at 13 weeks gestation.

@@ -54,9 +54,9 @@ export default function SettingsScreen() {
     try {
       const data = JSON.parse(await file.text()) as Partial<StoreV2>;
       const result = importAll(data, 'merge');
-      toast.push(t('settings.imported', result), { tone: 'owned' });
+      toast.push(t('settings.imported', result), { tone: 'defended' });
     } catch {
-      toast.push(t('common.state.error.title'), { tone: 'borrowed' });
+      toast.push(t('common.state.error.title'), { tone: 'undefended' });
     }
   }
 
@@ -110,7 +110,7 @@ export default function SettingsScreen() {
               {testing && <Spinner />}
             </div>
             {testResult && (
-              <Callout tone={testResult.ok ? 'neutral' : 'borrowed'}>{testResult.message}</Callout>
+              <Callout tone={testResult.ok ? 'neutral' : 'danger'}>{testResult.message}</Callout>
             )}
           </div>
         </Sheet>

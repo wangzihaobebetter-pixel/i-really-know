@@ -103,7 +103,7 @@ export default function QueueScreen() {
           {active && (
             <div className="stack-tight">
               {loading && <Spinner label={t('map.diagnosing')} />}
-              {error && <Callout tone="shaky">{error}</Callout>}
+              {error && <Callout tone="partial">{error}</Callout>}
               {prompt && (
                 <>
                   <p className="t-body-strong measure">{prompt.question}</p>

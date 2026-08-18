@@ -1,0 +1,1 @@
+We qualitatively determine that the stopping potential is dependent on the frequency of impinging light, in agreement with Einstein's model. The dependence of photoelectron energy on frequency is used to measure the value of h, Planck's constant. We find [Formula here], which is in good agreement with the accepted value [Formula here].
