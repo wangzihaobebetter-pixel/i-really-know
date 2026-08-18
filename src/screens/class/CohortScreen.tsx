@@ -8,7 +8,7 @@ import {
 } from '../../ui';
 import { PRESET_COUNTS } from '../../store/presets';
 import { generate, aggregate, describeError } from '../../lib/llm';
-import { detectMaterialKind, ownershipIndex, calibration, titleFromMaterial } from '../../lib/analysis';
+import { detectMaterialKind, divergence, titleFromMaterial } from '../../lib/analysis';
 import { id, now } from '../../lib/ids';
 import type { Session, Submission } from '../../types';
 
@@ -159,6 +159,11 @@ export default function CohortScreen() {
             <Button size="sm" variant="ghost" onClick={summarise} disabled={busy || !hasKey}>
               {t('class.aggregate')}
             </Button>
+            {/* The artefact with no competitor equivalent. It changes what you
+                teach next, not just who you grade. */}
+            <Button size="sm" variant="primary" onClick={() => nav('reteach', { cohortId: cohort.id })}>
+              {t('reteach.title')}
+            </Button>
           </div>
         </div>
         {busy && <Spinner label={t('common.state.loading')} />}
@@ -166,8 +171,7 @@ export default function CohortScreen() {
 
         {cohort.submissions.map((sub) => {
           const s = sessions.find((x) => x.id === sub.sessionId);
-          const oi = s ? ownershipIndex(s.probes) : undefined;
-          const cal = s ? calibration(s.probes) : undefined;
+          const div = s ? divergence(s.probes) : undefined;
           return (
             <Sheet key={sub.id} elevation={1} padding="var(--space-4) var(--space-5)">
               <div className="row-between wrap" style={{ gap: 'var(--space-3)' }}>
@@ -175,13 +179,15 @@ export default function CohortScreen() {
                   <span className="t-body-strong">{sub.label}</span>
                   <span className="t-small ink-3">
                     {sub.status}
-                    {oi !== undefined ? ` · ownership ${oi}` : ''}
-                    {cal !== undefined ? ` · calibration ${cal}` : ''}
+                    {div ? ` · ${t('sheet.calibrationLine', {
+                      claimed: div.claimed, defended: div.defended, total: div.scored,
+                      delta: div.delta > 0 ? `+${div.delta}` : String(div.delta),
+                    })}` : ''}
                     {cohort.aggregate?.perSubmissionFlags[sub.id]
                       ? ` · ${cohort.aggregate.perSubmissionFlags[sub.id]}`
                       : ''}
                   </span>
-                  {sub.error && <span className="t-small ink-borrowed">{sub.error}</span>}
+                  {sub.error && <span className="t-small ink-undefended">{sub.error}</span>}
                 </div>
                 <Button
                   size="sm"

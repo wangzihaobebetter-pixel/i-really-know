@@ -217,6 +217,17 @@ registerStrings('viva', {
    declined to answer · no response recorded.
    ============================================================ */
 
+registerStrings('class', {
+  en: {
+    demoTitle: 'See the instructor artefacts first',
+    demoBody: 'Loads a worked cohort so the evidence sheet and the reteach map can be read before any key is set. The submissions and the questions are real and sourced; the outcomes are illustrative and are labelled as such.',
+  },
+  'zh-CN': {
+    demoTitle: '先看看给老师的两份材料',
+    demoBody: '载入一个示例班级，不用配 key 就能读证据单和重讲地图。作业和题目都是真实且有出处的；结果是示意性的，界面上会标明。',
+  },
+});
+
 registerStrings('sheet', {
   en: {
     title: 'Evidence sheet',

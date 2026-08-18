@@ -3,7 +3,7 @@
  * A sample is a real submission plus a hand-written probe set, turned into an
  * ordinary Session so every downstream screen treats it exactly like a real run.
  */
-import type { Probe, Session } from '../types';
+import type { Cohort, Probe, Session } from '../types';
 import { id, now } from '../lib/ids';
 import {
   calibration, detectMaterialKind, ownershipIndex, placeAllAnchors, withDivergence,
@@ -151,4 +151,46 @@ export function unplacedAnchors(): { sampleId: string; quote: string }[] {
     }
   }
   return bad;
+}
+
+/**
+ * A cohort the instructor tier can be seen through without an API key.
+ *
+ * JUDGEMENT CALL, recorded in LOG 012. The evidence sheet and the reteach map
+ * are the paid tier and the thing a professor would tell a colleague about, so
+ * they must be reachable and reviewable before anyone spends a token. Building
+ * them requires several graded submissions, and no real class has ever sat this
+ * examination.
+ *
+ * What is real: the artifacts, their sources, and the probes.
+ * What is illustrative: the outcomes, and the fact that these three artifacts
+ * are treated as one class. Both are labelled wherever they render, and the
+ * cohort is flagged `isDemo` so no surface can present it as a recorded class.
+ */
+export function buildDemoCohort(): { cohort: Cohort; sessions: Session[] } {
+  const cohortId = 'cohort_demo';
+  const built = DEMO_SAMPLES.map((def) => {
+    const session = { ...buildWorkedSession(def), id: `${cohortId}_${def.id}`, cohortId, mode: 'class' as const };
+    return { def, session };
+  });
+  return {
+    cohort: {
+      id: cohortId,
+      name: 'Worked example cohort',
+      packId: built[0]?.def.packId ?? 'general',
+      preset: 'standard',
+      difficulty: 'standard',
+      createdAt: now(),
+      isDemo: true,
+      submissions: built.map(({ def, session }) => ({
+        id: `sub_${def.id}`,
+        label: def.title,
+        material: def.material,
+        materialKind: session.materialKind,
+        sessionId: session.id,
+        status: 'ready' as const,
+      })),
+    },
+    sessions: built.map((b) => ({ ...b.session, submissionId: `sub_${b.def.id}` })),
+  };
 }

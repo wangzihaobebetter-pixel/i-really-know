@@ -6,6 +6,7 @@ import { useT, useLang } from '../../i18n';
 import { Button, Callout, EmptyState, Input, Select, Sheet, Tag } from '../../ui';
 import { formatDate } from '../../lib/session-ops';
 import { id, now } from '../../lib/ids';
+import { buildDemoCohort } from '../../samples';
 import type { Cohort, PackId } from '../../types';
 
 export default function ClassScreen() {
@@ -16,6 +17,7 @@ export default function ClassScreen() {
   const settings = useStore((s) => s.settings);
   const hasKey = useStore(selectHasKey);
   const upsertCohort = useStore((s) => s.upsertCohort);
+  const upsertSession = useStore((s) => s.upsertSession);
 
   const [name, setName] = useState('');
   const [packId, setPackId] = useState<PackId>('cs');
@@ -36,12 +38,26 @@ export default function ClassScreen() {
     nav('cohort', { cohortId: cohort.id });
   }
 
+  function loadDemo() {
+    const { cohort, sessions } = buildDemoCohort();
+    sessions.forEach(upsertSession);
+    upsertCohort(cohort);
+    nav('cohort', { cohortId: cohort.id });
+  }
+
   return (
     <div className="col-read stack">
       <header className="stack-tight">
         <h1 className="t-display-2">{t('class.title')}</h1>
         <p className="t-body ink-2 measure">{t('class.subtitle')}</p>
       </header>
+
+      {/* The instructor tier is the business, so it has to be reviewable
+          before anyone spends a token on it. */}
+      <Callout tone="action" title={t('class.demoTitle')}
+               action={<Button size="sm" onClick={loadDemo}>{t('class.demo')}</Button>}>
+        {t('class.demoBody')}
+      </Callout>
 
       {!hasKey && <Callout tone="action">{t('class.needKey')}</Callout>}
 

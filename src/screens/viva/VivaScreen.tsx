@@ -3,11 +3,13 @@ import { useStore, selectSession, selectHasKey } from '../../store';
 import { getPack } from '../../packs';
 import { useRoute, useNavigate } from '../../router';
 import { useT, useLang } from '../../i18n';
+import { Mic, Square } from 'lucide-react';
 import {
-  AnchoredText, Button, Callout, Mark, ScorePip, Segmented, SegmentStrip,
+  AnchoredText, Button, Callout, Mark, ScorePip, SegmentStrip,
   Sheet, Spinner, Tag, TimerRing,
 } from '../../ui';
 import { verdictOf } from '../../lib/analysis';
+import { isSpeechSupported, startDictation, type Dictation } from '../../lib/speech';
 import { score as scoreProbe, describeError } from '../../lib/llm';
 import { MED_SAFETY_NOTE } from '../../packs';
 import type { SelfGrade, Verdict } from '../../types';
@@ -35,6 +37,13 @@ export default function VivaScreen() {
   const [paused, setPaused] = useState(false);
   const [scoring, setScoring] = useState(false);
   const [scoreError, setScoreError] = useState<string | null>(null);
+  const [recording, setRecording] = useState(false);
+  const [voiceError, setVoiceError] = useState<string | null>(null);
+  const [sourceOpen, setSourceOpen] = useState(false);
+  const dictation = useRef<Dictation | null>(null);
+  const usedVoice = useRef(false);
+  const speechAvailable = isSpeechSupported();
+  const voiceOn = settings.voiceEnabled && speechAvailable;
   const startedAt = useRef<number>(Date.now());
   const answerRef = useRef<HTMLTextAreaElement>(null);
 
@@ -67,12 +76,47 @@ export default function VivaScreen() {
     return () => window.clearInterval(h);
   }, [phase, paused, probe?.id, settings.timersEnabled]);
 
+  /* Stop dictation whenever the probe changes or the screen unmounts —
+     a recogniser left running across a navigation keeps the mic open. */
+  useEffect(() => () => { dictation.current?.stop(); dictation.current = null; }, []);
+  useEffect(() => {
+    dictation.current?.stop();
+    dictation.current = null;
+    setRecording(false);
+    setVoiceError(null);
+    setSourceOpen(false);
+  }, [probe?.id]);
+
+  function toggleDictation() {
+    if (recording) {
+      dictation.current?.stop();
+      dictation.current = null;
+      setRecording(false);
+      return;
+    }
+    setVoiceError(null);
+    const prefix = answer.trim() ? `${answer.trim()} ` : '';
+    const d = startDictation(
+      lang,
+      (text) => setAnswer(prefix + text),
+      (kind) => { setVoiceError(kind); setRecording(false); },
+      () => setRecording(false),
+    );
+    if (!d) { setVoiceError('unsupported'); return; }
+    dictation.current = d;
+    usedVoice.current = true;
+    setRecording(true);
+  }
+
   const commit = useCallback(() => {
     if (!session || !probe) return;
     const timeUsedSec = Math.round((Date.now() - startedAt.current) / 1000);
+    dictation.current?.stop();
+    dictation.current = null;
+    setRecording(false);
     updateProbe(session.id, probe.id, {
       answer,
-      answerMode: 'text',
+      answerMode: usedVoice.current ? 'voice' : 'text',
       committedAt: Date.now(),
       timeUsedSec,
     });
@@ -148,38 +192,48 @@ export default function VivaScreen() {
         <SegmentStrip total={total} current={index} states={states} />
       </div>
 
+      {/* P3 §6: the source span sits ABOVE the question, clamped to a few
+          lines with a "show more" affordance — it is context, not the task. */}
       {probe.anchor.placed && probe.anchor.start !== undefined && (() => {
-        // Show the anchor in context, and mark it — otherwise the reader has to
-        // guess which sentence the probe is actually about.
         const from = Math.max(0, probe.anchor.start! - 260);
         const to = Math.min(session.material.length, (probe.anchor.end ?? probe.anchor.start!) + 260);
         return (
           <Sheet elevation={0} padding="var(--space-4) var(--space-5)">
-            <span className="t-micro ink-3">{t('viva.fromSubmission')}</span>
-            <AnchoredText
-              text={`${from > 0 ? '…' : ''}${session.material.slice(from, to)}${to < session.material.length ? '…' : ''}`}
-              mode={session.materialKind === 'code' ? 'code' : 'prose'}
-              anchors={[{
-                id: probe.id,
-                start: (from > 0 ? 1 : 0) + probe.anchor.start! - from,
-                end: (from > 0 ? 1 : 0) + (probe.anchor.end ?? probe.anchor.start!) - from,
-                verdict: 'none',
-              }]}
-            />
+            <span className="t-micro ink-3">{t('viva.sourceLabel')}</span>
+            <div className="probe-source" data-expanded={sourceOpen}>
+              <AnchoredText
+                text={`${from > 0 ? '…' : ''}${session.material.slice(from, to)}${to < session.material.length ? '…' : ''}`}
+                mode={session.materialKind === 'code' ? 'code' : 'prose'}
+                anchors={[{
+                  id: probe.id,
+                  start: (from > 0 ? 1 : 0) + probe.anchor.start! - from,
+                  end: (from > 0 ? 1 : 0) + (probe.anchor.end ?? probe.anchor.start!) - from,
+                  verdict: 'none',
+                }]}
+              />
+            </div>
+            <button type="button" className="viva-leave" onClick={() => setSourceOpen((o) => !o)}>
+              {sourceOpen ? t('viva.sourceLess') : t('viva.sourceMore')}
+            </button>
           </Sheet>
         );
       })()}
       {!probe.anchor.placed && probe.anchor.quote && (
         <Sheet elevation={0} padding="var(--space-4) var(--space-5)">
-          <span className="t-micro ink-3">{t('viva.fromSubmission')}</span>
+          <span className="t-micro ink-3">{t('viva.sourceLabel')}</span>
           <p className="t-mono t-small">{probe.anchor.quote}</p>
         </Sheet>
       )}
 
+      {/* THE PROBE. P3 §6: the probe question is the largest text on screen,
+          and never in the display face — corpus 04 §C1: "never set a probe in
+          a personality font — it reads as the app being cute about something
+          serious". In v2 the largest element on this screen was an empty
+          textarea and the question was body text in a card. */}
       <Sheet elevation={1}>
         <div className="stack-tight">
           <div className="row-between">
-            <span className="t-micro ink-3">the probe</span>
+            <span className="t-micro ink-3">{t('viva.reveal')}</span>
             {settings.timersEnabled && phase === 'answering' && (
               <button
                 type="button"
@@ -191,28 +245,64 @@ export default function VivaScreen() {
               </button>
             )}
           </div>
-          <p className="t-body-lg measure">{probe.question}</p>
-          {remaining === 0 && phase === 'answering' && settings.timersEnabled && (
-            <p className="t-small ink-shaky">{t('viva.timeUp')}</p>
-          )}
+          <p className="probe-question measure">{probe.question}</p>
         </div>
       </Sheet>
 
       {phase === 'answering' && (
         <div className="stack-tight">
-          <label className="field-label" htmlFor="viva-answer">{t('viva.answerLabel')}</label>
+          {/* Voice is the default input. Where the browser has no recogniser
+              the UI says so plainly instead of hiding the feature. */}
+          {settings.voiceEnabled && (
+            <div className="voice-slot">
+              {speechAvailable ? (
+                <>
+                  <button
+                    type="button"
+                    className="mic-btn"
+                    data-recording={recording}
+                    onClick={toggleDictation}
+                    aria-pressed={recording}
+                    aria-label={recording ? t('viva.voiceStop') : t('viva.voiceAnswer')}
+                  >
+                    {recording ? <Square size={22} /> : <Mic size={26} />}
+                  </button>
+                  <div className="stack-tight grow">
+                    <span className="t-body-strong">
+                      {recording ? t('viva.voiceListening') : t('viva.voiceAnswer')}
+                    </span>
+                    <span className="t-small ink-3">
+                      {recording ? t('viva.voiceSilence') : t('viva.voiceReview')}
+                    </span>
+                  </div>
+                </>
+              ) : (
+                <span className="t-small ink-3 measure">{t('viva.voiceUnsupported')}</span>
+              )}
+            </div>
+          )}
+          {voiceError && voiceError !== 'unsupported' && (
+            <Callout tone="danger">{t('common.error.network')}</Callout>
+          )}
+
+          {/* The transcript is ALWAYS shown as editable text before it is
+              committed. Corpus 05 §2.1: articulating under pressure is the
+              difficulty, not knowing the material. */}
+          <label className="field-label" htmlFor="viva-answer">
+            {voiceOn && usedVoice.current ? t('viva.voiceReview') : t('viva.answerLabel')}
+          </label>
           <textarea
             id="viva-answer"
             ref={answerRef}
             className="control viva-answer"
-            rows={8}
+            rows={5}
             value={answer}
             onChange={(e) => setAnswer(e.target.value)}
             placeholder="…"
           />
           <p className="field-hint">{t('viva.answerHint')}</p>
           <div className="row wrap">
-            <Button variant="primary" onClick={commit} disabled={!answer.trim()}>
+            <Button variant="primary" size="lg" onClick={commit} disabled={!answer.trim()}>
               {t('viva.commit')}
             </Button>
             <Button variant="ghost" onClick={() => { setAnswer(''); commit(); }}>
@@ -222,20 +312,32 @@ export default function VivaScreen() {
         </div>
       )}
 
+      {/* SELF-GRADE BEFORE ANY VERDICT. Full-bleed, one question, nothing else
+          on screen. Corpus 04 §E1 — "no Next button visible until they commit"
+          — because a carelessly-given self-grade destroys the measurement, and
+          the measurement is the entire product. */}
       {phase === 'selfgrade' && (
         <Sheet elevation={1}>
-          <div className="stack-tight">
-            <p className="t-body-strong">{t('viva.selfTitle')}</p>
-            <Segmented<SelfGrade>
-              ariaLabel={t('viva.selfTitle')}
-              value={committed.selfGrade ?? 'shaky'}
-              onChange={applySelfGrade}
-              options={[
-                { value: 'owned', label: t('viva.selfOwned') },
-                { value: 'shaky', label: t('viva.selfShaky') },
-                { value: 'notmine', label: t('viva.selfNotmine') },
-              ]}
-            />
+          <div className="selfgrade">
+            <p className="t-title measure">{t('viva.selfTitleV3')}</p>
+            <div className="selfgrade-opts">
+              {([
+                ['owned', t('viva.selfOwned')],
+                ['shaky', t('viva.selfShaky')],
+                ['notmine', t('viva.selfNotmine')],
+              ] as [SelfGrade, string][]).map(([value, label]) => (
+                <button
+                  key={value}
+                  type="button"
+                  className="selfgrade-opt"
+                  aria-pressed={committed.selfGrade === value}
+                  onClick={() => applySelfGrade(value)}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+            <p className="t-small ink-3 measure">{t('viva.selfWhy')}</p>
           </div>
         </Sheet>
       )}

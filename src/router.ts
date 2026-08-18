@@ -7,7 +7,7 @@ import { useSyncExternalStore, useCallback } from 'react';
 
 export type RouteName =
   | 'home' | 'run' | 'map' | 'record' | 'transcript' | 'queue'
-  | 'class' | 'cohort' | 'studentSheet' | 'packs' | 'packDetail'
+  | 'class' | 'cohort' | 'studentSheet' | 'reteach' | 'packs' | 'packDetail'
   | 'settings' | 'import' | 'devUi' | 'notfound';
 
 export interface Route {
@@ -27,6 +27,7 @@ const PATTERNS: Pattern[] = [
   { name: 'queue',        segments: ['queue'] },
   { name: 'class',        segments: ['class'] },
   { name: 'cohort',       segments: ['class', ':cohortId'] },
+  { name: 'reteach',      segments: ['class', ':cohortId', 'reteach'] },
   { name: 'studentSheet', segments: ['class', ':cohortId', 's', ':submissionId'] },
   { name: 'packs',        segments: ['packs'] },
   { name: 'packDetail',   segments: ['packs', ':packId'] },
@@ -100,7 +101,7 @@ export const ROUTE_GROUP: Record<RouteName, 'verify' | 'queue' | 'record' | 'cla
   home: 'verify', run: 'verify', map: 'verify', import: 'verify',
   queue: 'queue',
   record: 'record', transcript: 'record',
-  class: 'class', cohort: 'class', studentSheet: 'class',
+  class: 'class', cohort: 'class', studentSheet: 'class', reteach: 'class',
   packs: 'packs', packDetail: 'packs',
   settings: 'settings',
   devUi: 'none', notfound: 'none',

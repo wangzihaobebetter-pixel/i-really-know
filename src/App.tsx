@@ -21,6 +21,7 @@ const QueueScreen        = lazy(() => import('./screens/queue/QueueScreen'));
 const ClassScreen        = lazy(() => import('./screens/class/ClassScreen'));
 const CohortScreen       = lazy(() => import('./screens/class/CohortScreen'));
 const StudentSheetScreen = lazy(() => import('./screens/class/StudentSheetScreen'));
+const ReteachScreen      = lazy(() => import('./screens/class/ReteachScreen'));
 const PacksScreen        = lazy(() => import('./screens/packs/PacksScreen'));
 const PackDetailScreen   = lazy(() => import('./screens/packs/PackDetailScreen'));
 const SettingsScreen     = lazy(() => import('./screens/settings/SettingsScreen'));
@@ -42,6 +43,7 @@ function Outlet() {
     case 'class':        return <ClassScreen />;
     case 'cohort':       return <CohortScreen key={p.cohortId} />;
     case 'studentSheet': return <StudentSheetScreen key={p.submissionId} />;
+    case 'reteach':      return <ReteachScreen key={p.cohortId} />;
     case 'packs':        return <PacksScreen />;
     case 'packDetail':   return <PackDetailScreen key={p.packId} />;
     case 'settings':     return <SettingsScreen />;
