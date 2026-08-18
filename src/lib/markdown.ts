@@ -188,8 +188,16 @@ function emitInline(
     if (ch === '*') {
       const strong = source.startsWith('**', i);
       const token = strong ? '**' : '*';
-      const close = source.indexOf(token, i + token.length);
-      if (close >= 0 && close < to && close > i + token.length) {
+      const close = findCloser(source, i + token.length, to, token);
+      /* CommonMark's flanking rules, in their minimal form: a run opens
+         emphasis only if it is NOT followed by whitespace, and closes only if
+         it is NOT preceded by whitespace.
+         Without this, `(char **)malloc(count * sizeof(char))` pairs the `**`
+         with the multiplication `*` and silently deletes both — eating two
+         characters out of a student's own submission. Caught by
+         verify-markdown, which is why that gate exists. */
+      const opens = !isSpace(source[i + token.length]);
+      if (opens && close > i + token.length) {
         const s = b.len;
         emitInline(b, source, i + token.length, close, inlines);
         inlines.push({ kind: strong ? 'strong' : 'em', start: s, end: b.len });
@@ -223,6 +231,19 @@ function emitInline(
 
     b.push(source, i, i + 1);
     i++;
+  }
+}
+
+const isSpace = (c: string | undefined): boolean => c === undefined || /\s/.test(c);
+
+/** First valid closing run for `token` in [from, to): not preceded by space. */
+function findCloser(source: string, from: number, to: number, token: string): number {
+  let at = from;
+  for (;;) {
+    const idx = source.indexOf(token, at);
+    if (idx < 0 || idx >= to) return -1;
+    if (idx > from && !isSpace(source[idx - 1])) return idx;
+    at = idx + token.length;
   }
 }
 

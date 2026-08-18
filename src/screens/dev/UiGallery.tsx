@@ -11,6 +11,42 @@ import { useStore } from '../../store';
 
 const VERDICTS: Verdict[] = ['defended', 'partial', 'undefended', 'underclaimed', 'none'];
 
+/* Every state the contrast gate samples has to actually exist on a page it
+     can reach, or the gate silently measures nothing — which is how v2's AA
+     claim came to be true about six selectors and silent about the product. */
+function GateSpecimen() {
+  return (
+    <section className="stack" style={{ marginBottom: 'var(--space-8)' }}>
+      <h2 className="t-title">Axis A · demonstrated</h2>
+      <div className="anchored anchored-prose">
+        <p className="md-p">
+          <mark className="anchor-span anchor-defended">defended span</mark>{' · '}
+          <mark className="anchor-span anchor-partial">partly defended span</mark>{' · '}
+          <mark className="anchor-span anchor-undefended">could not defend span</mark>{' · '}
+          <mark className="anchor-span anchor-underclaimed">defended but not claimed</mark>{' · '}
+          <mark className="anchor-span anchor-defended is-active">focused span, wash on</mark>
+        </p>
+      </div>
+      <div className="row wrap" style={{ gap: 'var(--space-5)' }}>
+        <Mark verdict="defended" />
+        <Mark verdict="partial" />
+        <Mark verdict="undefended" />
+        <Mark verdict="underclaimed" />
+      </div>
+      <h2 className="t-title">Axis B · divergence</h2>
+      <div className="row wrap" style={{ gap: 'var(--space-5)' }}>
+        <span className="ink-over t-body">claimed more than demonstrated</span>
+        <span className="ink-under t-body">demonstrated more than claimed</span>
+      </div>
+      <h2 className="t-title">Glass chrome</h2>
+      <div className="glass" style={{ padding: 'var(--space-5)' }}>
+        <span className="t-small">Chrome text over glass. Never over the student&rsquo;s own words.</span>
+      </div>
+    </section>
+  );
+}
+
+
 function Row({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section style={{ marginTop: 'var(--space-8)' }}>
@@ -43,6 +79,7 @@ export default function UiGallery() {
 
   return (
     <div className="col-data">
+      <GateSpecimen />
       <div className="row-between wrap">
         <h1 className="t-display-2">Primitive gallery</h1>
         <Segmented

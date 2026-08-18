@@ -25,7 +25,12 @@ for (const f of files.filter((x) => x.includes('/i18n/'))) {
       ['zh-CN', zhStart >= 0 ? body.slice(zhStart) : ''],
     ];
     for (const [lang, section] of sections) {
-      for (const k of section.matchAll(/^\s{4}'?([\w.]+)'?:/gm)) {
+      /* v2 matched keys at EXACTLY four spaces of indentation. Any table
+         nested one level deeper, or formatted differently, was invisible —
+         and an invisible key is one the parity check cannot fail on. Match any
+         indentation, and require the line to look like a string assignment so
+         object-literal noise is not counted as a key. */
+      for (const k of section.matchAll(/^\s+'?([\w.]+)'?:\s*['`]/gm)) {
         const full = k[1].startsWith(pkg + '.') ? k[1] : `${pkg}.${k[1]}`;
         registered.add(full);
         perLang[lang].add(full);
@@ -57,10 +62,23 @@ for (const [key, file] of used) {
   }
 }
 
+/* PARITY. `translate()` falls back to en and then to the RAW KEY, so a key
+   missing from English ships as literal `sheet.method` on a professor's PDF.
+   Both directions are failures and both are reported. */
 const onlyZh = [...perLang['zh-CN']].filter((k) => !perLang.en.has(k));
 const onlyEn = [...perLang.en].filter((k) => !perLang['zh-CN'].has(k));
 for (const k of onlyZh) missing.push([`${k} (missing in en — would render as the raw key)`, 'src/i18n']);
 for (const k of onlyEn) missing.push([`${k} (missing in zh-CN)`, 'src/i18n']);
+
+/* A parser that silently stops matching is the failure mode this file exists
+   to prevent, so assert it is still seeing a plausible number of keys. */
+if (registered.size < 150) {
+  console.error(`verify-i18n: only ${registered.size} keys parsed — the parser is out of date, not the app.`);
+  process.exit(1);
+}
+if (perLang.en.size !== perLang['zh-CN'].size) {
+  console.error(`verify-i18n: table sizes differ (en ${perLang.en.size}, zh-CN ${perLang['zh-CN'].size}).`);
+}
 
 console.log(`verify-i18n: ${registered.size} keys registered (en ${perLang.en.size}, zh-CN ${perLang['zh-CN'].size}), ${used.size} used`);
 if (missing.length) {

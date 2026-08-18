@@ -29,7 +29,12 @@
   /* --- Ink --- */
   --ink: #16181D;
   --ink-2: #4C5158;
-  --ink-3: #6B7078;
+  /* P3 §2.2 specified #6B7078, computed against `app` and `sheet` only. The
+     browser gate then measured tertiary ink on `--app-2` (nav rail, sample
+     cards) at 4.29:1 — below AA. P3 §8 G7 anticipated exactly this: its table
+     is arithmetic, not a passing test, and the P4 gate decides. Darkened until
+     it clears on all three light surfaces: 5.07 app / 4.68 app-2 / 5.44 sheet. */
+  --ink-3: #656A72;
 
   /* --- Axis A · demonstrated --- */
   --defended: #10704B;
