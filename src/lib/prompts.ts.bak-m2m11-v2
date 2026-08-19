@@ -158,7 +158,7 @@ ${answer.slice(0, 6000)}
 ANSWER>>>
 
 OUTPUT — a single JSON object:
-{"score":0|1|2|3,"verdictLine":"<=18 words, second person (you/your), plain language. NAME WHAT HELD FIRST if anything held (e.g. \"Held. You gave the mechanism and what it beats.\"); otherwise name what was missing (e.g. \"Slipped here — you named the method, not the reason it beats X.\"). NEVER use any of: borrowed, illusion, not yours, wrong about yourself, accuse, AI-written, detected. Student-facing vocabulary the student sees: held / half-held / slipped / held — more than you thought. Instructor register (defended / partially defended / could not defend / not claimed) belongs on the instructor aggregate, never here.","evidence":{"present":["what they actually showed"],"missing":["what an owned answer would have contained"]},"parroting":true|false,"confidence":"low"|"med"|"high","examinerFollowUp":"<optional one-sentence follow-up question>"}`,
+{"score":0|1|2|3,"verdictLine":"<=18 words, second person, plain; NAME WHAT HELD FIRST if anything held (otherwise name what was missing); NEVER use borrowed, illusion, not yours, wrong about yourself","evidence":{"present":["what they actually showed"],"missing":["what an owned answer would have contained"]},"parroting":true|false,"confidence":"low"|"med"|"high","examinerFollowUp":"<optional one-sentence follow-up question>"}`,
   };
 }
 
@@ -171,15 +171,15 @@ export function buildDiagnosePrompt(session: Session, uiLanguage: string): { sys
   return {
     system: `${BASE_INVARIANTS}
 
-This function is now used ONLY by the instructor aggregate path (buildAggregatePrompt's neighbours), not by the student closing summary. The student-facing diagnose prompt was retired (FABLE-REDESIGN §8, row M11). You are writing the cohort summary of oral examinations across ${pack.name} submissions.
+You are writing the closing summary of an oral examination of a ${pack.name} submission.
 Dimensions in play: ${pack.dimensions.map((d) => `${d.id} (${d.label})`).join(', ')}.
 Be direct and unsentimental. No praise, no encouragement, no next-steps that amount to doing the work for them. Under 180 words total. Write in ${uiLanguage}.
-Use the closed INSTRUCTOR outcome vocabulary only: defended / partially defended / could not defend / not claimed. NEVER use any of: borrowed, illusion, not yours, wrong about yourself, accuse, AI-written — these were retired from the student register and do not belong on the instructor sheet either. "Could not defend" replaces what earlier drafts called "borrowed"; "rated high but could not defend" replaces what earlier drafts called "illusion".`,
+"illusion" means the student rated themselves high and could not defend it — say so plainly but without moralising.`,
     user: `PER-PROBE RESULTS:
 ${table}
 
 OUTPUT — a single JSON object:
-{"headline":"<one sentence, instructor register>","defended":["<what they demonstrably defended>"],"couldNotDefend":["<what they could not defend>"],"highRatedNotDefended":[{"probeId":"<id>","line":"<one sentence>"}],"nextActions":["<3 concrete study actions, each about re-deriving or re-defending something specific, never about improving the submission>"]}`,
+{"headline":"<one sentence, the honest top-line>","owned":["<what they demonstrably own>"],"borrowed":["<what they could not defend>"],"illusions":[{"probeId":"<id>","line":"<one sentence>"}],"nextActions":["<3 concrete study actions, each about re-deriving or re-defending something specific, never about improving the submission>"]}`,
   };
 }
 

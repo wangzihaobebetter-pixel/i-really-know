@@ -20,7 +20,7 @@ h1, h2, h3, h4, p, figure, blockquote, dl, dd { margin: 0; }
 ul, ol { margin: 0; padding: 0; list-style: none; }
 img, svg { display: block; max-width: 100%; }
 button, input, select, textarea { font: inherit; color: inherit; }
-a { color: var(--action); text-decoration: none; }
+a { color: var(--accent); text-decoration: none; }
 a:hover { text-decoration: underline; text-underline-offset: 2px; }
 
 :focus { outline: none; }
@@ -30,7 +30,7 @@ a:hover { text-decoration: underline; text-underline-offset: 2px; }
   border-radius: var(--r-control);
 }
 
-::selection { background: var(--action-wash); }
+::selection { background: var(--accent-wash); }
 
 /* Scrollbars stay quiet */
 * { scrollbar-width: thin; scrollbar-color: var(--hairline) transparent; }
@@ -54,18 +54,41 @@ a:hover { text-decoration: underline; text-underline-offset: 2px; }
   overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
 }
 
-/* State ink helpers. P3 §2.2: the palette is deliberately isoluminant between
-   state pairs, so colour is NEVER the only cue — every use is paired with a
-   glyph, a word, or an underline style. */
-.ink-defended    { color: var(--defended); }
-.ink-partial     { color: var(--partial); }
-.ink-undefended  { color: var(--undefended); }
-.ink-underclaimed{ color: var(--underclaimed); }
+/* State ink helpers. FABLE §6: the palette is isoluminant between pairs, so
+   colour is NEVER the only cue — every use is paired with a glyph, a word,
+   or an underline style. New vocabulary aliases the old class names so the
+   existing screens keep their colour sense until copy is rewritten. */
+.ink-held        { color: var(--held); }
+.ink-half-held   { color: var(--half-held); }
+.ink-slipped     { color: var(--slipped); }
+.ink-held-more   { color: var(--held-more); }
 .ink-over        { color: var(--over); }
 .ink-under       { color: var(--under); }
-.ink-action      { color: var(--action); }
+.ink-accent      { color: var(--accent); }
 .ink-2 { color: var(--ink-2); }
 .ink-3 { color: var(--ink-3); }
+
+/* v2-class aliases — these names still appear in many screens. They resolve
+   to the new palette so the token rewrite is one diff, not a cascade. */
+.ink-defended     { color: var(--held); }
+.ink-partial      { color: var(--half-held); }
+.ink-undefended   { color: var(--slipped); }
+.ink-underclaimed { color: var(--held-more); }
+.ink-action       { color: var(--accent); }
+
+/* Background helpers — same logic. */
+.bg-held        { background-color: var(--held-wash); }
+.bg-half-held   { background-color: var(--half-held-wash); }
+.bg-slipped     { background-color: var(--slipped-wash); }
+.bg-held-more   { background-color: var(--held-more-wash); }
+.bg-accent      { background-color: var(--accent-wash); }
+
+/* v2 aliases. */
+.bg-defended     { background-color: var(--held-wash); }
+.bg-partial      { background-color: var(--half-held-wash); }
+.bg-undefended   { background-color: var(--slipped-wash); }
+.bg-underclaimed { background-color: var(--held-more-wash); }
+.bg-action       { background-color: var(--accent-wash); }
 
 @media print {
   body { background: #fff; color: #000; }

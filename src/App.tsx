@@ -2,6 +2,12 @@
  * Route table. WP0 owns this file — no other package edits it (§8).
  * Each lazy import points at a path a package will fill in; WP0 ships a
  * working placeholder at every one of those paths so the shell is never broken.
+ *
+ * v3 IA collapse (FABLE-REDESIGN.md §4.2). Three tabs + gear:
+ *   Today (今天) · Work (作业) · You (你) · gear Settings.
+ *   Follow-ups is reached from Today, not a tab. Instructor class/* screens
+ *   are off the student's nav entirely. Packs, Record, Transcript, Import,
+ *   Map, UiGallery screens are deleted or replaced by placeholders.
  */
 import React, { lazy } from 'react';
 import { AppShell } from './app/AppShell';
@@ -12,21 +18,26 @@ import './i18n/common';
 import './i18n/screens';
 import './i18n/v3';
 
-const HomeScreen         = lazy(() => import('./screens/home/HomeScreen'));
-const VivaScreen         = lazy(() => import('./screens/viva/VivaScreen'));
-const MapScreen          = lazy(() => import('./screens/map/MapScreen'));
-const RecordScreen       = lazy(() => import('./screens/record/RecordScreen'));
-const TranscriptScreen   = lazy(() => import('./screens/record/TranscriptScreen'));
-const QueueScreen        = lazy(() => import('./screens/queue/QueueScreen'));
+// --- Student tabs / surfaces ---------------------------------------------
+const TodayScreen       = lazy(() => import('./screens/today/TodayScreen'));
+const WorkScreen        = lazy(() => import('./screens/work/WorkScreen'));
+const WorkDetailScreen  = lazy(() => import('./screens/work/WorkDetailScreen'));
+const YouScreen         = lazy(() => import('./screens/you/YouScreen'));
+const FollowupsScreen   = lazy(() => import('./screens/followups/FollowupsScreen'));
+const SettingsScreen    = lazy(() => import('./screens/settings/SettingsScreen'));
+
+// --- Run-through + result + bring + read ----------------------------------
+const BringScreen       = lazy(() => import('./screens/bring/BringScreen'));
+const ReadScreen        = lazy(() => import('./screens/read/ReadScreen'));
+const VivaScreen        = lazy(() => import('./screens/viva/VivaScreen'));
+const ResultScreen      = lazy(() => import('./screens/result/ResultScreen'));
+const WelcomeScreen     = lazy(() => import('./screens/welcome/WelcomeScreen'));
+
+// --- Instructor (off the student tab bar; reachable from Settings + URL) -
 const ClassScreen        = lazy(() => import('./screens/class/ClassScreen'));
 const CohortScreen       = lazy(() => import('./screens/class/CohortScreen'));
 const StudentSheetScreen = lazy(() => import('./screens/class/StudentSheetScreen'));
 const ReteachScreen      = lazy(() => import('./screens/class/ReteachScreen'));
-const PacksScreen        = lazy(() => import('./screens/packs/PacksScreen'));
-const PackDetailScreen   = lazy(() => import('./screens/packs/PackDetailScreen'));
-const SettingsScreen     = lazy(() => import('./screens/settings/SettingsScreen'));
-const ImportScreen       = lazy(() => import('./screens/import/ImportScreen'));
-const UiGallery          = lazy(() => import('./screens/dev/UiGallery'));
 
 function Outlet() {
   const route = useRoute();
@@ -34,22 +45,22 @@ function Outlet() {
   const p = route.params;
 
   switch (route.name) {
-    case 'home':         return <HomeScreen />;
-    case 'run':          return <VivaScreen key={p.sessionId} />;
-    case 'map':          return <MapScreen key={p.sessionId} />;
-    case 'record':       return <RecordScreen />;
-    case 'transcript':   return <TranscriptScreen key={p.sessionId} />;
-    case 'queue':        return <QueueScreen />;
-    case 'class':        return <ClassScreen />;
-    case 'cohort':       return <CohortScreen key={p.cohortId} />;
-    case 'studentSheet': return <StudentSheetScreen key={p.submissionId} />;
-    case 'reteach':      return <ReteachScreen key={p.cohortId} />;
-    case 'packs':        return <PacksScreen />;
-    case 'packDetail':   return <PackDetailScreen key={p.packId} />;
-    case 'settings':     return <SettingsScreen />;
-    case 'import':       return <ImportScreen />;
-    case 'devUi':        return import.meta.env.DEV ? <UiGallery /> : <NotFound />;
-    default:             return <NotFound />;
+    case 'today':         return <TodayScreen />;
+    case 'bring':         return <BringScreen />;
+    case 'read':          return <ReadScreen key={p.id} />;
+    case 'run':           return <VivaScreen key={p.sessionId} />;
+    case 'result':        return <ResultScreen key={p.id} />;
+    case 'work':          return <WorkScreen />;
+    case 'workDetail':    return <WorkDetailScreen key={p.id} />;
+    case 'you':           return <YouScreen />;
+    case 'followups':     return <FollowupsScreen />;
+    case 'welcome':       return <WelcomeScreen />;
+    case 'settings':      return <SettingsScreen />;
+    case 'class':         return <ClassScreen />;
+    case 'cohort':        return <CohortScreen key={p.cohortId} />;
+    case 'studentSheet':  return <StudentSheetScreen key={p.submissionId} />;
+    case 'reteach':       return <ReteachScreen key={p.cohortId} />;
+    default:              return <NotFound />;
   }
 
   function NotFound() {
@@ -57,7 +68,7 @@ function Outlet() {
       <div className="col-read">
         <EmptyState
           title={t('common.state.notfound.title')}
-          action={<Button variant="primary" onClick={() => navigate('home')}>{t('common.state.notfound.action')}</Button>}
+          action={<Button variant="primary" onClick={() => navigate('today')}>{t('common.state.notfound.action')}</Button>}
         />
       </div>
     );

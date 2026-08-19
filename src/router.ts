@@ -2,13 +2,20 @@
  * Hash router (spec §2.1). Hash, not history API: the app deploys to a GitHub
  * Pages project sub-path, and `base: './'` + deep links + refresh must all work.
  * WP0 owns this file and `src/App.tsx`.
+ *
+ * v3 IA collapse (FABLE-REDESIGN.md §4.2). 13 screens → 9. Five tabs collapse
+ * to three (Today · Work · You) plus a gear. Packs, record, transcript, import,
+ * map, queue, devUi routes are gone; their screens are deleted or replaced by
+ * placeholders. Instructor class/... routes remain reachable by URL and from
+ * Settings but are off the student tab bar.
  */
 import { useSyncExternalStore, useCallback } from 'react';
 
 export type RouteName =
-  | 'home' | 'run' | 'map' | 'record' | 'transcript' | 'queue'
-  | 'class' | 'cohort' | 'studentSheet' | 'reteach' | 'packs' | 'packDetail'
-  | 'settings' | 'import' | 'devUi' | 'notfound';
+  | 'today' | 'bring' | 'read' | 'run' | 'result' | 'work' | 'workDetail'
+  | 'you' | 'followups' | 'welcome'
+  | 'class' | 'cohort' | 'studentSheet' | 'reteach'
+  | 'settings' | 'notfound';
 
 export interface Route {
   name: RouteName;
@@ -19,21 +26,21 @@ export interface Route {
 interface Pattern { name: RouteName; segments: string[] }
 
 const PATTERNS: Pattern[] = [
-  { name: 'home',         segments: [] },
+  { name: 'today',        segments: [] },
+  { name: 'bring',        segments: ['bring'] },
+  { name: 'read',         segments: ['read', ':id'] },
   { name: 'run',          segments: ['run', ':sessionId'] },
-  { name: 'map',          segments: ['map', ':sessionId'] },
-  { name: 'record',       segments: ['record'] },
-  { name: 'transcript',   segments: ['record', ':sessionId'] },
-  { name: 'queue',        segments: ['queue'] },
+  { name: 'result',       segments: ['result', ':id'] },
+  { name: 'work',         segments: ['work'] },
+  { name: 'workDetail',   segments: ['work', ':id'] },
+  { name: 'you',          segments: ['you'] },
+  { name: 'followups',    segments: ['followups'] },
+  { name: 'welcome',      segments: ['welcome'] },
   { name: 'class',        segments: ['class'] },
   { name: 'cohort',       segments: ['class', ':cohortId'] },
   { name: 'reteach',      segments: ['class', ':cohortId', 'reteach'] },
   { name: 'studentSheet', segments: ['class', ':cohortId', 's', ':submissionId'] },
-  { name: 'packs',        segments: ['packs'] },
-  { name: 'packDetail',   segments: ['packs', ':packId'] },
   { name: 'settings',     segments: ['settings'] },
-  { name: 'import',       segments: ['import'] },
-  { name: 'devUi',        segments: ['dev', 'ui'] },
 ];
 
 export function parseHash(hash: string): Route {
@@ -96,13 +103,22 @@ export function useNavigate() {
   );
 }
 
-/** Which rail/tab item should read as active for a given route. */
-export const ROUTE_GROUP: Record<RouteName, 'verify' | 'queue' | 'record' | 'class' | 'packs' | 'settings' | 'none'> = {
-  home: 'verify', run: 'verify', map: 'verify', import: 'verify',
-  queue: 'queue',
-  record: 'record', transcript: 'record',
-  class: 'class', cohort: 'class', studentSheet: 'class', reteach: 'class',
-  packs: 'packs', packDetail: 'packs',
+/** Which tab should read as active for a given route. */
+export const ROUTE_GROUP: Record<RouteName, 'today' | 'work' | 'you' | 'followups' | 'class' | 'settings' | 'none'> = {
+  today: 'today',
+  bring: 'today',
+  read: 'today',
+  run: 'today',
+  result: 'today',
+  followups: 'today',
+  work: 'work',
+  workDetail: 'work',
+  you: 'you',
+  welcome: 'none',
+  class: 'class',
+  cohort: 'class',
+  studentSheet: 'class',
+  reteach: 'class',
   settings: 'settings',
-  devUi: 'none', notfound: 'none',
+  notfound: 'none',
 };

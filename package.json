@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host",
-    "build": "tsc --noEmit && node verify-samples.mjs && node verify-i18n.mjs && node verify-markdown.mjs && node verify-never-accuse.mjs && node verify-pwa.mjs && node verify-divergence.mjs && node verify-verdict-render.mjs && vite build",
+    "build": "tsc --noEmit && node verify-samples.mjs && node verify-i18n.mjs && node verify-markdown.mjs && node verify-never-accuse.mjs && node verify-pwa.mjs && node verify-divergence.mjs && node verify-verdict-render.mjs && node verify-divergence-hero.mjs && node verify-viva-mobile.mjs && node verify-class-print-register.mjs && node verify-fonts-cn.mjs && vite build",
     "preview": "vite preview --host",
     "start": "vite --port 4173 --host",
     "verify:samples": "node verify-samples.mjs",
@@ -19,6 +19,10 @@
     "verify:all": "npm run build && npm run verify:e2e && npm run verify:keyed && npm run verify:errors && npm run verify:contrast",
     "verify:divergence": "node verify-divergence.mjs",
     "verify:verdict-render": "node verify-verdict-render.mjs",
+    "verify:divergence-hero": "node verify-divergence-hero.mjs",
+    "verify:viva-mobile": "node verify-viva-mobile.mjs",
+    "verify:class-print-register": "node verify-class-print-register.mjs",
+    "verify:fonts-cn": "node verify-fonts-cn.mjs",
     "verify:markdown": "node verify-markdown.mjs",
     "verify:never-accuse": "node verify-never-accuse.mjs"
   },

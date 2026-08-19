@@ -9,7 +9,7 @@ import type {
 
 /* ---------- self-grade ↔ score bridge ---------- */
 
-const SELF_AS_SCORE: Record<SelfGrade, number> = { owned: 3, shaky: 1.5, notmine: 0.5 };
+const SELF_AS_SCORE: Record<SelfGrade, number> = { owned: 3, shaky: 1.5, notmine: 0 };
 
 export function selfGradeAsScore(g: SelfGrade | undefined): number | undefined {
   return g ? SELF_AS_SCORE[g] : undefined;

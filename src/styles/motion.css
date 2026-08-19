@@ -1,18 +1,23 @@
 /* ============================================================
-   Motion — P3 §2.4.
-   Springs for the student's own material (a span being inked, the divergence
-   count). Eases for chrome (sheets, nav, tooltips).
-   Symmetry is a hard rule: the overconfident and the underconfident reveal use
-   the SAME spring, duration and overshoot. Asymmetric physics is an accusation
-   encoded in motion (P3 §3.4b).
+   Motion — FABLE-REDESIGN.md §6.
+
+   Springs for the student's own material (an underline being inked, a span
+   lifting, a state settling). Eases for chrome (sheets, tabs, tooltips).
+
+   Symmetry is a hard rule: held and slipped use the SAME physics. Asymmetric
+   motion is an accusation encoded in motion — held and slipped look the same
+   weight, the same duration, the same overshoot. The only difference is the
+   WIDTH of the underline and the words.
+
+   Reduced motion: everything snaps. Nothing fades a numeral or a sentence.
    ============================================================ */
 
 @keyframes page-turn-out { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-12px); } }
 @keyframes page-turn-in  { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
 /* Draws the underline left-to-right. The HEIGHT must stay at the underline's
-   3px: animating to `100% 100%` filled the whole span with the state colour,
-   which turned the Painted Page back into the highlighted-selection look P3
-   §4.2 replaced. */
+   3px: animating to `100% 100%` fills the whole span with the state colour,
+   which turns the Painted Page back into the highlighted-selection look. */
 @keyframes ink-draw      { from { background-size: 0 3px; } to { background-size: 100% 3px; } }
 @keyframes ink-wipe      { from { background-size: 0% 100%; } to { background-size: 100% 100%; } }
 @keyframes span-lift     { from { transform: translateY(0); } to { transform: translateY(-2px); } }
@@ -23,25 +28,32 @@
 @keyframes shimmer       { 0% { background-position: -180% 0; } 100% { background-position: 180% 0; } }
 @keyframes spin          { to { transform: rotate(360deg); } }
 @keyframes commit-stamp  { 0% { transform: scale(1.15); } 100% { transform: scale(1); } }
-@keyframes divergence-pulse { 0% { box-shadow: 0 0 0 0 var(--over); } 100% { box-shadow: 0 0 0 6px transparent; } }
 
-/* chrome — eases */
+/* Reading bar: linear sweep at ~120 px/s. Resets at the bottom of the loop. */
+@keyframes reading-sweep {
+  0%   { transform: translateY(-100%); }
+  100% { transform: translateY(100%); }
+}
+
+/* Chrome — easings (FABLE §6 durations: 120 / 180 / 260). */
 .m-page-in  { animation: page-turn-in 200ms var(--ease) 40ms both; }
 .m-page-out { animation: page-turn-out 160ms var(--ease) both; }
-.m-rise     { animation: sheet-rise 220ms var(--ease) both; }
-.m-fade     { animation: fade-in 160ms var(--ease) both; }
+.m-rise     { animation: sheet-rise var(--dur-sheet) var(--ease) both; }
+.m-fade     { animation: fade-in var(--dur-fade-up) var(--ease) both; }
 .m-in       { animation: rise-in var(--dur-slow) var(--ease) both; }
+.m-fade-up  { animation: rise-in var(--dur-fade-up) var(--ease) both; }
+.m-fold     { animation: fade-in var(--dur-fold) var(--ease) both; }
+.m-tab      { animation: fade-in var(--dur-tab) var(--ease) both; }
 
-/* the student's own material — springs */
+/* The student's own material — springs. */
 .m-ink-wipe { animation: ink-draw var(--dur-ink) var(--spring) both; }
 .m-spring   { animation: rise-in var(--dur-spring) var(--spring) both; }
 .m-stamp    { animation: commit-stamp 180ms var(--spring) both; }
-.m-pulse    { animation: divergence-pulse 600ms var(--ease) both; }
+.m-reading  { animation: reading-sweep calc(var(--reading-speed) * 1ms) linear infinite; }
 
-/* P3 §2.4: a fading numeral is unreadable mid-transition. Under reduced motion
-   the hero SNAPS to its final value, the curve renders statically and span
-   inking applies instantly. Nothing fades — v2 forced everything to fade-in,
-   which was wrong for exactly the element that carries the whole screen. */
+/* FABLE §6 — refused: shake, flash, red pulse, sound, confetti, count-up
+   numerals. The pulse and divergence-pulse animations are retired. */
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 1ms !important;
@@ -50,5 +62,7 @@
     transition-duration: 1ms !important;
   }
   .m-ink-wipe { animation: none !important; background-size: 100% 100% !important; }
-  .m-spring, .m-in, .m-stamp, .m-pulse { animation: none !important; opacity: 1 !important; transform: none !important; }
+  .m-spring, .m-in, .m-stamp, .m-fade-up, .m-fade, .m-rise, .m-fold, .m-tab, .m-reading {
+    animation: none !important; opacity: 1 !important; transform: none !important;
+  }
 }

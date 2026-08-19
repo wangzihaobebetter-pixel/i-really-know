@@ -1,41 +1,68 @@
 /* ============================================================
-   Type scale — P3 §2.1. Size is the hierarchy, not weight.
-   The gap between --t-hero and --t-display is ~3.4×. That gap IS the design.
+   Type scale — FABLE-REDESIGN.md §6.
+   Size is the hierarchy, not weight. There is no hero numeral.
+   The page carries itself in SERIF SENTENCES, not numbers.
 
-   ONE HERO PER SCREEN. This is the rule that structurally prevents v2's
-   two-`56`s row (掌握度 56 beside 自我认知准确度 56, same size, side by side)
-   from ever coming back. Enforced by review, and by there being exactly one
-   .t-hero element rendered per route.
+   Used only for, FABLE §6:
+     - welcome line
+     - Today greeting
+     - self-rate question
+     - response line 1
+     - result sentence
+     - end card
+   Never for a question, never for the student's text.
    ============================================================ */
 
-.t-hero {
+.t-sentence {
   font-family: var(--font-display);
-  font-size: var(--t-hero);
-  font-weight: 800;
-  line-height: 0.92;
-  letter-spacing: -0.03em;
-  font-variant-numeric: tabular-nums;
-  font-feature-settings: "tnum" 1;
+  font-size: var(--t-sentence);
+  font-weight: 500;
+  font-variation-settings: "opsz" 110, "wght" 500;
+  line-height: 1.18;
+  letter-spacing: -0.015em;
 }
 
-.t-display   { font-family: var(--font-display); font-weight: 800; font-size: var(--t-display); line-height: 1.08; letter-spacing: -0.02em; }
-.t-title     { font-family: var(--font-ui);      font-weight: 600; font-size: var(--t-title);   line-height: 1.25; letter-spacing: -0.01em; }
-.t-heading   { font-family: var(--font-ui);      font-weight: 600; font-size: 1.125rem;         line-height: 1.3; }
-.t-body-lg   { font-size: var(--t-body-lg); line-height: 1.55; }
-.t-body      { font-size: var(--t-body);    line-height: 1.55; }
-.t-small     { font-size: var(--t-small);   line-height: 1.45; }
-.t-micro     { font-size: var(--t-micro);   line-height: 1.35; letter-spacing: .04em; text-transform: uppercase; font-weight: 600; }
+/* Result/sentence headlines in the document. */
+.t-display {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-variation-settings: "opsz" 90, "wght" 500;
+  font-size: var(--t-sentence);
+  line-height: 1.18;
+  letter-spacing: -0.015em;
+}
+
+/* The question itself — sans, weight 600, the largest text on the run-through
+   screen. Sans on purpose: serif sets a tone that misreads as a slogan. */
+.t-question {
+  font-family: var(--font-ui);
+  font-weight: 600;
+  font-size: var(--t-question);
+  line-height: 1.32;
+  letter-spacing: -0.005em;
+}
+
+.t-title     { font-family: var(--font-ui); font-weight: 600; font-size: var(--t-title);   line-height: 1.25; letter-spacing: -0.01em; }
+.t-heading   { font-family: var(--font-ui); font-weight: 600; font-size: 1.125rem;         line-height: 1.3; }
+.t-body-lg   { font-family: var(--font-ui); font-size: var(--t-body); line-height: 1.6; }
+.t-body      { font-family: var(--font-ui); font-size: var(--t-body); line-height: 1.6; }
+.t-small     { font-family: var(--font-ui); font-size: var(--t-small); line-height: 1.45; }
+.t-micro     { font-family: var(--font-ui); font-size: var(--t-micro); line-height: 1.35; letter-spacing: .04em; }
 .t-mono      { font-family: var(--font-mono); font-size: 0.9375rem; line-height: 1.5; }
 .t-num       { font-variant-numeric: tabular-nums; }
 
-/* v2 aliases kept so no screen silently loses its type while v3 lands. */
-.t-display-1 { font-family: var(--font-display); font-weight: 800; font-size: var(--t-display); line-height: 1.08; letter-spacing: -0.02em; }
-.t-display-2 { font-family: var(--font-display); font-weight: 700; font-size: clamp(1.5rem, 5vw, 2rem); line-height: 1.12; letter-spacing: -0.015em; }
+/* 17 px on desktop, 15.5 px at 390 px — legibility over line count. */
+@media (max-width: 480px) {
+  .t-body, .t-body-lg { font-size: var(--t-body-mobile); line-height: 1.65; }
+}
 
-/* P3 §4.5: Chinese margin notes are distinguished by weight, colour and the
-   left rule — NEVER by slant. Songti SC has no italic, so `font-style: italic`
-   made the browser synthesise a mechanical oblique (visible in v2's
-   shot-illusion-paper.png). `:lang()` scopes the italic to Latin text only. */
+/* v2 aliases kept so no screen silently loses its type while v3 lands.
+   Re-pointed at the new vocabulary so v2 references still render. */
+.t-display-1 { font-family: var(--font-display); font-weight: 500; font-variation-settings: "opsz" 90, "wght" 500; font-size: var(--t-sentence); line-height: 1.18; letter-spacing: -0.015em; }
+.t-display-2 { font-family: var(--font-ui); font-weight: 700; font-size: clamp(1.5rem, 5vw, 2rem); line-height: 1.12; letter-spacing: -0.015em; }
+
+/* Margin notes — weight, colour, and the left rule distinguish them; never
+   slant. Songti SC has no italic, so synthesising an oblique misreads. */
 .t-note        { font-family: var(--font-ui); font-weight: 600; }
 .t-note:lang(en) { font-style: italic; font-weight: 500; }
 

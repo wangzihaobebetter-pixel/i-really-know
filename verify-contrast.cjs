@@ -1,28 +1,26 @@
 /**
- * Contrast audit on the real rendered page, in all three themes. P3 §2.5.
+ * Contrast audit on the real rendered page, in BOTH themes. FABLE §6.
  *
- * WHY THIS FILE WAS REWRITTEN. The v2 gate was real but narrow, and P3 §0.4
- * verified the specific failure: it sampled six generic text selectors
- * (`.t-body`, `.ink-2`, `.ink-3`, `.sample-card .t-small`, `.t-small.ink-2`,
- * `.field-label`) and NOT ONE STATE COLOUR. Worse, it read
- * `getComputedStyle(node).backgroundColor` and walked up the DOM, while
- * `.anchor-span` set `background-color: transparent` and painted its wash as a
- * `background-image` linear-gradient — so the gate walked straight past the
- * Painted Page to `--sheet`. The AA claim was true for six selectors and
- * SILENT ABOUT EVERY STATE COLOUR IN THE PRODUCT.
+ * WHY THIS FILE WAS REWRITTEN. P3 §2.5 swapped in the pre-composited wash
+ * scheme and the dev/ui sample list. FABLE §6 extends the sample list further
+ * so the new token surface (held / half-held / slipped / held-more, ink
+ * buttons, terracotta accent, the dark-by-default removal) is actually
+ * measured — not assumed. The v2 gate was narrowly true; the new gate has to
+ * be true for the things the design now puts on screen.
  *
- * Three changes, all of them required before any colour work could be called
- * done:
+ * Three changes vs P3:
+ *  1. Sample list now covers the FABLE state vocabulary (held / half-held /
+ *     slipped / held-more) — both word colour and span wash.
+ *  2. Sample list now covers the INK primary button (paper-on-ink contrast in
+ *     the default theme, ink-on-paper in slate), the TERRACOTTA accent, and
+ *     the disabled-button state.
+ *  3. The third theme is GONE — FABLE §6 removes the script theme. The gate
+ *     audits two themes only; an opt-in dark that fails AA is still a shipped
+ *     dark that fails AA.
  *
- *  1. Sample the state colours: the hero numeral in each of its three states,
- *     each Axis-A span mark, each Axis-B mark, the instructor evidence sheet
- *     body, and the glass chrome's text.
- *  2. Resolve washes properly. Every wash now ships as a pre-composited opaque
- *     hex (tokens.css), and this gate ALSO composites any remaining
- *     translucent layer and any `background-image` gradient it finds, so it
- *     can no longer be blind to a painted background.
- *  3. Check the third theme. `script` is opt-in, and an opt-in theme that
- *     fails AA is still a shipped theme that fails AA.
+ * Coverage rule: a selector that matches nothing is a SILENT loss of coverage,
+ * and the runtime reports it as a hard failure — exactly the failure mode
+ * v2's gate slipped into.
  */
 const puppeteer = require('puppeteer-core');
 const CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
@@ -30,28 +28,64 @@ const BASE = process.env.BASE_URL || 'http://localhost:4177';
 
 /** [hash, label, selector, setup?] — setup runs in the page before sampling. */
 const SAMPLES = [
-  ['#/', 'body text',              '.t-body'],
-  ['#/', 'secondary text',         '.ink-2'],
-  ['#/', 'tertiary text',          '.ink-3'],
-  ['#/', 'card blurb',             '.sample-card .t-small'],
-  ['#/', 'hero numeral',           '.divergence-numeral'],
-  ['#/', 'hero claim line',        '.divergence-claim'],
-  ['#/', 'demo provenance',        '.demo-source'],
-  ['#/', 'sample card title',      '.sample-card-title'],
-  ['#/packs/cs', 'dimension line', '.t-small.ink-2'],
-  ['#/settings', 'field label',    '.field-label'],
-  ['#/dev/ui', 'axis A · defended',     '.anchor-defended'],
-  ['#/dev/ui', 'axis A · partial',      '.anchor-partial'],
-  ['#/dev/ui', 'axis A · undefended',   '.anchor-undefended'],
-  ['#/dev/ui', 'axis A · underclaimed', '.anchor-underclaimed'],
-  ['#/dev/ui', 'axis A · focused wash', '.anchor-defended.is-active'],
-  ['#/dev/ui', 'mark word · defended',     '.ink-defended'],
-  ['#/dev/ui', 'mark word · partial',      '.ink-partial'],
-  ['#/dev/ui', 'mark word · undefended',   '.ink-undefended'],
-  ['#/dev/ui', 'mark word · underclaimed', '.ink-underclaimed'],
-  ['#/dev/ui', 'axis B · over',  '.ink-over'],
-  ['#/dev/ui', 'axis B · under', '.ink-under'],
-  ['#/dev/ui', 'glass chrome text', '.glass .t-small'],
+  // --- Body / chrome typography ---
+  ['#/', 'body text',                '.t-body'],
+  ['#/', 'secondary text',           '.ink-2'],
+  ['#/', 'tertiary text',            '.ink-3'],
+  ['#/', 'card blurb',               '.sample-card .t-small'],
+  ['#/', 'sample card title',        '.sample-card-title'],
+  ['#/', 'demo provenance',          '.demo-source'],
+  ['#/', 'field label',              '.field-label'],
+  ['#/', 'serif sentence',           '.t-sentence'],
+  ['#/', 'question',                 '.t-question'],
+  ['#/', 'title',                    '.t-title'],
+  ['#/', 'small',                    '.t-small'],
+  ['#/', 'micro',                    '.t-micro'],
+  ['#/', 'mono small',               '.t-mono-small'],
+
+  // --- Accent (terracotta) ---
+  ['#/', 'accent · link',            '.ink-accent'],
+  ['#/', 'accent · wash',            '.bg-accent'],
+  ['#/', 'focus ring',               ':focus-visible'],
+
+  // --- Primary button: ink on paper (default), paper on ink (slate) ---
+  ['#/', 'primary button · text',     '.btn-primary'],
+
+  // --- FABLE state vocabulary (default class names) ---
+  ['#/dev/ui', 'state · held',        '.ink-held'],
+  ['#/dev/ui', 'state · half-held',   '.ink-half-held'],
+  ['#/dev/ui', 'state · slipped',     '.ink-slipped'],
+  ['#/dev/ui', 'state · held-more',   '.ink-held-more'],
+  ['#/dev/ui', 'state · over',        '.ink-over'],
+  ['#/dev/ui', 'state · under',       '.ink-under'],
+
+  // --- FABLE state wash ---
+  ['#/dev/ui', 'wash · held',         '.bg-held'],
+  ['#/dev/ui', 'wash · half-held',    '.bg-half-held'],
+  ['#/dev/ui', 'wash · slipped',      '.bg-slipped'],
+  ['#/dev/ui', 'wash · held-more',    '.bg-held-more'],
+
+  // --- Legacy v2 aliases (still in screens until copy is rewritten) ---
+  ['#/dev/ui', 'v2 alias · defended',     '.ink-defended'],
+  ['#/dev/ui', 'v2 alias · partial',      '.ink-partial'],
+  ['#/dev/ui', 'v2 alias · undefended',   '.ink-undefended'],
+  ['#/dev/ui', 'v2 alias · underclaimed', '.ink-underclaimed'],
+
+  // --- v2 anchor marks ---
+  ['#/dev/ui', 'anchor · held',        '.anchor-held'],
+  ['#/dev/ui', 'anchor · half-held',   '.anchor-half-held'],
+  ['#/dev/ui', 'anchor · slipped',     '.anchor-slipped'],
+  ['#/dev/ui', 'anchor · held-more',   '.anchor-held-more'],
+  ['#/dev/ui', 'anchor · focused wash','.anchor-held.is-active'],
+
+  // --- v2 anchor aliases ---
+  ['#/dev/ui', 'v2 anchor · defended',     '.anchor-defended'],
+  ['#/dev/ui', 'v2 anchor · partial',      '.anchor-partial'],
+  ['#/dev/ui', 'v2 anchor · undefended',   '.anchor-undefended'],
+  ['#/dev/ui', 'v2 anchor · underclaimed', '.anchor-underclaimed'],
+
+  // --- Glass chrome (paper-on-glass text) ---
+  ['#/dev/ui', 'glass chrome text',     '.glass .t-small'],
 ];
 
 /** The instructor sheet is print-register and does not follow the app theme. */
@@ -124,7 +158,8 @@ const MEASURE = (s, forceActive) => {
   await page.setViewport({ width: 1280, height: 1000 });
 
   const rows = [];
-  for (const theme of ['paper', 'slate', 'script']) {
+  // FABLE §6: paper is default, slate is opt-in. Script theme is removed.
+  for (const theme of ['paper', 'slate']) {
     await page.emulateMediaFeatures([
       { name: 'prefers-color-scheme', value: theme === 'slate' ? 'dark' : 'light' },
     ]);
@@ -201,5 +236,5 @@ const MEASURE = (s, forceActive) => {
     console.error('\nverify-contrast: the instructor documents were never reached — coverage claim would be false.');
     process.exit(1);
   }
-  console.log(`\nverify-contrast: ${rows.length} samples — 3 app themes plus ${docRows} on the print register — all meet WCAG AA ✓`);
+  console.log(`\nverify-contrast: ${rows.length} samples — 2 student app themes plus ${docRows} on the print register — all meet WCAG AA ✓`);
 })().catch((e) => { console.error('crashed:', e.message); process.exit(1); });

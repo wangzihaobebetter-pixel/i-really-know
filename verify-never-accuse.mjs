@@ -35,6 +35,40 @@ const INSTRUCTOR_SCREENS = [
   'src/screens/class/ReteachScreen.tsx',
 ];
 
+/**
+ * STUDENT PACKAGES — FABLE-REDESIGN §8 row M11 extends the never-accuse gate
+ * to student surfaces too. The kill list (§1.1) calls out exactly the words
+ * the owner rejected as 「极度冰冷和粗糙」: accuse, illusion, borrowed,
+ * wrong about yourself, not yours. These cannot appear on any string the
+ * student reads.
+ *
+ * Namespace mapping: the design renames the surfaces (#/today, #/result)
+ * but the i18n keys still live under `home` (Today) and `map` (Result), with
+ * `viva` covering the run-through.
+ */
+const STUDENT_PACKAGES = ['viva', 'map', 'home'];
+const STUDENT_SCREENS = [
+  'src/screens/today/TodayScreen.tsx',
+  'src/screens/viva/VivaScreen.tsx',
+  'src/screens/followups/FollowupsScreen.tsx',
+];
+
+/** Student-surface denylist. Each term maps to a reason. */
+const STUDENT_DENY = [
+  { re: /\baccuse[sd]?\b/i,                 why: 'student-facing accusation' },
+  { re: /\baccusation[s]?\b/i,              why: 'student-facing accusation' },
+  { re: /\billusion[s]?\b/i,                why: 'retired student-facing term' },
+  { re: /\bborrowed\b/i,                    why: 'retired student-facing term' },
+  { re: /wrong about yourself/i,             why: 'retired student-facing phrase' },
+  { re: /\bnot\s+yours\b/i,                why: 'retired student-facing phrase' },
+  // Chinese
+  { re: /指控/,                               why: 'student-facing accusation' },
+  { re: /幻觉/,                               why: 'retired student-facing term' },
+  { re: /借用/,                               why: 'retired student-facing term' },
+  { re: /不是你的/,                            why: 'retired student-facing phrase' },
+  { re: /你自己.{0,4}判断错/,                  why: 'retired student-facing phrase' },
+];
+
 const DENY = [
   // English
   { re: /\bcheat(s|ed|ing|er)?\b/i,            why: 'accusation' },
@@ -127,7 +161,10 @@ for (const f of files.filter((x) => x.includes('/i18n/'))) {
   const src = readFileSync(f, 'utf8');
   for (const block of src.matchAll(/registerStrings\('([\w-]+)',\s*\{([\s\S]*?)\n\}\);/g)) {
     const pkg = block[1];
-    if (!INSTRUCTOR_PACKAGES.includes(pkg)) continue;
+    const isInstructor = INSTRUCTOR_PACKAGES.includes(pkg);
+    const isStudent = STUDENT_PACKAGES.includes(pkg);
+    if (!isInstructor && !isStudent) continue;
+    const surface = isInstructor ? 'instructor' : 'student';
     const body = block[2];
     const enStart = body.indexOf('en: {');
     const zhStart = body.indexOf("'zh-CN': {");
@@ -138,7 +175,7 @@ for (const f of files.filter((x) => x.includes('/i18n/'))) {
       for (const m of section.matchAll(/^\s{4}'?([\w.]+)'?:\s*'((?:[^'\\]|\\.)*)'/gm)) {
         strings.push({
           key: m[1].startsWith(`${pkg}.`) ? m[1] : `${pkg}.${m[1]}`,
-          lang, text: m[2].replace(/\\'/g, "'"), file: f,
+          lang, text: m[2].replace(/\\'/g, "'"), file: f, surface,
         });
       }
     }
@@ -155,7 +192,7 @@ for (const f of files.filter((x) => x.includes('/i18n/'))) {
       for (const m of section.matchAll(/^\s{4}'?([\w.]+)'?:\s*'((?:[^'\\]|\\.)*)'/gm)) {
         const key = m[1].startsWith('common.') ? m[1] : `common.${m[1]}`;
         if (OUTCOME_KEYS.includes(key)) {
-          strings.push({ key, lang, text: m[2].replace(/\\'/g, "'"), file: f, outcome: true });
+          strings.push({ key, lang, text: m[2].replace(/\\'/g, "'"), file: f, outcome: true, surface: 'instructor' });
         }
       }
     }
@@ -171,7 +208,21 @@ for (const f of INSTRUCTOR_SCREENS) {
     .join('\n');
   for (const m of code.matchAll(/>([^<>{}\n]{4,})</g)) {
     const text = m[1].trim();
-    if (text) strings.push({ key: `${f}:jsx`, lang: 'literal', text, file: f });
+    if (text) strings.push({ key: `${f}:jsx`, lang: 'literal', text, file: f, surface: 'instructor' });
+  }
+}
+
+/* Student-surface literal JSX text — same gate as instructor screens,
+   so a hard-coded English word cannot slip past the i18n layer on a Today,
+   Viva or Followups row. */
+for (const f of STUDENT_SCREENS) {
+  const src = readFileSync(f, 'utf8');
+  const code = src.split('\n')
+    .filter((l) => !/^\s*(\*|\/|\/\*)/.test(l))
+    .join('\n');
+  for (const m of code.matchAll(/>([^<>{}\n]{4,})</g)) {
+    const text = m[1].trim();
+    if (text) strings.push({ key: `${f}:jsx`, lang: 'literal', text, file: f, surface: 'student' });
   }
 }
 
@@ -182,9 +233,12 @@ const failures = [];
 for (const s of strings) {
   if (ALLOWED_KEYS.has(s.key)) continue;
 
-  for (const rule of DENY) {
+  /* Pick the denylist for this surface. Instructor strings run DENY plus
+     the closed outcome vocabulary; student strings run STUDENT_DENY. */
+  const denylist = s.surface === 'student' ? STUDENT_DENY : DENY;
+  for (const rule of denylist) {
     if (rule.re.test(s.text)) {
-      failures.push(`${s.key} [${s.lang}] contains a forbidden term (${rule.why})\n      → ${s.text.slice(0, 120)}`);
+      failures.push(`${s.key} [${s.lang}] contains a forbidden term on a ${s.surface} surface (${rule.why})\n      → ${s.text.slice(0, 120)}`);
     }
   }
   if (PERCENT.test(s.text) && !CITATION.test(s.text)) {
@@ -209,7 +263,9 @@ if (!sheetSource.includes("t('sheet.signTitle')")) {
 }
 
 const cited = strings.filter((s) => PERCENT.test(s.text) && CITATION.test(s.text));
-console.log(`verify-never-accuse: ${strings.length} instructor-surface strings checked against ${DENY.length} denied terms`);
+const instCount = strings.filter((s) => s.surface === 'instructor').length;
+const stuCount = strings.filter((s) => s.surface === 'student').length;
+console.log(`verify-never-accuse: ${strings.length} strings checked (instructor ${instCount}, student ${stuCount}) against DENY ${DENY.length} + STUDENT_DENY ${STUDENT_DENY.length} denied terms`);
 if (cited.length) {
   console.log(`  ${cited.length} string(s) carry a percentage WITH a citation, which is permitted:`);
   for (const c of cited) console.log(`    · ${c.key} [${c.lang}]`);

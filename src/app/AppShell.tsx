@@ -30,7 +30,7 @@ class RouteBoundary extends React.Component<{ children: React.ReactNode; onReset
       <div className="col-read" style={{ padding: 'var(--space-8) var(--space-5)' }}>
         <EmptyState
           title="That screen failed to load."
-          action={<Button variant="primary" onClick={() => { this.setState({ error: null }); this.props.onReset(); }}>Back to Verify</Button>}
+          action={<Button variant="primary" onClick={() => { this.setState({ error: null }); this.props.onReset(); }}>Back to Today</Button>}
         />
         <pre className="t-mono t-small ink-3" style={{ whiteSpace: 'pre-wrap', marginTop: 'var(--space-6)' }}>
           {String(this.state.error?.message ?? this.state.error)}
@@ -50,24 +50,6 @@ function V1MigrationGate() {
     const n = runV1Migration();
     if (n > 0) toast.push(`Imported ${n} session${n === 1 ? '' : 's'} from v1.`, { tone: 'defended' });
   }, [migrated, runV1Migration, toast]);
-  return null;
-}
-
-function KeyboardShortcuts({ route }: { route: Route }) {
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      const el = document.activeElement;
-      const typing = el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement || (el as HTMLElement)?.isContentEditable;
-      if (typing || e.metaKey || e.ctrlKey || e.altKey) return;
-      if (route.name === 'run') return;   // never yank the user out of a viva
-      const map: Record<string, Parameters<typeof navigate>[0]> = {
-        '1': 'home', '2': 'queue', '3': 'record', '4': 'class', '5': 'packs',
-      };
-      if (map[e.key]) { e.preventDefault(); navigate(map[e.key]); }
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [route.name]);
   return null;
 }
 
@@ -91,7 +73,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     <ThemeProvider>
       <ToastHost>
         {hydrated && <V1MigrationGate />}
-        <KeyboardShortcuts route={route} />
         {!immersive && (wide ? <NavRail route={route} /> : <TabBar route={route} />)}
         <main
           style={{
@@ -109,7 +90,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               <Skeleton height={180} />
             </div>
           ) : (
-            <RouteBoundary onReset={() => navigate('home')}>
+            <RouteBoundary onReset={() => navigate('today')}>
               <Suspense fallback={<div className="col-read stack"><Skeleton lines={4} /><Skeleton height={160} /></div>}>
                 {children}
               </Suspense>

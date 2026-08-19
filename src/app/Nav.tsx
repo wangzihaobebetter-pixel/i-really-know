@@ -1,31 +1,36 @@
 import React from 'react';
-import { PenLine, RotateCcw, Files, Users, Layers, Settings2 } from 'lucide-react';
+import { PenLine, Files, User, Settings2 } from 'lucide-react';
 import { href, ROUTE_GROUP, type Route } from '../router';
 import { useT } from '../i18n';
 import { useStore, selectDueTargets } from '../store';
 
-type Group = 'verify' | 'queue' | 'record' | 'class' | 'packs' | 'settings';
+type Group = 'today' | 'work' | 'you' | 'settings';
 
 interface NavItem { group: Group; route: Parameters<typeof href>[0]; icon: React.ReactNode; key: string }
 
+/**
+ * v3 IA collapse (FABLE-REDESIGN.md §4.2).
+ * Three tabs + gear: Today (今天) · Work (作业) · You (你) · ⚙ Settings.
+ * The followups button is reached from Today, not a tab. Instructor
+ * class/* screens are off the student nav entirely. Packs is no longer
+ * a tab — packs are invisible infrastructure, surfaced only as a chip
+ * on the bring screen.
+ */
 const ITEMS: NavItem[] = [
-  { group: 'verify',   route: 'home',     icon: <PenLine size={20} strokeWidth={1.75} />,    key: 'common.nav.verify' },
-  { group: 'queue',    route: 'queue',    icon: <RotateCcw size={20} strokeWidth={1.75} />,  key: 'common.nav.queue' },
-  { group: 'record',   route: 'record',   icon: <Files size={20} strokeWidth={1.75} />,      key: 'common.nav.record' },
-  { group: 'class',    route: 'class',    icon: <Users size={20} strokeWidth={1.75} />,      key: 'common.nav.class' },
-  { group: 'packs',    route: 'packs',    icon: <Layers size={20} strokeWidth={1.75} />,     key: 'common.nav.packs' },
+  { group: 'today',    route: 'today',    icon: <PenLine size={20} strokeWidth={1.75} />,    key: 'common.nav.today' },
+  { group: 'work',     route: 'work',     icon: <Files size={20} strokeWidth={1.75} />,      key: 'common.nav.work' },
+  { group: 'you',      route: 'you',      icon: <User size={20} strokeWidth={1.75} />,       key: 'common.nav.you' },
 ];
 
 const SETTINGS_ITEM: NavItem = { group: 'settings', route: 'settings', icon: <Settings2 size={20} strokeWidth={1.75} />, key: 'common.nav.settings' };
 
-function Badge({ n }: { n: number }) {
+function DueDot({ n }: { n: number }) {
   if (!n) return null;
   return (
-    <span className="t-mono t-num" style={{
-      position: 'absolute', top: 4, right: 12, minWidth: 16, height: 16, padding: '0 4px',
-      borderRadius: 'var(--r-pill)', background: 'var(--shaky)', color: 'var(--paper)',
-      fontSize: '.6875rem', display: 'grid', placeItems: 'center', lineHeight: 1,
-    }}>{n > 99 ? '99+' : n}</span>
+    <span aria-hidden="true" style={{
+      position: 'absolute', top: 6, right: '50%', transform: 'translateX(18px)',
+      width: 8, height: 8, borderRadius: 'var(--r-pill)', background: 'var(--ink)',
+    }} />
   );
 }
 
@@ -48,7 +53,7 @@ export function NavRail({ route }: { route: Route }) {
     >
       {it.icon}
       <span className="t-micro">{t(it.key)}</span>
-      {it.group === 'queue' && <Badge n={due} />}
+      {it.group === 'today' && <DueDot n={due} />}
     </a>
   );
 
@@ -72,7 +77,7 @@ export function TabBar({ route }: { route: Route }) {
   const t = useT();
   const due = useStore(selectDueTargets()).length;
   const active = ROUTE_GROUP[route.name];
-  const tabs = [ITEMS[0], ITEMS[1], ITEMS[2], ITEMS[3], SETTINGS_ITEM];
+  const tabs: NavItem[] = [...ITEMS, SETTINGS_ITEM];
 
   return (
     <nav
@@ -97,7 +102,7 @@ export function TabBar({ route }: { route: Route }) {
         >
           {it.icon}
           <span className="t-micro" style={{ fontSize: '.625rem' }}>{t(it.key)}</span>
-          {it.group === 'queue' && <Badge n={due} />}
+          {it.group === 'today' && <DueDot n={due} />}
         </a>
       ))}
     </nav>
