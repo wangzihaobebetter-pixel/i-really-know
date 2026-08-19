@@ -33,9 +33,9 @@ async function configure(page, model) {
   await page.goto(`${APP}#/settings`, { waitUntil: 'networkidle0' });
   const selects = await page.$$('select');
   await selects[0].select('custom');
-  await setNth(page, 'input.control', 0, MOCK_API);
-  await setNth(page, 'input.control', 1, '[REDACTED]');
-  await setNth(page, 'input.control', 2, model);
+  await setNth(page, 'input.control', 0, '[REDACTED]');
+  await setNth(page, 'input.control', 1, model);
+  await setNth(page, 'input.control', 2, MOCK_API);
 }
 async function testConnection(page, model) {
   await configure(page, model);
@@ -75,7 +75,7 @@ async function testConnection(page, model) {
     await setNth(page, 'input[type="date"]', 0, new Date(Date.now() + 86_400_000).toISOString().slice(0, 10));
     await setNth(page, 'input.control:not([type="date"])', 0, 'Error-path scheduler review');
     const source = readFileSync(join(process.cwd(), 'src/lib/session-ops.ts'), 'utf8');
-    await setNth(page, 'textarea', 0, source.slice(source.indexOf('export function targetsFromSession'), source.indexOf('export function probeForTarget')));
+    await setNth(page, '#bring-material', 0, source.slice(source.indexOf('export function targetsFromSession'), source.indexOf('export function probeForTarget')));
     await clickText(page, 'Read it');
     await page.waitForSelector('[data-testid="read-screen"]');
     await page.waitForFunction(() => document.body.innerText.includes('Start the questions'), { timeout: 30000 });
@@ -92,22 +92,22 @@ async function testConnection(page, model) {
     await page.waitForSelector('[data-testid="bring-screen"]');
     await setNth(page, 'input[type="date"]', 0, new Date(Date.now() + 86_400_000).toISOString().slice(0, 10));
     await setNth(page, 'input.control:not([type="date"])', 0, 'Scoring recovery review');
-    await setNth(page, 'textarea', 0, source.slice(source.indexOf('export function targetsFromSession'), source.indexOf('export function probeForTarget')));
+    await setNth(page, '#bring-material', 0, source.slice(source.indexOf('export function targetsFromSession'), source.indexOf('export function probeForTarget')));
     await clickText(page, 'Read it');
     await page.waitForSelector('[data-testid="read-screen"]');
     await page.waitForFunction(() => document.body.innerText.includes('Start the questions'), { timeout: 30000 });
     await clickText(page, 'Start the questions');
     await page.waitForSelector('[data-testid="run-screen"]');
-    await setNth(page, 'textarea', 0, 'The schedule changes because a missed answer resets the target to the one-day stage.');
-    await clickText(page, 'That is my answer');
-    await clickText(page, 'Holds');
+    await setNth(page, '.v5-answer-input', 0, 'The schedule changes because a missed answer resets the target to the one-day stage.');
+    await page.click('.v5-send');
+    await clickText(page, 'stand behind it');
     await page.waitForFunction(() => document.body.innerText.includes('Mark it myself and continue'), { timeout: 30000 });
     let bodyText = await page.evaluate(() => document.body.innerText);
-    if (bodyText.includes('Next question') || bodyText.includes('See what held')) failures.push('scoring failure exposed Next/Finish before manual marking');
+    if (bodyText.includes('Next question') || bodyText.includes('See what you can take')) failures.push('scoring failure exposed Next/Finish before manual marking');
     await clickText(page, 'Mark it myself and continue');
     await clickText(page, 'It half-held');
-    await page.waitForFunction(() => document.body.innerText.includes('Next question') || document.body.innerText.includes('See what held'));
-    await page.click('.run-details summary');
+    await page.waitForFunction(() => document.body.innerText.includes('Next question') || document.body.innerText.includes('See what you can take'));
+    await page.click('.v5-reply-details summary');
     bodyText = await page.evaluate(() => document.body.innerText);
     if (!bodyText.includes('The schedule changes because')) failures.push('scoring failure lost the committed answer');
     const scoreSeen = await (await fetch(`${MOCK_ROOT}/__seen`)).json();
@@ -123,5 +123,5 @@ async function testConnection(page, model) {
     failures.forEach((failure) => console.error('  ✗ ' + failure));
     process.exit(1);
   }
-  console.log('verify-errors: 401, 429, malformed JSON, and score-failure manual recovery passed in the v4 flow ✓');
+  console.log('verify-errors: 401, 429, malformed JSON, and score-failure manual recovery passed in the v5 flow ✓');
 })();

@@ -64,7 +64,7 @@ a:hover { text-decoration: underline; text-underline-offset: 2px; }
 .ink-held-more   { color: var(--held-more); }
 .ink-over        { color: var(--over); }
 .ink-under       { color: var(--under); }
-.ink-accent      { color: var(--accent); }
+.ink-accent      { color: var(--action); }
 .ink-2 { color: var(--ink-2); }
 .ink-3 { color: var(--ink-3); }
 

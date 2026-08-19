@@ -22,7 +22,7 @@ export const DEFAULT_SETTINGS: Settings = {
   count: 6,
   preset: 'standard',
   difficulty: 'standard',
-  theme: 'system',
+  theme: 'paper',
   language: 'auto',
   voiceEnabled: true,
 };

@@ -4,10 +4,10 @@ import { PROVIDER_PRESETS } from '../../store/presets';
 import { useT } from '../../i18n';
 import { useNavigate } from '../../router';
 import {
-  Button, Callout, Input, Segmented, Select, Sheet, Spinner, Toggle, useToast,
+  BottomSheet, Button, Callout, Input, Segmented, Select, Sheet, Spinner, Toggle, useToast,
 } from '../../ui';
 import { ping, describeError } from '../../lib/llm';
-import type { Difficulty, ProviderId, RunPreset, Settings, StoreV2 } from '../../types';
+import type { ProviderId, Settings, StoreV2 } from '../../types';
 
 export default function SettingsScreen() {
   const t = useT();
@@ -24,6 +24,7 @@ export default function SettingsScreen() {
 
   const [testing, setTesting] = useState(false);
   const [testResult, setTestResult] = useState<{ ok: boolean; message: string } | null>(null);
+  const [wipeOpen, setWipeOpen] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const set = <K extends keyof Settings>(key: K, value: Settings[K]) => setSettings({ [key]: value } as Partial<Settings>);
@@ -63,90 +64,33 @@ export default function SettingsScreen() {
   }
 
   function doWipe() {
-    if (!window.confirm(t('settings.wipeConfirm'))) return;
     wipeAll();
+    setWipeOpen(false);
     toast.push(t('common.action.confirm'), { tone: 'neutral' });
   }
 
   return (
-    <div className="col-read stack">
-      <h1 className="t-display-2">{t('settings.title')}</h1>
+    <div className="col-read stack settings-v5">
+      <header className="product-wordmark"><span className="living-mark" aria-hidden /><strong>{t('v5.brand')}</strong></header>
+      <section className="return-surface-opening"><span className="v5-eyebrow">{t('settings.title')}</span><h1>{t('settings.title')}</h1><p>{t('settings.dataHint')}</p></section>
 
-      <section className="stack-tight">
-        <h2 className="t-title">{t('settings.providerTitle')}</h2>
-        <Callout tone="neutral">{t('settings.providerHint')}</Callout>
-        <Sheet elevation={1}>
+      <section className="settings-connect-v5">
+        <div><h2>{t('settings.providerTitle')}</h2><p>{t('settings.providerHint')}</p></div>
+        <Sheet elevation={1} className="model-connect-v5">
           <div className="stack-tight">
-            <Select
-              label={t('settings.provider')}
-              value={settings.provider}
-              onChange={(e) => applyProviderPreset(e.target.value as ProviderId)}
-              options={PROVIDER_PRESETS.map((p) => ({ value: p.id, label: p.label }))}
-            />
-            <Input
-              label={t('settings.apiBase')}
-              value={settings.apiBase}
-              mono
-              onChange={(e) => set('apiBase', e.target.value)}
-              placeholder="https://api.openai.com/v1"
-            />
-            <Input
-              label={t('settings.apiKey')}
-              type="password"
-              autoComplete="off"
-              value={settings.apiKey}
-              mono
-              onChange={(e) => set('apiKey', e.target.value)}
-              placeholder="sk-…"
-            />
-            <Input
-              label={t('settings.model')}
-              value={settings.model}
-              mono
-              onChange={(e) => set('model', e.target.value)}
-            />
+            <Select label={t('settings.provider')} value={settings.provider} onChange={(e) => applyProviderPreset(e.target.value as ProviderId)} options={PROVIDER_PRESETS.map((preset) => ({ value: preset.id, label: preset.label }))} />
+            <Input label={t('settings.apiKey')} type="password" autoComplete="off" value={settings.apiKey} onChange={(e) => set('apiKey', e.target.value)} placeholder="••••••••••••" />
+            <Input label={t('settings.model')} value={settings.model} onChange={(e) => set('model', e.target.value)} />
+            <details className="settings-advanced-v5">
+              <summary>{t('v5.advanced')}</summary>
+              <Input label={t('settings.apiBase')} value={settings.apiBase} mono onChange={(e) => set('apiBase', e.target.value)} placeholder="https://api.openai.com/v1" />
+            </details>
             <div className="row wrap">
-              <Button variant="secondary" onClick={testConnection} disabled={testing || !settings.apiKey.trim()}>
-                {testing ? t('settings.testing') : t('settings.test')}
-              </Button>
+              <Button variant="primary" onClick={testConnection} disabled={testing || !settings.apiKey.trim()}>{testing ? t('settings.testing') : t('settings.test')}</Button>
               {testing && <Spinner />}
             </div>
-            {testResult && (
-              <Callout tone={testResult.ok ? 'neutral' : 'danger'}>{testResult.message}</Callout>
-            )}
-          </div>
-        </Sheet>
-      </section>
-
-      <section className="stack-tight">
-        <h2 className="t-title">{t('settings.runTitle')}</h2>
-        <Sheet elevation={1}>
-          <div className="stack-tight">
-            <Select
-              label={t('settings.count')}
-              value={String(settings.count)}
-              onChange={(e) => set('count', Number(e.target.value) as Settings['count'])}
-              options={[4, 5, 6, 7].map((n) => ({ value: String(n), label: String(n) }))}
-            />
-            <div className="stack-tight">
-              <span className="field-label">{t('settings.preset')}</span>
-              <Segmented<RunPreset>
-                ariaLabel={t('settings.preset')}
-                value={settings.preset}
-                onChange={(v) => set('preset', v)}
-                options={(['quick', 'standard', 'defense'] as RunPreset[]).map((p) => ({ value: p, label: t(`common.preset.${p}`) }))}
-              />
-            </div>
-            <div className="stack-tight">
-              <span className="field-label">{t('settings.difficulty')}</span>
-              <Segmented<Difficulty>
-                ariaLabel={t('settings.difficulty')}
-                value={settings.difficulty}
-                onChange={(v) => set('difficulty', v)}
-                options={(['foundations', 'standard', 'defense'] as Difficulty[]).map((d) => ({ value: d, label: t(`common.difficulty.${d}`) }))}
-              />
-            </div>
-            <Toggle label={t('settings.voice')} checked={settings.voiceEnabled} onChange={(v) => set('voiceEnabled', v)} />
+            {testResult && <Callout tone={testResult.ok ? 'neutral' : 'danger'}>{testResult.message}</Callout>}
+            <p className="settings-privacy-v5">{t('bring4.privacy')}</p>
           </div>
         </Sheet>
       </section>
@@ -155,6 +99,7 @@ export default function SettingsScreen() {
         <h2 className="t-title">{t('settings.appearanceTitle')}</h2>
         <Sheet elevation={1}>
           <div className="stack-tight">
+            <Toggle label={t('settings.voice')} checked={settings.voiceEnabled} onChange={(v) => set('voiceEnabled', v)} />
             <div className="stack-tight">
               <span className="field-label">{t('settings.theme')}</span>
               <Segmented<Settings['theme']>
@@ -162,9 +107,8 @@ export default function SettingsScreen() {
                 value={settings.theme}
                 onChange={(v) => set('theme', v)}
                 options={[
-                  { value: 'paper', label: 'Paper' },
-                  { value: 'slate', label: 'Slate' },
-                  { value: 'system', label: 'System' },
+                  { value: 'paper', label: 'Sunlit' },
+                  { value: 'slate', label: 'Night' },
                 ]}
               />
             </div>
@@ -212,7 +156,7 @@ export default function SettingsScreen() {
               v1 →
             </Button>
           )}
-          <Button variant="danger" onClick={doWipe}>{t('settings.wipe')}</Button>
+          <Button variant="danger" onClick={() => setWipeOpen(true)}>{t('settings.wipe')}</Button>
         </div>
         <input
           ref={fileRef}
@@ -222,6 +166,10 @@ export default function SettingsScreen() {
           onChange={(e) => { void doImport(e.target.files?.[0]); e.target.value = ''; }}
         />
       </section>
+
+      <BottomSheet open={wipeOpen} onClose={() => setWipeOpen(false)} title={t('settings.wipe')} footer={<Button variant="danger" onClick={doWipe}>{t('common.action.confirm')}</Button>}>
+        <p className="t-body ink-2 measure">{t('settings.wipeConfirm')}</p>
+      </BottomSheet>
     </div>
   );
 }

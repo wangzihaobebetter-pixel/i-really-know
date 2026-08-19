@@ -2,9 +2,11 @@
 
 **Learning verification, not learning acceleration.**
 
-Bring a piece of work you have already written. The app reads it, asks 4–7 questions that cannot be answered by copying, records your own read before showing any judgement, marks the exact source passages, and returns weak concepts after 1, 3 and 7 days from a different angle.
+Bring a piece of work you have already written and name the room you are preparing for. The app reads it visibly, asks 4–7 questions that cannot be answered by copying, records your own read before showing any judgement, and brings loose links back from a different angle.
 
-「我真会」让你把已经写好的论文、报告、代码或笔记带进来，先遇见考官可能会问的问题，再看哪些地方站住、哪些地方需要换个角度回来。它不会替你改写作业，也不检测或指控 AI 使用。
+「我真会」是一场站在真实场合之前的私人彩排：把已经写好的论文、报告、代码或笔记带进来，先在这里听到难问，再把自己说过且站住的话留下。它不会替你改写作业，也不检测或指控 AI 使用。
+
+The v5 student surface is built around a **living margin**: one visible line connects the exact source passage to the hard question, the student's answer, and the mark that remains. Today is framed by the next room and date; Work keeps each marked piece; You begins with the student's own words rather than a score.
 
 ## Product boundaries
 
@@ -17,7 +19,7 @@ Bring a piece of work you have already written. The app reads it, asks 4–7 que
 
 ## Student and instructor flows
 
-- **Student:** 60-second sourced example → bring work + occasion + date → visible reading → one question at a time → self-read → one-line response → marked page → scheduled returns.
+- **Student:** one live sourced exchange → bring work + occasion + date → visible reading → one question at a time → self-read → one-line response → own words + marked page → scheduled returns.
 - **Instructor:** local CSV roster → one private student link per submission → student sends a private result link back → local evidence sheet and concept-level reteach map → print or direct PDF download.
 
 Student and result links are self-contained URL fragments. They are never sent to this app's hosting server; anyone who receives a link can read the material inside it, so share it only with the intended person. Returned result links are student-controlled, not identity-authenticated, and stay out of the class reteach map until the instructor explicitly reviews them.

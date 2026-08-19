@@ -33,6 +33,21 @@ export const SAMPLES: SampleDef[] = [
   contraceptionSample, motorOilSample, planckSample, plantCompetitionSample,
 ];
 
+/** The one cold-start sample is deliberately Marcus-shaped and localized. */
+export const FEATURED_SAMPLE = graphSample;
+
+export function buildFeaturedSampleSession(lang: 'en' | 'zh-CN'): Session {
+  const session = buildSampleSession(FEATURED_SAMPLE);
+  if (lang !== 'zh-CN') return session;
+  return {
+    ...session,
+    probes: session.probes.map((probe, index) => index === 0 ? {
+      ...probe,
+      question: '这行代码按 count × sizeof(char) 给 char** 分配了内存。在 64 位机器上，它实际买到了什么？',
+    } : probe),
+  };
+}
+
 /** Samples carrying an illustrative worked run, used for the home demo. */
 export const DEMO_SAMPLES = SAMPLES.filter((s) => s.worked?.length);
 

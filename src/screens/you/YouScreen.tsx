@@ -1,9 +1,9 @@
 import React from 'react';
-import { BookHeart, CircleEqual, Compass, ShieldCheck } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { selectRealSessions, useStore } from '../../store';
 import { useNavigate } from '../../router';
 import { useLang, useT } from '../../i18n';
-import { Button, Sheet } from '../../ui';
+import { Button } from '../../ui';
 import { divergence, verdictOf } from '../../lib/analysis';
 import { dimensionLabel } from '../../packs';
 import { formatDate } from '../../lib/session-ops';
@@ -15,11 +15,19 @@ export default function YouScreen() {
   const sessions = useStore(selectRealSessions)
     .filter((session) => session.status === 'complete' && !session.sampleId)
     .sort((a, b) => (b.completedAt ?? b.createdAt) - (a.completedAt ?? a.createdAt));
+  const queue = useStore((state) => state.queue);
 
-  const words = sessions.flatMap((session) => session.probes
+  const sessionWords = sessions.flatMap((session) => session.probes
     .filter((probe) => ['defended', 'underclaimed'].includes(verdictOf(probe)) && probe.answer?.trim())
-    .map((probe) => ({ answer: probe.answer!.trim(), title: session.title, at: session.completedAt ?? session.createdAt })))
-    .slice(0, 12);
+    .map((probe) => ({ answer: probe.answer!.trim(), title: session.title, at: session.completedAt ?? session.createdAt })));
+  const followupWords = queue.flatMap((target) => {
+    const source = sessions.find((session) => session.id === target.sessionId);
+    if (!source) return [];
+    return target.history
+      .filter((attempt) => (attempt.score ?? -1) >= 2 && attempt.answer?.trim())
+      .map((attempt) => ({ answer: attempt.answer!.trim(), title: source.title, at: attempt.at }));
+  });
+  const words = [...sessionWords, ...followupWords].sort((a, b) => b.at - a.at).slice(0, 12);
 
   const reads = sessions
     .map((session) => ({ session, read: divergence(session.probes) }))
@@ -36,81 +44,65 @@ export default function YouScreen() {
       slips.set(key, item);
     }
   }
-  const patterns = [...slips.values()].sort((a, b) => b.count - a.count).slice(0, 5);
+  const patterns = [...slips.values()].sort((a, b) => b.count - a.count).slice(0, 3);
+  const latestRead = reads[0]?.read;
+  const readSentence = latestRead?.direction === 'under'
+    ? (lang === 'zh-CN' ? '最近一次，你比自己承认的更稳。' : 'Last time, you were steadier than you gave yourself credit for.')
+    : latestRead?.direction === 'over'
+      ? (lang === 'zh-CN' ? '最近一次，你先在这里发现了自己高估的那道缝。' : 'Last time, you found the gap in your own read here first.')
+      : (lang === 'zh-CN' ? '最近一次，你对自己的判断和实际很接近。' : 'Last time, your read on yourself was close.');
 
   if (!sessions.length) {
     return (
-      <div className="col-read stack page-enter" data-testid="you-screen">
-        <header className="stack-tight"><span className="t-micro ink-accent">{t('you4.eyebrow')}</span><h1 className="t-sentence">{t('you4.title')}</h1></header>
-        <Sheet elevation={0} className="quiet-empty" padding="var(--space-7)">
-          <BookHeart size={30} aria-hidden />
-          <p className="t-body ink-2 measure">{t('you4.empty')}</p>
-          <Button variant="primary" onClick={() => nav('bring')}>{t('you4.start')}</Button>
-        </Sheet>
-        <p className="no-comparison"><ShieldCheck size={16} aria-hidden />{t('you4.noComparison')}</p>
+      <div className="col-read you-v5 page-enter" data-testid="you-screen">
+        <header className="product-wordmark"><span className="living-mark" aria-hidden /><strong>{t('v5.brand')}</strong></header>
+        <section className="return-surface-opening"><span className="v5-eyebrow">{t('you4.eyebrow')}</span><h1>{t('you4.title')}</h1></section>
+        <section className="you-empty-v5"><span className="empty-loop" aria-hidden><i /></span><h2>{lang === 'zh-CN' ? '这里会长出你的原话。' : 'Your own words will grow here.'}</h2><p>{t('you4.empty')}</p><Button variant="primary" onClick={() => nav('bring')}>{t('you4.start')}</Button></section>
+        <p className="no-comparison-v5">{t('you4.noComparison')}</p>
       </div>
     );
   }
 
   return (
-    <div className="col-read stack page-enter" data-testid="you-screen">
-      <header className="stack-tight">
-        <span className="t-micro ink-accent">{t('you4.eyebrow')}</span>
-        <h1 className="t-sentence">{t('you4.title')}</h1>
-        <p className="t-body-lg ink-2 measure">{t('you4.body')}</p>
-      </header>
+    <div className="col-read you-v5 page-enter" data-testid="you-screen">
+      <header className="product-wordmark"><span className="living-mark" aria-hidden /><strong>{t('v5.brand')}</strong></header>
+      <section className="return-surface-opening"><span className="v5-eyebrow">{t('you4.eyebrow')}</span><h1>{t('you4.title')}</h1><p>{lang === 'zh-CN' ? '不是分数。是你已经能亲口站在后面的东西。' : 'Not a score. The things you can now stand behind in your own words.'}</p></section>
 
       {words.length > 0 && (
-        <section className="you-section words-book stack-tight">
-          <div className="row"><BookHeart size={19} aria-hidden /><h2 className="t-title">{t('you4.words')}</h2></div>
-          <div className="words-scroll">
+        <section className="voice-bank-v5">
+          <div className="v5-section-head"><h2>{t('you4.words')}</h2><span>{words.length}</span></div>
+          <div className="voice-bank-scroll">
             {words.map((word, index) => (
-              <blockquote key={`${word.at}-${index}`}>
-                “{word.answer}”
-                <cite>{word.title}</cite>
+              <blockquote key={`${word.at}-${index}`} data-tone={index % 3}>
+                <span>“{word.answer}”</span>
+                <cite>{word.title} · {formatDate(word.at, lang)}</cite>
               </blockquote>
             ))}
           </div>
         </section>
       )}
 
-      {reads.length > 0 && (
-        <section className="you-section stack-tight">
-          <div className="row"><CircleEqual size={19} aria-hidden /><h2 className="t-title">{t('you4.read')}</h2></div>
-          <div className="read-timeline">
-            {reads.slice(0, 6).map(({ session, read }) => {
-              const line = read.direction === 'under'
-                ? (lang === 'zh-CN' ? '你低估了自己' : 'You underestimated yourself')
-                : read.direction === 'over'
-                  ? (lang === 'zh-CN' ? '你当时说得比实际更满' : 'You expected more than held')
-                  : (lang === 'zh-CN' ? '你的判断和表现贴得很近' : 'Your read was close');
-              return (
-                <div className="read-timeline-row" data-direction={read.direction} key={session.id}>
-                  <span className="timeline-dot" aria-hidden />
-                  <span className="grow"><strong>{line}</strong><small>{session.title}</small></span>
-                  <time>{formatDate(session.completedAt ?? session.createdAt, lang)}</time>
-                </div>
-              );
-            })}
+      {latestRead && (
+        <section className="read-yourself-v5">
+          <span className="v5-eyebrow">{t('you4.read')}</span>
+          <h2>{readSentence}</h2>
+          <div className="read-dots-v5" aria-label={t('you4.read')}>
+            {reads.slice(0, 8).reverse().map(({ session, read }) => <span key={session.id} data-direction={read.direction} title={formatDate(session.completedAt ?? session.createdAt, lang)} />)}
           </div>
+          <button type="button" onClick={() => nav('work')}>{lang === 'zh-CN' ? '打开每一次' : 'Open each run-through'}<ArrowRight size={17} /></button>
         </section>
       )}
 
       {patterns.length > 0 && (
-        <section className="you-section stack-tight">
-          <div className="row"><Compass size={19} aria-hidden /><h2 className="t-title">{t('you4.patterns')}</h2></div>
-          <div className="pattern-list">
-            {patterns.map((pattern) => (
-              <div className="pattern-row" key={pattern.label}>
-                <span className="grow">{pattern.label}</span>
-                <span className="t-small ink-3">{pattern.count} {lang === 'zh-CN' ? '次' : pattern.count === 1 ? 'time' : 'times'}</span>
-              </div>
-            ))}
-          </div>
+        <section className="patterns-v5">
+          <div className="v5-section-head"><h2>{t('you4.patterns')}</h2></div>
+          {patterns.map((pattern, index) => (
+            <div className="pattern-v5" key={pattern.label}><span>{String(index + 1).padStart(2, '0')}</span><strong>{pattern.label}</strong><small>{lang === 'zh-CN' ? `${pattern.count} 次从这里松开` : `${pattern.count} times this link loosened`}</small></div>
+          ))}
         </section>
       )}
 
-      <p className="no-comparison"><ShieldCheck size={16} aria-hidden />{t('you4.noComparison')}</p>
+      <p className="no-comparison-v5">{t('you4.noComparison')}</p>
     </div>
   );
 }

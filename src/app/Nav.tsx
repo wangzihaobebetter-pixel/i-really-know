@@ -1,5 +1,5 @@
 import React from 'react';
-import { PenLine, Files, User, Settings2 } from 'lucide-react';
+import { PenLine, Files, User, Settings } from 'lucide-react';
 import { href, ROUTE_GROUP, type Route } from '../router';
 import { useT } from '../i18n';
 import { useStore, selectDueTargets } from '../store';
@@ -22,7 +22,7 @@ const ITEMS: NavItem[] = [
   { group: 'you',      route: 'you',      icon: <User size={20} strokeWidth={1.75} />,       key: 'common.nav.you' },
 ];
 
-const SETTINGS_ITEM: NavItem = { group: 'settings', route: 'settings', icon: <Settings2 size={20} strokeWidth={1.75} />, key: 'common.nav.settings' };
+const SETTINGS_ITEM: NavItem = { group: 'settings', route: 'settings', icon: <Settings size={20} strokeWidth={1.75} />, key: 'common.nav.settings' };
 
 function DueDot({ n }: { n: number }) {
   if (!n) return null;
@@ -77,34 +77,30 @@ export function TabBar({ route }: { route: Route }) {
   const t = useT();
   const due = useStore(selectDueTargets()).length;
   const active = ROUTE_GROUP[route.name];
-  const tabs: NavItem[] = [...ITEMS, SETTINGS_ITEM];
+  const tabs: NavItem[] = ITEMS;
 
   return (
-    <nav
-      className="no-print"
-      aria-label={t('common.app.name')}
-      style={{
-        position: 'fixed', insetInline: 0, bottom: 0, zIndex: 30,
-        background: 'var(--paper-2)', borderTop: '1px solid var(--hairline)',
-        display: 'grid', gridTemplateColumns: `repeat(${tabs.length}, 1fr)`,
-        paddingBottom: 'env(safe-area-inset-bottom)',
-      }}
-    >
+    <nav className="no-print product-tabbar" aria-label={t('common.app.name')}>
       {tabs.map((it) => (
         <a
           key={it.group} href={href(it.route)}
           aria-current={active === it.group ? 'page' : undefined}
-          style={{
-            position: 'relative', height: 'var(--tabbar-h)', display: 'grid', justifyItems: 'center',
-            alignContent: 'center', gap: 2, textDecoration: 'none',
-            color: active === it.group ? 'var(--ink)' : 'var(--ink-3)',
-          }}
+          className="product-tab"
         >
           {it.icon}
-          <span className="t-micro" style={{ fontSize: '.625rem' }}>{t(it.key)}</span>
+          <span>{t(it.key)}</span>
           {it.group === 'today' && <DueDot n={due} />}
         </a>
       ))}
     </nav>
+  );
+}
+
+export function SettingsOrb() {
+  const t = useT();
+  return (
+    <a className="settings-orb no-print" href={href('settings')} aria-label={t('common.nav.settings')}>
+      <Settings size={19} strokeWidth={2} />
+    </a>
   );
 }

@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host",
-    "build": "tsc --noEmit && node verify-samples.mjs && node verify-i18n.mjs && node verify-markdown.mjs && node verify-never-accuse.mjs && node verify-pwa.mjs && node verify-divergence.mjs && node verify-verdict-render.mjs && node verify-divergence-hero.mjs && node verify-viva-mobile.mjs && node verify-class-print-register.mjs && node verify-fonts-cn.mjs && node verify-css-vars.mjs && node verify-router.mjs && node verify-student-links.mjs && node verify-csv.mjs && node verify-v4-shell.mjs && node verify-v4-run.mjs && node verify-v4-followups.mjs && node verify-followup-logic.mjs && node verify-v4-teacher.mjs && node verify-v4-return.mjs && vite build && node build-sw.mjs",
+    "build": "tsc --noEmit && node verify-samples.mjs && node verify-i18n.mjs && node verify-markdown.mjs && node verify-never-accuse.mjs && node verify-pwa.mjs && node verify-divergence.mjs && node verify-verdict-render.mjs && node verify-divergence-hero.mjs && node verify-viva-mobile.mjs && node verify-class-print-register.mjs && node verify-fonts-cn.mjs && node verify-css-vars.mjs && node verify-router.mjs && node verify-student-links.mjs && node verify-csv.mjs && node verify-v4-shell.mjs && node verify-v4-run.mjs && node verify-v4-followups.mjs && node verify-followup-logic.mjs && node verify-v4-teacher.mjs && node verify-v4-return.mjs && node verify-v5-product.mjs && vite build && node build-sw.mjs",
     "preview": "vite preview --host",
     "start": "vite --port 4173 --host",
     "verify:samples": "node verify-samples.mjs",
@@ -25,7 +25,8 @@
     "verify:fonts-cn": "node verify-fonts-cn.mjs",
     "verify:markdown": "node verify-markdown.mjs",
     "verify:never-accuse": "node verify-never-accuse.mjs",
-    "verify:v4": "node verify-css-vars.mjs && node verify-router.mjs && node verify-student-links.mjs && node verify-csv.mjs && node verify-v4-shell.mjs && node verify-v4-run.mjs && node verify-v4-followups.mjs && node verify-followup-logic.mjs && node verify-v4-teacher.mjs && node verify-v4-return.mjs"
+    "verify:v4": "node verify-css-vars.mjs && node verify-router.mjs && node verify-student-links.mjs && node verify-csv.mjs && node verify-v4-shell.mjs && node verify-v4-run.mjs && node verify-v4-followups.mjs && node verify-followup-logic.mjs && node verify-v4-teacher.mjs && node verify-v4-return.mjs",
+    "verify:product": "node verify-v5-product.mjs"
   },
   "dependencies": {
     "html-to-image": "^1.11.13",

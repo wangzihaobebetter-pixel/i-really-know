@@ -17,16 +17,16 @@
    ============================================================ */
 
 :root {
-  /* --- Surfaces: warm paper by default, ink/white document sheet --- */
-  --app: #FAF8F3;
-  --app-2: #F1ECE2;
-  --sheet: #FFFFFF;
-  --hairline: #E4E0D6;
+  /* --- Surfaces: a sunlit studio by default; the document remains calm. --- */
+  --app: #F6F3EA;
+  --app-2: #ECE7DB;
+  --sheet: #FFFEFA;
+  --hairline: #D8D2C3;
 
   /* --- Ink --- */
-  --ink: #1A1917;
-  --ink-2: #4A4843;
-  --ink-3: #6E6B64;
+  --ink: #20201D;
+  --ink-2: #55524D;
+  --ink-3: #726F68;
 
   /* --- Axis A · demonstrated (FABLE §6 vocabulary) ---
      held / half-held / slipped / held-more-than-you-thought.
@@ -45,10 +45,13 @@
   /* --- Non-state ---
      The blue action colour drops; the primary button is INK on paper.
      Accent (terracotta) is for brand, links, active tab, reading bar, focus. */
-  --accent: #A8461A;
-  --accent-ink: #FFFFFF;
-  --primary-button-bg: #1A1917;
-  --primary-button-ink: #FAF8F3;
+  --accent: #FF5A36;
+  --accent-text: #C93C20;
+  --accent-ink: #20201D;
+  --counter-accent: #3B63F3;
+  --warm-signal: #F5C84B;
+  --primary-button-bg: #20201D;
+  --primary-button-ink: #FFFEFA;
   --danger: #B3261E;
 
   /* --- Pre-composited opaque washes (focused span only) --- */
@@ -59,13 +62,13 @@
   --underclaimed-wash: var(--held-more-wash);
   --over-wash: #F1DEE8;
   --under-wash: #DDE9EC;
-  --accent-wash: #F2E2D7;
+  --accent-wash: #FBE2D8;
   --danger-wash: #F4E1DF;
 
   /* Compatibility aliases used by the shared primitives and v4 surfaces. */
   --paper: var(--app);
   --paper-2: var(--app-2);
-  --action: var(--accent);
+  --action: var(--accent-text);
   --action-ink: var(--accent-ink);
   --action-wash: var(--accent-wash);
   --defended: var(--held);
@@ -80,12 +83,12 @@
   --glass-solid: #FBFBFA;
   --glass-hairline: rgba(26, 25, 23, 0.10);
 
-  --focus-ring: #A8461A;
+  --focus-ring: #3B63F3;
 
   /* --- Radius (FABLE §6 kept) --- */
   --r-mark: 3px;
-  --r-control: 12px;
-  --r-sheet: 16px;
+  --r-control: 16px;
+  --r-sheet: 22px;
   --r-pill: 999px;
 
   /* --- Space scale (FABLE §6 kept) --- */
@@ -101,26 +104,25 @@
 
   /* --- Layout --- */
   --rail-w: 72px;
-  --tabbar-h: 56px;
+  --tabbar-h: 68px;
   --col-read: 720px;
   --col-data: 1120px;
   --col-doc: 760px;
   --gutter: 24px;
   --gutter-mobile: 16px;
 
-  /* --- Type families (FABLE §6) ---
-     Display: Fraunces, then bilingual serif fallback for Chinese.
-     The serif is the bilingual choice: Songti / Noto Serif SC exists
-     wherever PingFang does. */
-  --font-display: "Fraunces Variable", "Songti SC", "Noto Serif SC", "Songti TC", "STSong", serif;
+  /* --- Type families ---
+     Product sentences use the self-hosted rounded Latin face; Chinese falls
+     immediately to native PingFang/Noto Sans so both languages are intentional. */
+  --font-display: "Nunito Variable", "PingFang SC", "Noto Sans SC", "Inter Variable", system-ui, sans-serif;
   --font-ui: "Inter Variable", system-ui, -apple-system, "PingFang SC", "Noto Sans SC", sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 
   /* --- Type scale (FABLE §6) ---
      The hero is gone. The page carries itself in SENTENCES, not numerals.
      Nothing larger than the sentence anywhere in the student app. */
-  --t-sentence: clamp(1.625rem, 5.5vw, 2rem);
-  --t-question: 1.5rem;
+  --t-sentence: clamp(1.75rem, 7vw, 2.125rem);
+  --t-question: 1.6875rem;
   --t-title: 1.25rem;
   --t-body: 1.0625rem;
   --t-body-lg: var(--t-body);
@@ -174,6 +176,7 @@
   --under: #5FC8E8;
 
   --accent: #E58B5B;
+  --accent-text: #FF9B70;
   --accent-ink: #17181B;
   --primary-button-bg: #ECEAE4;
   --primary-button-ink: #17181B;

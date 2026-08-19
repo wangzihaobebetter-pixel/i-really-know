@@ -1,29 +1,6 @@
-/* ============================================================
-   Self-hosted variable fonts (FABLE-REDESIGN.md §6).
-
-   Display: Fraunces Variable (OFL). Self-hosted, Latin subset ≈ 57 KB,
-   opsz 9-144, weight 400-600. The face named in tokens.css is now actually
-   loaded from disk — v2's `--font-display: "Fraunces"` declared a typeface
-   nobody had ever seen.
-
-   Chinese display falls to the SYSTEM SERIF ("Songti SC", "Noto Serif SC")
-   that ships wherever PingFang does. A Latin rounded display face cannot
-   carry a Chinese UI; Songti SC is the bilingual choice FABLE §6 makes.
-
-   No runtime dependency on Google Fonts: the PWA must work offline, and
-   the product's non-negotiable is "no backend, key stays in the browser".
-   ============================================================ */
-
-@font-face {
-  font-family: "Fraunces Variable";
-  font-style: normal;
-  font-display: swap;
-  font-weight: 400 600;
-  src: url("../assets/fonts/fraunces-latin-wght-normal.woff2") format("woff2-variations");
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
-    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2074, U+20AC, U+2122, U+2191,
-    U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-}
+/* Self-hosted, offline-safe product fonts.
+   Nunito carries short brand/product sentences in Latin; Chinese uses the
+   native PingFang/Noto Sans stack. Inter remains the neutral reading face. */
 
 @font-face {
   font-family: "Inter Variable";
@@ -45,4 +22,15 @@
   unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF,
     U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020,
     U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: "Nunito Variable";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 200 1000;
+  src: url("../assets/fonts/nunito-latin-wght-normal.woff2") format("woff2-variations");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2074, U+20AC, U+2122, U+2191,
+    U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
