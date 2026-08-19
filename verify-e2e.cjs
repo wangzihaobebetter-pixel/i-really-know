@@ -1,158 +1,255 @@
-/**
- * End-to-end check against the real build in a real browser.
- * Drives the keyless path a first-time user actually takes: open a sample,
- * answer every probe, self-grade, finish, and land on the Painted Page.
- * Fails loudly on console errors, so a runtime crash cannot pass as "built ok".
- */
 const puppeteer = require('puppeteer-core');
+const { mkdtempSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } = require('node:fs');
+const { join } = require('node:path');
+const { tmpdir } = require('node:os');
 
-const CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
-const BASE = process.env.BASE_URL || 'http://localhost:4177';
+const BASE = process.env.APP_URL || 'http://127.0.0.1:4173/';
+const CHROME = process.env.CHROME_PATH || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
+const ARTIFACTS = join(process.cwd(), 'artifacts', 'e2e');
+const DOWNLOADS = join(ARTIFACTS, 'downloads');
+rmSync(DOWNLOADS, { recursive: true, force: true });
+mkdirSync(DOWNLOADS, { recursive: true });
+const profile = mkdtempSync(join(tmpdir(), 'irk-e2e-'));
+const failures = [];
+const evidence = {};
 
-const problems = [];
-const note = (m) => console.log('  ' + m);
+function check(condition, message) {
+  if (!condition) failures.push(message);
+}
+async function text(page) { return page.evaluate(() => document.body.innerText); }
+async function clickText(page, needle, selector = 'button') {
+  const clicked = await page.evaluate(({ needle, selector }) => {
+    const target = [...document.querySelectorAll(selector)].find((el) => (el.textContent || '').trim().includes(needle));
+    if (!target) return false;
+    target.click();
+    return true;
+  }, { needle, selector });
+  if (!clicked) throw new Error(`Could not find ${selector} containing “${needle}”`);
+}
+async function setNth(page, selector, index, value) {
+  await page.evaluate(({ selector, index, value }) => {
+    const input = document.querySelectorAll(selector)[index];
+    if (!input) throw new Error(`Missing ${selector}[${index}]`);
+    const proto = input instanceof HTMLTextAreaElement ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype;
+    Object.getOwnPropertyDescriptor(proto, 'value').set.call(input, value);
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    input.dispatchEvent(new Event('change', { bubbles: true }));
+  }, { selector, index, value });
+}
+async function shot(page, name, fullPage = false) {
+  // Let the 160–260 ms page/sheet transitions settle before taking visual evidence.
+  await new Promise((resolve) => setTimeout(resolve, 320));
+  const path = join(ARTIFACTS, name);
+  await page.screenshot({ path, fullPage });
+  return path;
+}
+async function forceEnglish(page) {
+  await page.evaluateOnNewDocument(() => {
+    Object.defineProperty(navigator, 'language', { get: () => 'en-US' });
+    Object.defineProperty(navigator, 'languages', { get: () => ['en-US'] });
+  });
+}
+async function waitForDownload(previous, timeoutMs = 20000) {
+  const start = Date.now();
+  while (Date.now() - start < timeoutMs) {
+    const files = readdirSync(DOWNLOADS).filter((name) => name.endsWith('.pdf') && !name.endsWith('.crdownload'));
+    const fresh = files.find((name) => !previous.includes(name));
+    if (fresh) return join(DOWNLOADS, fresh);
+    await new Promise((resolve) => setTimeout(resolve, 200));
+  }
+  return null;
+}
 
 (async () => {
   const browser = await puppeteer.launch({
     executablePath: CHROME,
-    headless: 'new',
-    args: ['--no-sandbox', '--disable-gpu'],
+    headless: true,
+    userDataDir: profile,
+    args: ['--no-first-run', '--no-default-browser-check', '--disable-background-networking', '--lang=en-US'],
   });
+  const pageErrors = [];
+  try {
+    const page = await browser.newPage();
+    await forceEnglish(page);
+    page.on('pageerror', (error) => pageErrors.push(error.message));
+    await page.setViewport({ width: 390, height: 844, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
+    await page.goto(BASE, { waitUntil: 'networkidle0', timeout: 30000 });
+    await page.waitForSelector('[data-testid="welcome-screen"]', { timeout: 10000 });
+    await page.evaluate(() => document.fonts.ready);
+    evidence.welcome = await shot(page, '01-mobile-welcome.png');
+    const welcomeText = await text(page);
+    check(welcomeText.includes('Bring one sentence that matters'), 'cold start did not state the value proposition');
 
-  const page = await browser.newPage();
-  const consoleErrors = [];
-  page.on('console', (m) => { if (m.type() === 'error') consoleErrors.push(m.text()); });
-  page.on('pageerror', (e) => consoleErrors.push('pageerror: ' + e.message));
+    for (let i = 0; i < 5; i += 1) {
+      await clickText(page, 'Next');
+      await new Promise((resolve) => setTimeout(resolve, 80));
+    }
+    check((await text(page)).includes('Try the question yourself'), '60-second welcome did not end in one real question');
+    await clickText(page, 'Try the question yourself');
+    await page.waitForSelector('[data-testid="run-screen"]', { timeout: 10000 });
+    evidence.question = await shot(page, '02-mobile-question.png');
+    check((await page.$$('.run-question')).length === 1, 'run-through showed more or fewer than one question');
 
-  /* ---------- 1. desktop home ---------- */
-  await page.setViewport({ width: 1280, height: 900, deviceScaleFactor: 2 });
-  await page.goto(BASE, { waitUntil: 'networkidle0' });
-  await page.waitForSelector('.sample-card', { timeout: 15000 });
+    const answer = 'I would check whether the stated association survives adjustment for the variables that could affect both exposure and outcome, then compare the estimate and uncertainty rather than treating the raw pattern as causal.';
+    await page.type('#run-answer', answer);
+    await clickText(page, 'That is my answer');
+    await page.waitForSelector('.selfgrade-opts');
+    evidence.selfgrade = await shot(page, '03-mobile-selfgrade.png');
+    check(!(await text(page)).includes('Held — more than you thought'), 'judgment appeared before self-grade');
+    await clickText(page, 'Not sure');
+    await page.waitForSelector('.manualgrade-opts');
+    await clickText(page, 'It held');
+    await page.waitForSelector('.run-feedback-line');
+    check((await page.$$('.run-feedback-line')).length === 1, 'answer did not receive exactly one immediate line');
+    await clickText(page, 'See what held');
+    await page.waitForSelector('[data-testid="result-screen"]');
+    evidence.result = await shot(page, '04-mobile-result.png');
+    const resultText = await text(page);
+    check(resultText.includes('Held — more than you thought'), 'underclaim was not given first-class result treatment');
+    check(resultText.includes('Your page, marked'), 'marked original page is missing');
+    check(resultText.includes('That is enough for this time'), 'result has no structural ending');
 
-  const sampleCount = await page.$$eval('.sample-card', (n) => n.length);
-  note(`home: ${sampleCount} sample cards`);
-  if (sampleCount < 8) problems.push(`expected 8 sample cards, saw ${sampleCount}`);
+    const headings = await page.$$eval('.result-group-heading', (els) => els.map((el) => getComputedStyle(el).fontSize));
+    check(headings.length >= 1 && new Set(headings).size === 1, 'result outcome headings are not equal-size');
+    await page.evaluate(() => window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'instant' }));
+    evidence.resultEnd = await shot(page, '04b-mobile-result-ending.png');
 
-  const h1 = await page.$eval('h1', (n) => n.textContent.trim());
-  note(`home h1: "${h1}"`);
-  // An unresolved i18n key renders as the key itself — that shipped once already.
-  const rawKeys = await page.evaluate(() =>
-    (document.body.innerText.match(/\b(?:common|home|import|viva|map|record|queue|packs|settings|class)\.[a-zA-Z.]+\b/g) || []).slice(0, 5));
-  if (rawKeys.length) problems.push('unresolved i18n keys on screen: ' + rawKeys.join(', '));
-  await page.screenshot({ path: 'shot-home-desktop.png' });
+    await clickText(page, 'Finish here');
+    await page.waitForSelector('[data-testid="today-screen"]');
+    evidence.today = await shot(page, '05-mobile-today.png');
 
-  /* ---------- 2. run a whole sample, keyless ---------- */
-  /* v3's home leads with the live demo, so the first sample card is reached
-     below it. Clicking a card still opens that sample's viva. */
-  await page.click('.sample-card');
-  await page.waitForSelector('#viva-answer', { timeout: 15000 });
+    // No-key submission of a real artifact from this repository: it must end in a transparent choice, not a dead end.
+    await page.evaluate(() => { location.hash = '#/bring'; });
+    await page.waitForSelector('[data-testid="bring-screen"]');
+    await page.$$eval('.occasion-chip', (buttons) => buttons[buttons.length - 1].click());
+    await setNth(page, 'input.control:not([type="date"])', 0, 'Pull request code review');
+    const tomorrow = new Date(Date.now() + 86_400_000).toISOString().slice(0, 10);
+    await setNth(page, 'input[type="date"]', 0, tomorrow);
+    await setNth(page, 'input.control:not([type="date"])', 1, 'Spaced-return scheduler');
+    const realSource = readFileSync(join(process.cwd(), 'src/lib/session-ops.ts'), 'utf8');
+    const realMaterial = realSource.slice(realSource.indexOf('export function gradeTarget'), realSource.indexOf('export function probeForTarget'));
+    check(realMaterial.includes('gradeTarget'), 'QA could not load the real repository artifact');
+    await setNth(page, 'textarea', 0, realMaterial);
+    await clickText(page, 'Read it');
+    await page.waitForSelector('[role="dialog"]');
+    evidence.noKey = await shot(page, '06-mobile-no-key-choice.png');
+    const noKeyText = await text(page);
+    check(noKeyText.includes('The key stays on this device'), 'no-key choice did not explain local key handling');
+    check(noKeyText.includes('Use the real example instead'), 'no-key choice had no value-preserving path');
 
-  let probesDone = 0;
-  for (let i = 0; i < 12; i++) {
-    const onViva = await page.$('#viva-answer');
-    if (!onViva) break;
+    // Teacher half at desktop width, including CSV, self-contained link and both PDFs.
+    const teacher = await browser.newPage();
+    await forceEnglish(teacher);
+    teacher.on('pageerror', (error) => pageErrors.push(error.message));
+    await teacher.setViewport({ width: 1440, height: 1000, deviceScaleFactor: 1 });
+    const client = await teacher.createCDPSession();
+    await client.send('Page.setDownloadBehavior', { behavior: 'allow', downloadPath: DOWNLOADS });
+    await teacher.goto(`${BASE}#/class`, { waitUntil: 'networkidle0', timeout: 30000 });
+    await clickText(teacher, 'Load a demo cohort');
+    await teacher.waitForFunction(() => location.hash.startsWith('#/class/') && document.querySelectorAll('.teacher-row').length >= 3);
+    evidence.cohort = await shot(teacher, '07-desktop-cohort.png', true);
+    check((await teacher.$$('nav')).length === 0, 'student navigation leaked into the independent instructor workspace');
 
-    /* P3 §6: the probe question is the largest text on screen and has its own
-       class now. In v2 it was body text and this selector was `.t-body-lg`. */
-    const question = await page.$eval('.probe-question', (n) => n.textContent.trim().slice(0, 60));
-    await page.type('#viva-answer', 'A deliberately mediocre answer that restates the submission without giving a mechanism.');
+    const csvPath = join(profile, 'qa-roster.csv');
+    writeFileSync(csvPath, `name,student_id,title,material\nQA Student,QA-001,Real scheduler code,"${realMaterial.replaceAll('"', '""').replaceAll('\n', ' ')}"\n`);
+    const csvInput = await teacher.$('input[type="file"]');
+    await csvInput.uploadFile(csvPath);
+    await teacher.waitForFunction(() => document.querySelectorAll('.teacher-row').length >= 4);
+    check((await teacher.$$('.teacher-row')).length >= 4, 'CSV roster import did not add the submission');
 
-    // commit
-    const committed = await clickByText(page, 'button', ['Commit answer', '提交回答']);
-    if (!committed) { problems.push(`probe ${i + 1}: no commit button`); break; }
+    await clickText(teacher, 'Copy student link');
+    await teacher.waitForSelector('.share-fallback textarea');
+    const shareLink = await teacher.$eval('.share-fallback textarea', (el) => el.value);
+    check(shareLink.includes('#/join/'), 'student link is not self-contained');
+    const joinPage = await browser.newPage();
+    await forceEnglish(joinPage);
+    await joinPage.setViewport({ width: 390, height: 844, isMobile: true, hasTouch: true });
+    await joinPage.goto(shareLink, { waitUntil: 'networkidle0', timeout: 30000 });
+    await joinPage.waitForSelector('[data-testid="join-screen"]');
+    check((await text(joinPage)).includes('These questions are ready for you'), 'student share link did not open independently');
+    await joinPage.waitForFunction(() => {
+      const button = [...document.querySelectorAll('button')].find((item) => item.textContent.includes('Save it here and begin'));
+      return button && !button.disabled;
+    });
+    await clickText(joinPage, 'Save it here and begin');
+    await joinPage.waitForSelector('[data-testid="run-screen"]');
+    const returnedCount = (await joinPage.$$('.run-progress span')).length;
+    for (let index = 0; index < returnedCount; index += 1) {
+      await joinPage.waitForSelector('#run-answer');
+      await joinPage.type('#run-answer', `Student answer for returned question ${index + 1}: I would name the choice, trace the mechanism, and check the boundary case.`);
+      await clickText(joinPage, 'That is my answer');
+      await joinPage.waitForSelector('.selfgrade-opts');
+      await clickText(joinPage, 'Not sure');
+      await joinPage.waitForSelector('.manualgrade-opts');
+      await clickText(joinPage, index === 0 ? 'It slipped' : 'It held');
+      await joinPage.waitForSelector('.run-feedback-line');
+      await clickText(joinPage, index === returnedCount - 1 ? 'See what held' : 'Next question');
+    }
+    await joinPage.waitForSelector('[data-testid="result-screen"]');
+    await clickText(joinPage, 'Copy the result link');
+    await joinPage.waitForSelector('.return-result-card textarea');
+    const returnLink = await joinPage.$eval('.return-result-card textarea', (element) => element.value);
+    check(returnLink.includes('#/return/'), 'student result did not create a self-contained return link');
+    await joinPage.close();
 
-    // self-grade must appear BEFORE any score — that ordering is the product
-    await page.waitForSelector('.selfgrade-opt', { timeout: 5000 }).catch(() => {});
-    /* The self-grade must appear BEFORE any verdict is on screen. Reversing
-       that ordering destroys the only signal this product has, so assert it
-       rather than trusting it. */
-    const verdictLeaked = await page.evaluate(() =>
-      !!document.querySelector('.divergence-numeral, .mark'));
-    if (verdictLeaked) problems.push(`probe ${i + 1}: a verdict was on screen before the self-grade`);
-    const graded = await clickByText(page, 'button', ['Shaky', '有点虚']);
-    if (!graded) { problems.push(`probe ${i + 1}: no self-grade control`); break; }
+    await teacher.goto(returnLink, { waitUntil: 'networkidle0', timeout: 30000 });
+    await teacher.waitForSelector('[data-testid="return-screen"]');
+    await teacher.waitForFunction(() => document.querySelectorAll('.toast').length === 0, { timeout: 8000 });
+    evidence.returnImport = await shot(teacher, '08-desktop-return-import.png');
+    await clickText(teacher, 'Import as unverified evidence and review');
+    await teacher.waitForSelector('article.doc');
+    check((await text(teacher)).includes('Student answer for returned question 1'), 'returned student words did not reach the local evidence sheet');
+    check((await text(teacher)).includes('not authenticated'), 'returned result was not clearly marked unverified');
+    await clickText(teacher, 'I reviewed these answers');
+    await teacher.waitForFunction(() => document.body.innerText.includes('Returned link reviewed by the instructor'));
+    await teacher.waitForFunction(() => document.querySelectorAll('.toast').length === 0, { timeout: 8000 });
+    check((await teacher.$$('article.doc input, article.doc textarea, article.doc select')).length === 0, 'evidence document contains live form controls');
+    evidence.sheet = await shot(teacher, '09-desktop-evidence-sheet.png');
+    const beforeSheet = readdirSync(DOWNLOADS);
+    await clickText(teacher, 'Download PDF');
+    const sheetPdf = await waitForDownload(beforeSheet);
+    check(Boolean(sheetPdf), 'evidence sheet PDF did not download');
+    evidence.sheetPdf = sheetPdf;
 
-    probesDone++;
-    note(`probe ${probesDone} answered — "${question}…"`);
+    await teacher.evaluate(() => { location.hash = '#/class/cohort_demo'; });
+    await teacher.waitForSelector('.teacher-list');
+    await clickText(teacher, 'Reteach map');
+    await teacher.waitForSelector('article.doc');
+    check((await teacher.$$('article.doc input, article.doc textarea, article.doc select')).length === 0, 'reteach document contains live form controls');
+    evidence.reteach = await shot(teacher, '10-desktop-reteach-map.png');
+    check((await teacher.$$('.concept-row')).length > 0, 'reteach map did not aggregate concepts');
+    const beforeMap = readdirSync(DOWNLOADS);
+    await clickText(teacher, 'Download PDF');
+    const mapPdf = await waitForDownload(beforeMap);
+    check(Boolean(mapPdf), 'reteach-map PDF did not download');
+    evidence.mapPdf = mapPdf;
 
-    const advanced = await clickByText(page, 'button', ['Next probe', 'Finish and see the map', '下一题', '结束，看地图']);
-    if (!advanced) { problems.push(`probe ${i + 1}: no next/finish button`); break; }
-    await new Promise((r) => setTimeout(r, 350));
+    // Full emitted-asset precache: visit once, then load an unvisited lazy route offline.
+    const offline = await browser.newPage();
+    await forceEnglish(offline);
+    await offline.setViewport({ width: 390, height: 844, isMobile: true, hasTouch: true });
+    await offline.goto(`${BASE}#/welcome`, { waitUntil: 'networkidle0', timeout: 30000 });
+    const cacheKeys = await offline.evaluate(async () => { await navigator.serviceWorker.ready; return caches.keys(); });
+    check(cacheKeys.some((key) => /^irk-[a-f0-9]{12}$/.test(key)), 'versioned service worker cache did not install');
+    await offline.setOfflineMode(true);
+    await offline.evaluate(() => { location.hash = '#/settings'; });
+    await offline.waitForFunction(() => document.body.innerText.includes('Settings'), { timeout: 10000 });
+    evidence.offline = await shot(offline, '11-mobile-offline-settings.png');
+    check((await text(offline)).includes('Model provider'), 'an unvisited lazy route did not work offline');
+    await offline.setOfflineMode(false);
+
+    evidence.viewport = await page.evaluate(() => ({ innerWidth, outerWidth, scrollWidth: document.documentElement.scrollWidth }));
+    check(evidence.viewport.innerWidth === 390, `mobile viewport measured ${evidence.viewport.innerWidth}, not 390`);
+    check(evidence.viewport.scrollWidth <= 390, `mobile flow overflowed horizontally to ${evidence.viewport.scrollWidth}px`);
+    check(pageErrors.length === 0, `browser page errors: ${pageErrors.join(' | ')}`);
+  } catch (error) {
+    failures.push(error.stack || error.message);
+  } finally {
+    await browser.close();
+    rmSync(profile, { recursive: true, force: true });
   }
 
-  if (probesDone < 5) problems.push(`only completed ${probesDone} probes, expected 5`);
-
-  /* ---------- 3. the Painted Page ---------- */
-  await page.waitForSelector('.anchored', { timeout: 15000 }).catch(() => {
-    problems.push('map: .anchored (Painted Page) never rendered');
-  });
-  const spans = await page.$$eval('.anchor-span', (n) => n.length).catch(() => 0);
-  const marked = await page.$$eval('.anchor-span', (ns) =>
-    ns.filter((n) => /anchor-(defended|partial|undefended|underclaimed)/.test(n.className)).length).catch(() => 0);
-  note(`map: ${spans} anchored spans, ${marked} carrying a verdict colour`);
-  if (spans === 0) problems.push('map: no anchor spans — anchors did not place');
-  if (marked === 0) problems.push('map: anchors placed but none coloured by verdict');
-
-  /* v3's headline is a signed span count, not an unsigned 0-100 index, and
-     there must be exactly ONE hero on the screen (P3 §2.1). */
-  const heroes = await page.$$eval('.t-hero', (ns) => ns.map((n) => n.textContent.trim())).catch(() => []);
-  note(`map: ${heroes.length} hero numeral(s) ${JSON.stringify(heroes)}`);
-  if (heroes.length === 0) problems.push('map: no divergence hero rendered');
-  if (heroes.length > 1) problems.push(`map: ${heroes.length} hero numerals on one screen — the rule is one`);
-  if (heroes[0] && !/^[+−-]?\d+$/.test(heroes[0].replace(/\s/g, ''))) {
-    problems.push(`map: hero is not a signed count ("${heroes[0]}")`);
-  }
-
-  const claim = await page.$eval('.divergence-claim', (n) => n.textContent.trim()).catch(() => '');
-  note(`map: claim line "${claim}"`);
-  if (!claim) problems.push('map: the divergence claim line is missing — the number would be a bare score');
-
-  await page.screenshot({ path: 'shot-map-desktop.png', fullPage: false });
-
-  /* ---------- 4. mobile ---------- */
-  await page.setViewport({ width: 390, height: 844, deviceScaleFactor: 3 });
-  await page.goto(BASE, { waitUntil: 'networkidle0' });
-  await page.waitForSelector('.sample-card', { timeout: 15000 });
-  const overflow = await page.evaluate(() =>
-    document.documentElement.scrollWidth - document.documentElement.clientWidth);
-  note(`mobile 390px: horizontal overflow ${overflow}px`);
-  if (overflow > 2) problems.push(`mobile: ${overflow}px of horizontal overflow`);
-  await page.screenshot({ path: 'shot-home-mobile.png' });
-
-  /* ---------- 5. every route renders ---------- */
-  for (const hash of ['#/packs', '#/packs/med', '#/queue', '#/record', '#/settings', '#/class', '#/nope']) {
-    await page.goto(BASE + '/' + hash, { waitUntil: 'networkidle0' });
-    await new Promise((r) => setTimeout(r, 250));
-    const text = await page.evaluate(() => document.body.innerText.trim().length);
-    note(`route ${hash}: ${text} chars rendered`);
-    const floor = hash === '#/nope' ? 20 : 40;
-    if (text < floor) problems.push(`route ${hash} rendered almost nothing (${text} chars)`);
-  }
-
-  await browser.close();
-
-  const realErrors = consoleErrors.filter((e) => !/favicon|manifest|sw\.js/i.test(e));
-  if (realErrors.length) {
-    problems.push(`${realErrors.length} console errors`);
-    realErrors.slice(0, 6).forEach((e) => console.log('  console: ' + e.slice(0, 160)));
-  }
-
-  console.log('');
-  if (problems.length) {
-    console.error(`verify-e2e FAILED (${problems.length}):`);
-    problems.forEach((p) => console.error('  ✗ ' + p));
-    process.exit(1);
-  }
-  console.log('verify-e2e: all checks passed ✓');
-})().catch((e) => { console.error('verify-e2e crashed:', e.message); process.exit(1); });
-
-async function clickByText(page, selector, texts) {
-  const handle = await page.evaluateHandle((sel, wanted) => {
-    const nodes = [...document.querySelectorAll(sel)];
-    return nodes.find((n) => wanted.some((w) => n.textContent.trim() === w)) || null;
-  }, selector, texts);
-  const el = handle.asElement();
-  if (!el) return false;
-  await el.click();
-  return true;
-}
+  console.log(JSON.stringify({ base: BASE, evidence, failures }, null, 2));
+  if (failures.length) process.exit(1);
+  console.log('verify-e2e: cold start, no-key real artifact, 390px flow, teacher docs and offline install passed ✓');
+})();

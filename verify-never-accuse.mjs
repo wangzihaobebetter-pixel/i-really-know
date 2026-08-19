@@ -51,6 +51,7 @@ const STUDENT_SCREENS = [
   'src/screens/today/TodayScreen.tsx',
   'src/screens/viva/VivaScreen.tsx',
   'src/screens/followups/FollowupsScreen.tsx',
+  'src/screens/result/ResultScreen.tsx',
 ];
 
 /** Student-surface denylist. Each term maps to a reason. */
@@ -128,10 +129,10 @@ const OUTCOME_KEYS = [
   'sheet.noAnswer', 'sheet.declined', 'sheet.notClaimed',
 ];
 const ALLOWED_OUTCOMES = new Set([
-  'Defended', 'Partly defended', 'Could not defend', 'Defended, not claimed',
-  'Not examined', 'No response recorded', 'Declined to answer', 'Not claimed',
-  '辩护住了', '辩护了一半', '没能辩护', '辩护住了但没认', '未考',
-  '未记录到回答', '学生表示无法回答', '未自认掌握',
+  'Held', 'Half-held', 'Slipped', 'Steadier than you expected', 'Not asked yet',
+  'No response recorded', 'Declined to answer', 'No self-read recorded',
+  '站住了', '站了一半', '没站住', '比你预想的更稳', '还没问到',
+  '未记录到回答', '学生表示无法回答', '未记录自我判断',
 ]);
 
 /**

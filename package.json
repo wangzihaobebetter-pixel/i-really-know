@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host",
-    "build": "tsc --noEmit && node verify-samples.mjs && node verify-i18n.mjs && node verify-markdown.mjs && node verify-never-accuse.mjs && node verify-pwa.mjs && node verify-divergence.mjs && node verify-verdict-render.mjs && node verify-divergence-hero.mjs && node verify-viva-mobile.mjs && node verify-class-print-register.mjs && node verify-fonts-cn.mjs && vite build",
+    "build": "tsc --noEmit && node verify-samples.mjs && node verify-i18n.mjs && node verify-markdown.mjs && node verify-never-accuse.mjs && node verify-pwa.mjs && node verify-divergence.mjs && node verify-verdict-render.mjs && node verify-divergence-hero.mjs && node verify-viva-mobile.mjs && node verify-class-print-register.mjs && node verify-fonts-cn.mjs && node verify-css-vars.mjs && node verify-router.mjs && node verify-student-links.mjs && node verify-csv.mjs && node verify-v4-shell.mjs && node verify-v4-run.mjs && node verify-v4-followups.mjs && node verify-followup-logic.mjs && node verify-v4-teacher.mjs && node verify-v4-return.mjs && vite build && node build-sw.mjs",
     "preview": "vite preview --host",
     "start": "vite --port 4173 --host",
     "verify:samples": "node verify-samples.mjs",
@@ -16,7 +16,7 @@
     "verify:keyed": "node verify-keyed.cjs",
     "mock": "node mock-provider.mjs",
     "verify:errors": "node verify-errors.cjs",
-    "verify:all": "npm run build && npm run verify:e2e && npm run verify:keyed && npm run verify:errors && npm run verify:contrast",
+    "verify:all": "npm run build && node verify-all.cjs",
     "verify:divergence": "node verify-divergence.mjs",
     "verify:verdict-render": "node verify-verdict-render.mjs",
     "verify:divergence-hero": "node verify-divergence-hero.mjs",
@@ -24,10 +24,13 @@
     "verify:class-print-register": "node verify-class-print-register.mjs",
     "verify:fonts-cn": "node verify-fonts-cn.mjs",
     "verify:markdown": "node verify-markdown.mjs",
-    "verify:never-accuse": "node verify-never-accuse.mjs"
+    "verify:never-accuse": "node verify-never-accuse.mjs",
+    "verify:v4": "node verify-css-vars.mjs && node verify-router.mjs && node verify-student-links.mjs && node verify-csv.mjs && node verify-v4-shell.mjs && node verify-v4-run.mjs && node verify-v4-followups.mjs && node verify-followup-logic.mjs && node verify-v4-teacher.mjs && node verify-v4-return.mjs"
   },
   "dependencies": {
+    "html-to-image": "^1.11.13",
     "idb-keyval": "^6.2.1",
+    "jspdf": "^4.2.1",
     "lucide-react": "^0.451.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",

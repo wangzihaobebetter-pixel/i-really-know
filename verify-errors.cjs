@@ -1,122 +1,127 @@
-/**
- * Error-path check in a real browser: rejected key, rate-limit backoff, and a
- * model that returns prose instead of JSON. These branches existed in the
- * client from the start and had never once executed.
- */
+/** Real-browser error paths for the v4 settings → bring → visible-read flow. */
 const puppeteer = require('puppeteer-core');
-const CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
-const BASE = process.env.BASE_URL || 'http://localhost:4177';
-const MOCK = process.env.MOCK_URL || 'http://localhost:4188/v1';
+const { mkdtempSync, readFileSync, rmSync } = require('node:fs');
+const { join } = require('node:path');
+const { tmpdir } = require('node:os');
 
-const problems = [];
-const note = (m) => console.log('  ' + m);
+const CHROME = process.env.CHROME_PATH || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
+const APP = process.env.APP_URL || process.env.BASE_URL || 'http://127.0.0.1:4173/';
+const MOCK_ROOT = process.env.MOCK_ROOT || 'http://127.0.0.1:4199';
+const MOCK_API = `${MOCK_ROOT}/v1`;
+const profile = mkdtempSync(join(tmpdir(), 'irk-errors-'));
+const failures = [];
 
-const setField = (page, names, val) => page.evaluate((ns, v) => {
-  const f = [...document.querySelectorAll('.field')]
-    .find((x) => ns.includes(x.querySelector('.field-label')?.textContent.trim()));
-  const el = f?.querySelector('input, textarea');
-  if (!el) return false;
-  const proto = el.tagName === 'TEXTAREA' ? HTMLTextAreaElement : HTMLInputElement;
-  Object.getOwnPropertyDescriptor(proto.prototype, 'value').set.call(el, v);
-  el.dispatchEvent(new Event('input', { bubbles: true }));
-  return true;
-}, names, val);
-
-const click = async (page, texts) => {
-  const h = await page.evaluateHandle((w) => {
-    const n = [...document.querySelectorAll('button')];
-    return n.find((x) => w.some((t) => x.textContent.trim() === t)) || null;
-  }, texts);
-  const el = h.asElement();
-  if (el) await el.click();
-  return !!el;
-};
-
+async function setNth(page, selector, index, value) {
+  await page.evaluate(({ selector, index, value }) => {
+    const input = document.querySelectorAll(selector)[index];
+    if (!input) throw new Error(`Missing ${selector}[${index}]`);
+    const proto = input instanceof HTMLTextAreaElement ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype;
+    Object.getOwnPropertyDescriptor(proto, 'value').set.call(input, value);
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+  }, { selector, index, value });
+}
+async function clickText(page, text) {
+  const ok = await page.evaluate((text) => {
+    const button = [...document.querySelectorAll('button')].find((item) => (item.textContent || '').includes(text));
+    if (!button) return false;
+    button.click();
+    return true;
+  }, text);
+  if (!ok) throw new Error(`Missing button “${text}”`);
+}
+async function configure(page, model) {
+  await page.goto(`${APP}#/settings`, { waitUntil: 'networkidle0' });
+  const selects = await page.$$('select');
+  await selects[0].select('custom');
+  await setNth(page, 'input.control', 0, MOCK_API);
+  await setNth(page, 'input.control', 1, '[REDACTED]');
+  await setNth(page, 'input.control', 2, model);
+}
 async function testConnection(page, model) {
-  await page.goto(`${BASE}/#/settings`, { waitUntil: 'networkidle0' });
-  await page.waitForSelector('.field', { timeout: 10000 });
-  await setField(page, ['API base URL', 'API 地址'], MOCK);
-  await setField(page, ['API key'], 'sk-mock');
-  await setField(page, ['Model', '模型'], model);
-  await new Promise((r) => setTimeout(r, 300));
-  await click(page, ['Test connection', '测试连接']);
-  await page.waitForFunction(
-    () => /Connection works|连接正常|rejected|拒绝|rate-limiting|限流|could not read|读不了|went wrong/.test(document.body.innerText),
-    { timeout: 30000 },
-  ).catch(() => {});
-  return page.evaluate(() => document.body.innerText);
+  await configure(page, model);
+  const started = Date.now();
+  await clickText(page, 'Test connection');
+  await page.waitForFunction(() => /Connection works|rejected the API key|rate-limiting|could not reach/.test(document.body.innerText), { timeout: 30000 });
+  return { text: await page.evaluate(() => document.body.innerText), elapsed: Date.now() - started };
 }
 
 (async () => {
-  const browser = await puppeteer.launch({ executablePath: CHROME, headless: 'new', args: ['--no-sandbox'] });
-  const page = await browser.newPage();
-  await page.setViewport({ width: 1280, height: 900 });
-  await fetch(MOCK.replace(/\/v1$/, '') + '/__reset');
+  const browser = await puppeteer.launch({ executablePath: CHROME, headless: true, userDataDir: profile, args: ['--lang=en-US'] });
+  try {
+    const page = await browser.newPage();
+    await page.evaluateOnNewDocument(() => Object.defineProperty(navigator, 'language', { get: () => 'en-US' }));
+    await page.setViewport({ width: 390, height: 844, isMobile: true, hasTouch: true });
 
-  /* 1. rejected key → a readable message, not a raw 401, and no retry storm */
-  let text = await testConnection(page, 'fault-401');
-  const authOk = /rejected this API key|拒绝了这个 API key/.test(text);
-  note(`401: ${authOk ? 'shows the "check your key" message' : 'DID NOT surface an auth message'}`);
-  if (!authOk) problems.push('a 401 did not produce the readable auth message');
-  let seen = await (await fetch(MOCK.replace(/\/v1$/, '') + '/__seen')).json();
-  const authCalls = seen.length;
-  note(`401: client made ${authCalls} request(s) — auth errors must not be retried`);
-  if (authCalls > 1) problems.push(`auth error was retried ${authCalls} times; it should fail fast`);
+    // 401: readable, no retry.
+    await fetch(`${MOCK_ROOT}/__reset`);
+    let run = await testConnection(page, 'fault-401');
+    if (!run.text.includes('rejected the API key')) failures.push('401 did not show the readable key message');
+    let seen = await (await fetch(`${MOCK_ROOT}/__seen`)).json();
+    if (seen.length !== 1) failures.push(`401 made ${seen.length} requests instead of failing once`);
 
-  /* 2. 429 on the first call → backoff, then success */
-  await fetch(MOCK.replace(/\/v1$/, '') + '/__reset');
-  const t0 = Date.now();
-  text = await testConnection(page, 'fault-429-once');
-  const elapsed = Date.now() - t0;
-  const rateOk = /Connection works|连接正常/.test(text);
-  seen = await (await fetch(MOCK.replace(/\/v1$/, '') + '/__seen')).json();
-  note(`429: recovered=${rateOk}, ${seen.length} requests, ${elapsed}ms elapsed`);
-  if (!rateOk) problems.push('a single 429 was not recovered by the backoff');
-  if (seen.length < 2) problems.push('no retry was attempted after the 429');
-  if (elapsed < 900) problems.push(`retry happened after only ${elapsed}ms — backoff did not wait`);
+    // 429: one delayed retry, then success.
+    await fetch(`${MOCK_ROOT}/__reset`);
+    run = await testConnection(page, 'fault-429-once');
+    seen = await (await fetch(`${MOCK_ROOT}/__seen`)).json();
+    if (!run.text.includes('Connection works.')) failures.push('429 did not recover');
+    if (seen.length !== 2) failures.push(`429 path made ${seen.length} requests instead of two`);
+    if (run.elapsed < 900) failures.push(`429 retry waited only ${run.elapsed}ms`);
 
-  /* 3. prose instead of JSON → one repair round-trip, then success */
-  await fetch(MOCK.replace(/\/v1$/, '') + '/__reset');
-  await page.goto(`${BASE}/#/import`, { waitUntil: 'networkidle0' });
-  await page.waitForSelector('textarea', { timeout: 10000 });
-  await page.evaluate(() => {
-    const el = document.querySelector('textarea');
-    Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value').set.call(el,
-      'def solve(xs):\n    total = 0\n    for x in xs:\n        total += x * 2\n    return total\n\n'
-      + 'I used a running total instead of building a list because the input can be very large and '
-      + 'I only need the sum. The complexity is O(n) time and O(1) space. I did not handle the case '
-      + 'where xs contains None, because the caller validates that upstream.');
-    el.dispatchEvent(new Event('input', { bubbles: true }));
-  });
-  await new Promise((r) => setTimeout(r, 400));
-  await page.goto(`${BASE}/#/settings`, { waitUntil: 'networkidle0' });
-  await setField(page, ['Model', '模型'], 'fault-badjson');
-  await new Promise((r) => setTimeout(r, 300));
-  await page.goto(`${BASE}/#/import`, { waitUntil: 'networkidle0' });
-  await page.waitForSelector('textarea', { timeout: 10000 });
-  await page.evaluate(() => {
-    const el = document.querySelector('textarea');
-    Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value').set.call(el,
-      'def solve(xs):\n    total = 0\n    for x in xs:\n        total += x * 2\n    return total\n\n'
-      + 'I used a running total instead of building a list because the input can be very large. '
-      + 'Time complexity is O(n) and space is O(1). I did not handle None entries in xs.');
-    el.dispatchEvent(new Event('input', { bubbles: true }));
-  });
-  await new Promise((r) => setTimeout(r, 400));
-  await click(page, ['Begin examination', '开始口试']);
-  const recovered = await page.waitForSelector('#viva-answer', { timeout: 30000 }).then(() => true).catch(() => false);
-  seen = await (await fetch(MOCK.replace(/\/v1$/, '') + '/__seen')).json();
-  const kinds = seen.reduce((a, s) => ({ ...a, [s.kind]: (a[s.kind] || 0) + 1 }), {});
-  note(`bad JSON: recovered=${recovered}, calls=${JSON.stringify(kinds)}`);
-  if (!recovered) problems.push('a non-JSON response was not recovered by the repair round-trip');
-  if (!kinds.REPAIR) problems.push('the repair call was never made');
+    // Malformed generation: exactly one repair call, then the visible read room becomes ready.
+    await fetch(`${MOCK_ROOT}/__reset`);
+    await configure(page, 'fault-badjson');
+    await page.evaluate(() => { location.hash = '#/bring'; });
+    await page.waitForSelector('[data-testid="bring-screen"]');
+    await setNth(page, 'input[type="date"]', 0, new Date(Date.now() + 86_400_000).toISOString().slice(0, 10));
+    await setNth(page, 'input.control:not([type="date"])', 0, 'Error-path scheduler review');
+    const source = readFileSync(join(process.cwd(), 'src/lib/session-ops.ts'), 'utf8');
+    await setNth(page, 'textarea', 0, source.slice(source.indexOf('export function targetsFromSession'), source.indexOf('export function probeForTarget')));
+    await clickText(page, 'Read it');
+    await page.waitForSelector('[data-testid="read-screen"]');
+    await page.waitForFunction(() => document.body.innerText.includes('Start the questions'), { timeout: 30000 });
+    seen = await (await fetch(`${MOCK_ROOT}/__seen`)).json();
+    const kinds = seen.map((item) => item.kind);
+    if (kinds.filter((kind) => kind === 'GENERATE').length !== 1) failures.push('malformed path did not make exactly one generation call');
+    if (kinds.filter((kind) => kind === 'REPAIR').length !== 1) failures.push('malformed path did not make exactly one repair call');
+    if (!seen.every((item) => item.violations.length === 0)) failures.push('error-path provider contract violation');
 
-  await browser.close();
-  console.log('');
-  if (problems.length) {
-    console.error(`verify-errors FAILED (${problems.length}):`);
-    problems.forEach((p) => console.error('  ✗ ' + p));
+    // Scoring failure: the answer remains, but Next/Finish stays blocked until an explicit manual mark.
+    await fetch(`${MOCK_ROOT}/__reset`);
+    await configure(page, 'fault-score-500');
+    await page.evaluate(() => { location.hash = '#/bring'; });
+    await page.waitForSelector('[data-testid="bring-screen"]');
+    await setNth(page, 'input[type="date"]', 0, new Date(Date.now() + 86_400_000).toISOString().slice(0, 10));
+    await setNth(page, 'input.control:not([type="date"])', 0, 'Scoring recovery review');
+    await setNth(page, 'textarea', 0, source.slice(source.indexOf('export function targetsFromSession'), source.indexOf('export function probeForTarget')));
+    await clickText(page, 'Read it');
+    await page.waitForSelector('[data-testid="read-screen"]');
+    await page.waitForFunction(() => document.body.innerText.includes('Start the questions'), { timeout: 30000 });
+    await clickText(page, 'Start the questions');
+    await page.waitForSelector('[data-testid="run-screen"]');
+    await setNth(page, 'textarea', 0, 'The schedule changes because a missed answer resets the target to the one-day stage.');
+    await clickText(page, 'That is my answer');
+    await clickText(page, 'Holds');
+    await page.waitForFunction(() => document.body.innerText.includes('Mark it myself and continue'), { timeout: 30000 });
+    let bodyText = await page.evaluate(() => document.body.innerText);
+    if (bodyText.includes('Next question') || bodyText.includes('See what held')) failures.push('scoring failure exposed Next/Finish before manual marking');
+    await clickText(page, 'Mark it myself and continue');
+    await clickText(page, 'It half-held');
+    await page.waitForFunction(() => document.body.innerText.includes('Next question') || document.body.innerText.includes('See what held'));
+    await page.click('.run-details summary');
+    bodyText = await page.evaluate(() => document.body.innerText);
+    if (!bodyText.includes('The schedule changes because')) failures.push('scoring failure lost the committed answer');
+    const scoreSeen = await (await fetch(`${MOCK_ROOT}/__seen`)).json();
+
+    console.log(JSON.stringify({ authRequests: 1, rateRequests: 2, malformedKinds: kinds, scoreRequests: scoreSeen.filter((item) => item.kind === 'SCORE').length, failures }, null, 2));
+  } catch (error) {
+    failures.push(error.stack || error.message);
+  } finally {
+    await browser.close();
+    rmSync(profile, { recursive: true, force: true });
+  }
+  if (failures.length) {
+    failures.forEach((failure) => console.error('  ✗ ' + failure));
     process.exit(1);
   }
-  console.log('verify-errors: auth, rate-limit and malformed-JSON paths all behave ✓');
-})().catch((e) => { console.error('verify-errors crashed:', e.message); process.exit(1); });
+  console.log('verify-errors: 401, 429, malformed JSON, and score-failure manual recovery passed in the v4 flow ✓');
+})();

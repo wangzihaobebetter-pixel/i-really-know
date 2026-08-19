@@ -4,11 +4,11 @@
  * Two rules this file is under, both of them checkable:
  *
  *  1. NEVER use the kill-list terms on student surfaces. The kill-list comes
- *     from §1.1 of the redesign: "How wrong were you about yourself?", "You
- *     fell over on these. They came back.", home.queueLede, the 72% detection
- *     number, the N=426 figure on any student surface, "borrowed", "illusion",
- *     "not yours", "wrong about yourself". These are the strings the owner
- *     rejected as 「极度粗糙」 / 「极度冰冷和粗糙」.
+ *     from §1.1 of the redesign: the taunt headline (map.divergenceTitle), the
+ *     debt-collector queue lede (home.queueLede), the detection percentage,
+ *     the cohort figure on any student surface, and the retired words
+ *     "borrowed", "illusion", "not yours", "wrong about yourself". These are
+ *     the strings the owner rejected as 「极度粗糙」 / 「极度冰冷和粗糙」.
  *  2. Every `sheet.*` and `reteach.*` key is INSTRUCTOR SURFACE and is checked
  *     by `verify-never-accuse` against the closed instructor verb list. The
  *     student vocabulary (held / half-held / slipped / held — more than you
@@ -36,7 +36,7 @@ registerStrings('home', {
     ctaOwnV3: 'Bring my own work',
     demoNext: 'Show another',
     queueTitle: 'Follow-ups',
-    queueLede: 'Your examiner, before the examiner.',
+    queueLede: 'Come back to these — asked differently this time.',
     queueOne: '{n} is due back',
     queueMany: '{n} are due back',
     queueOpen: 'Come back to them',
@@ -60,7 +60,7 @@ registerStrings('home', {
     ctaOwnV3: '带一份我自己的作业',
     demoNext: '换一份',
     queueTitle: '回头再问',
-    queueLede: '你的考官，在考官之前。',
+    queueLede: '回头看看这些——这次换个问法。',
     queueOne: '有 {n} 处该回头问',
     queueMany: '有 {n} 处该回头问',
     queueOpen: '回头看看',
@@ -87,7 +87,7 @@ registerStrings('map', {
     'divergenceLine.unknown': 'Nothing is graded on both tracks yet.',
     divergenceUnit: 'spans',
     claimedOnly: 'You said you could hold {claimed} of the {scored} you graded.',
-    claimedPending: 'The other half of the number is an examiner’s. Nothing here guesses it for you.',
+    claimedPending: 'The examiner’s half of that count is theirs to give. Connect a model and the next run-through earns it.',
     noDivergence: 'Your read on yourself needs both tracks: your own estimate, and an examiner’s. This run has your estimate only.',
     noDivergenceAction: 'Connect a model',
 
@@ -143,7 +143,7 @@ registerStrings('map', {
     'divergenceLine.unknown': '还没有哪一处同时有你的自评和考官的判断。',
     divergenceUnit: '处',
     claimedOnly: '你评过的 {scored} 处里，你说有 {claimed} 处能站住。',
-    claimedPending: '这个数的另一半，得由考官给。这里不会替你猜。',
+    claimedPending: '这个数的一半，要考官来给。连一个模型，下一遍就能拿到。',
     noDivergence: '你对自己的判断需要两条线：你自己的估计，和考官的判断。这次只有你的估计。',
     noDivergenceAction: '去连一个模型',
 
@@ -291,10 +291,10 @@ registerStrings('sheet', {
     date: 'Date',
     duration: 'Session length',
     methodTitle: 'What this document reports',
-    method: 'This sheet records whether the student could defend specified passages of a submitted artifact under follow-up questioning. It does not report authorship, originality, or the presence of any writing assistance, and it makes no claim about who wrote the work. The student’s own estimate of each passage was recorded before any examiner judgement was shown to them.',
-    calibrationTitle: 'Self-estimate against demonstrated',
-    calibrationLine: 'Claimed {claimed} of {total}. Defended {defended} of {total}. Signed difference {delta}.',
-    calibrationFootnote: 'Baseline for comparison: in Knof et al. 2024 (BMC Medical Education, N=426, oral anatomy examination with self-assessment collected before results), 18.5% of students were accurate, 35.5% claimed more than they demonstrated, and 46.0% demonstrated more than they claimed.',
+    method: 'This sheet records whether the student could account for the choices and claims in specified passages under follow-up questioning. It does not report authorship, originality, or the presence of any writing assistance, and it makes no claim about who wrote the work. The student’s own read of each passage was recorded before any examiner judgement was shown to them.',
+    calibrationTitle: 'The student’s read, recorded first',
+    calibrationLine: 'The student expected {claimed} of {total} passages to hold. {defended} held under follow-up.',
+    calibrationFootnote: 'Context only: in Knof et al. 2024 (BMC Medical Education, N=426, oral anatomy examination with self-assessment collected before results), 18.5% of students were accurate, 35.5% expected more than they later demonstrated, and 46.0% demonstrated more than they expected.',
     rowsTitle: 'Passage by passage',
     rowSpan: 'The passage, in the student’s own words',
     rowProbe: 'Question asked',
@@ -303,7 +303,7 @@ registerStrings('sheet', {
     rowClaim: 'Student’s own estimate, recorded first',
     noAnswer: 'No response recorded',
     declined: 'Declined to answer',
-    notClaimed: 'Not claimed',
+    notClaimed: 'No self-read recorded',
     keyTitle: 'Key',
     signTitle: 'Reviewed and published by',
     signName: 'Instructor',
@@ -321,10 +321,10 @@ registerStrings('sheet', {
     date: '日期',
     duration: '本次时长',
     methodTitle: '这份文件报告的是什么',
-    method: '这份材料记录的是：在追问之下，学生能否为其提交作业中指定的若干段落作出辩护。它不报告作者身份、原创性，也不报告是否使用过任何写作辅助，更不对"这是谁写的"作出任何判断。学生对每一段的自我估计，是在向其展示任何考官判断之前记录的。',
-    calibrationTitle: '自我估计与实际辩护的对照',
-    calibrationLine: '自认能辩护 {claimed} / {total} 处。实际辩护下来 {defended} / {total} 处。带符号差值 {delta}。',
-    calibrationFootnote: '对照基线：Knof 等 2024（BMC Medical Education，N=426，口试解剖学考试，成绩公布前收集自评）中，18.5% 的学生判断准确，35.5% 自认高于实际表现，46.0% 实际表现高于自认。',
+    method: '这份材料记录的是：在追问之下，学生能否讲清楚其提交作业中指定段落里的选择和说法。它不报告作者身份、原创性，也不报告是否使用过任何写作辅助，更不对“这是谁写的”作出任何判断。学生对每一段的自我判断，是在向其展示任何考官判断之前记录的。',
+    calibrationTitle: '学生先说出的自我判断',
+    calibrationLine: '学生原先觉得 {total} 处中有 {claimed} 处站得住；追问后有 {defended} 处站住。',
+    calibrationFootnote: '仅供理解背景：Knof 等 2024（BMC Medical Education，N=426，口试解剖学考试，成绩公布前收集自评）中，18.5% 的学生判断准确，35.5% 预期高于后来表现，46.0% 后来表现高于原先预期。',
     rowsTitle: '逐段记录',
     rowSpan: '该段落，学生原话',
     rowProbe: '所提问题',
@@ -333,7 +333,7 @@ registerStrings('sheet', {
     rowClaim: '学生本人的估计（先于结果记录）',
     noAnswer: '未记录到回答',
     declined: '学生表示无法回答',
-    notClaimed: '未自认掌握',
+    notClaimed: '未记录自我判断',
     keyTitle: '图例',
     signTitle: '复核并发布',
     signName: '任课教师',
@@ -348,9 +348,9 @@ registerStrings('sheet', {
 registerStrings('reteach', {
   en: {
     title: 'Reteach map',
-    subtitle: 'What nobody in this class could defend, ranked. This is a map of what to teach next, not of who to grade down.',
-    panel1: 'Passages ranked by how many students could not defend them',
-    countLine: '{n} of {m} students could not defend this',
+    subtitle: 'The concepts that did not hold under follow-up. This changes what to teach next, never who to grade down.',
+    panel1: 'Concepts to return to in class',
+    countLine: '{n} of {m} submissions did not hold at this concept',
     expand: 'Show the passages',
     collapse: 'Hide the passages',
     deidentified: 'Names are hidden by default.',
@@ -367,9 +367,9 @@ registerStrings('reteach', {
   },
   'zh-CN': {
     title: '重讲地图',
-    subtitle: '这个班没人能辩护下来的地方，按人数排序。这是一张"接下来该讲什么"的地图，不是一张"该扣谁分"的表。',
-    panel1: '按"多少学生没能辩护"排序的段落',
-    countLine: '{m} 人中有 {n} 人没能辩护这一处',
+    subtitle: '追问后仍没站住的概念。这张图改变“接下来教什么”，永远不决定“给谁扣分”。',
+    panel1: '课堂上需要回头讲的概念',
+    countLine: '{m} 份作业中有 {n} 份在这个概念上没站住',
     expand: '展开这些段落',
     collapse: '收起',
     deidentified: '默认隐去姓名。',

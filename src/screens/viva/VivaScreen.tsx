@@ -1,408 +1,335 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useStore, selectSession, selectHasKey } from '../../store';
-import { getPack } from '../../packs';
-import { useRoute, useNavigate } from '../../router';
-import { useT, useLang } from '../../i18n';
-import { Mic, Square } from 'lucide-react';
-import {
-  AnchoredText, Button, Callout, Mark, ScorePip, SegmentStrip,
-  Sheet, Spinner, Tag, TimerRing,
-} from '../../ui';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { ArrowLeft, ArrowRight, ChevronDown, Mic, Square } from 'lucide-react';
+import { selectHasKey, selectSession, useStore } from '../../store';
+import { useNavigate, useRoute } from '../../router';
+import { useLang, useT } from '../../i18n';
+import { AnchoredText, Button, Mark, Sheet, Spinner } from '../../ui';
 import { verdictOf } from '../../lib/analysis';
+import { describeError, score as scoreProbe } from '../../lib/llm';
 import { isSpeechSupported, startDictation, type Dictation } from '../../lib/speech';
-import { score as scoreProbe, describeError } from '../../lib/llm';
-import { MED_SAFETY_NOTE } from '../../packs';
-import type { SelfGrade, Verdict } from '../../types';
+import type { Score, SelfGrade } from '../../types';
 
-type Phase = 'answering' | 'selfgrade' | 'revealed';
+type Phase = 'answering' | 'blankplan' | 'selfgrade' | 'scoring' | 'manualgrade' | 'revealed';
 
 export default function VivaScreen() {
   const t = useT();
   const lang = useLang();
   const nav = useNavigate();
-  const route = useRoute();
-  const sessionId = route.params.sessionId;
-
+  const sessionId = useRoute().params.sessionId;
   const session = useStore(selectSession(sessionId));
-  const settings = useStore((s) => s.settings);
+  const settings = useStore((state) => state.settings);
   const hasKey = useStore(selectHasKey);
-  const updateProbe = useStore((s) => s.updateProbe);
-  const updateSession = useStore((s) => s.updateSession);
-  const finalizeSession = useStore((s) => s.finalizeSession);
+  const updateSession = useStore((state) => state.updateSession);
+  const updateProbe = useStore((state) => state.updateProbe);
+  const finalizeSession = useStore((state) => state.finalizeSession);
 
   const [index, setIndex] = useState(0);
-  const [answer, setAnswer] = useState('');
   const [phase, setPhase] = useState<Phase>('answering');
-  const [remaining, setRemaining] = useState(0);
-  const [paused, setPaused] = useState(false);
-  const [scoring, setScoring] = useState(false);
-  const [scoreError, setScoreError] = useState<string | null>(null);
-  const [recording, setRecording] = useState(false);
-  const [voiceError, setVoiceError] = useState<string | null>(null);
+  const [answer, setAnswer] = useState('');
+  const [blankPlan, setBlankPlan] = useState('');
   const [sourceOpen, setSourceOpen] = useState(false);
+  const [scoreError, setScoreError] = useState('');
+  const [recording, setRecording] = useState(false);
+  const [voiceError, setVoiceError] = useState('');
   const dictation = useRef<Dictation | null>(null);
   const usedVoice = useRef(false);
-  const speechAvailable = isSpeechSupported();
-  const voiceOn = settings.voiceEnabled && speechAvailable;
-  const startedAt = useRef<number>(Date.now());
-  const answerRef = useRef<HTMLTextAreaElement>(null);
+  const startedAt = useRef(Date.now());
 
   const probe = session?.probes[index];
+  const committed = session?.probes[index];
   const total = session?.probes.length ?? 0;
+  const speechAvailable = isSpeechSupported();
 
-  /* Resume where the user left off. */
   useEffect(() => {
     if (!session) return;
-    const firstOpen = session.probes.findIndex((p) => !p.committedAt);
-    setIndex(firstOpen < 0 ? Math.max(0, session.probes.length - 1) : firstOpen);
+    const open = session.probes.findIndex((item) => !item.committedAt || !item.selfGrade || (!item.ai && item.manualScore === undefined));
+    setIndex(open < 0 ? Math.max(0, session.probes.length - 1) : open);
     if (session.status === 'ready') updateSession(session.id, { status: 'running' });
+  // Session id is the resume boundary.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session?.id]);
 
-  /* Reset per-probe state. */
   useEffect(() => {
     if (!probe) return;
     setAnswer(probe.answer ?? '');
-    setPhase(probe.committedAt ? (probe.selfGrade ? 'revealed' : 'selfgrade') : 'answering');
-    setRemaining(probe.timerSec);
-    setScoreError(null);
+    setBlankPlan('');
+    setScoreError('');
+    setVoiceError('');
+    setSourceOpen(false);
+    usedVoice.current = probe.answerMode === 'voice';
     startedAt.current = Date.now();
-    answerRef.current?.focus();
+    if (!probe.committedAt) setPhase('answering');
+    else if (!probe.selfGrade) setPhase('selfgrade');
+    else if (probe.ai || probe.manualScore !== undefined) setPhase('revealed');
+    else setPhase('manualgrade');
   }, [probe?.id]);
 
-  /* Timer — advisory only, it never forces a commit. */
-  useEffect(() => {
-    if (!settings.timersEnabled || phase !== 'answering' || paused || !probe) return;
-    const h = window.setInterval(() => setRemaining((r) => Math.max(0, r - 1)), 1000);
-    return () => window.clearInterval(h);
-  }, [phase, paused, probe?.id, settings.timersEnabled]);
+  useEffect(() => () => {
+    dictation.current?.stop();
+    dictation.current = null;
+  }, []);
 
-  /* Stop dictation whenever the probe changes or the screen unmounts —
-     a recogniser left running across a navigation keeps the mic open. */
-  useEffect(() => () => { dictation.current?.stop(); dictation.current = null; }, []);
-  useEffect(() => {
+  const source = useMemo(() => {
+    if (!session || !probe) return null;
+    if (probe.anchor.placed && probe.anchor.start !== undefined) {
+      const from = Math.max(0, probe.anchor.start - 220);
+      const to = Math.min(session.material.length, (probe.anchor.end ?? probe.anchor.start) + 260);
+      const prefix = from > 0 ? '…' : '';
+      const text = `${prefix}${session.material.slice(from, to)}${to < session.material.length ? '…' : ''}`;
+      const shift = prefix.length - from;
+      return {
+        text,
+        anchor: {
+          id: probe.id,
+          start: probe.anchor.start + shift,
+          end: (probe.anchor.end ?? probe.anchor.start) + shift,
+          verdict: 'none' as const,
+        },
+      };
+    }
+    return { text: probe.anchor.quote, anchor: undefined };
+  }, [session, probe]);
+
+  function stopVoice() {
     dictation.current?.stop();
     dictation.current = null;
     setRecording(false);
-    setVoiceError(null);
-    setSourceOpen(false);
-  }, [probe?.id]);
+  }
 
-  function toggleDictation() {
-    if (recording) {
-      dictation.current?.stop();
-      dictation.current = null;
-      setRecording(false);
-      return;
-    }
-    setVoiceError(null);
+  function toggleVoice() {
+    if (recording) { stopVoice(); return; }
+    setVoiceError('');
     const prefix = answer.trim() ? `${answer.trim()} ` : '';
-    const d = startDictation(
+    const next = startDictation(
       lang,
       (text) => setAnswer(prefix + text),
       (kind) => { setVoiceError(kind); setRecording(false); },
       () => setRecording(false),
     );
-    if (!d) { setVoiceError('unsupported'); return; }
-    dictation.current = d;
+    if (!next) { setVoiceError('unsupported'); return; }
+    dictation.current = next;
     usedVoice.current = true;
     setRecording(true);
   }
 
-  const commit = useCallback(() => {
+  function saveAnswer(value: string) {
     if (!session || !probe) return;
-    const timeUsedSec = Math.round((Date.now() - startedAt.current) / 1000);
-    dictation.current?.stop();
-    dictation.current = null;
-    setRecording(false);
+    stopVoice();
     updateProbe(session.id, probe.id, {
-      answer,
+      answer: value.trim(),
       answerMode: usedVoice.current ? 'voice' : 'text',
       committedAt: Date.now(),
-      timeUsedSec,
+      timeUsedSec: Math.max(0, Math.round((Date.now() - startedAt.current) / 1000)),
     });
+    setAnswer(value.trim());
     setPhase('selfgrade');
-  }, [session?.id, probe?.id, answer, updateProbe]);
+  }
 
-  const applySelfGrade = useCallback(async (grade: SelfGrade) => {
+  function commitAnswer() {
+    if (answer.trim()) saveAnswer(answer);
+  }
+
+  function commitBlankPlan() {
+    if (!blankPlan.trim()) return;
+    const value = lang === 'zh-CN'
+      ? `这题我会卡住。我会这样弄清楚：${blankPlan.trim()}`
+      : `I would blank on this. I would find out by: ${blankPlan.trim()}`;
+    saveAnswer(value);
+  }
+
+  async function chooseSelfGrade(grade: SelfGrade) {
     if (!session || !probe) return;
     updateProbe(session.id, probe.id, { selfGrade: grade });
-    setPhase('revealed');
-
-    if (!hasKey || !settings.scoreOnCommit || !answer.trim()) return;
-    setScoring(true);
-    setScoreError(null);
-    try {
-      const ai = await scoreProbe(settings, session, probe, answer, false);
-      updateProbe(session.id, probe.id, { ai });
-    } catch (err) {
-      setScoreError(describeError(err));
-    } finally {
-      setScoring(false);
+    if (!hasKey || !answer.trim()) {
+      setPhase('manualgrade');
+      return;
     }
-  }, [session?.id, probe?.id, answer, hasKey, settings, updateProbe]);
+    setPhase('scoring');
+    setScoreError('');
+    try {
+      const ai = await scoreProbe(
+        settings,
+        { ...session, probes: session.probes.map((item) => item.id === probe.id ? { ...item, answer, selfGrade: grade } : item) },
+        { ...probe, answer, selfGrade: grade },
+        answer,
+        usedVoice.current,
+      );
+      updateProbe(session.id, probe.id, { ai });
+      setPhase('revealed');
+    } catch (error) {
+      setScoreError(describeError(error));
+      setPhase('revealed');
+    }
+  }
+
+  function manualMark(score: Score) {
+    if (!session || !probe) return;
+    updateProbe(session.id, probe.id, { manualScore: score });
+    setScoreError('');
+    setPhase('revealed');
+  }
 
   function next() {
     if (!session) return;
-    if (index + 1 < total) {
-      setIndex(index + 1);
+    if (index < total - 1) {
+      setIndex((value) => value + 1);
       return;
     }
     finalizeSession(session.id);
-    nav('map', { sessionId: session.id });
+    nav('result', { sessionId: session.id });
   }
 
-  if (!session) {
+  if (!session || !probe || !committed) {
     return (
       <div className="col-read stack">
-        <Callout tone="danger" title={t('common.state.notfound.title')}>
-          <Button size="sm" onClick={() => nav('home')}>{t('common.state.notfound.action')}</Button>
-        </Callout>
-      </div>
-    );
-  }
-  if (!probe) {
-    return (
-      <div className="col-read stack">
-        <Sheet elevation={1}><Spinner label={t('common.state.loading')} /></Sheet>
+        <p>{t('common.state.notfound.title')}</p>
+        <Button onClick={() => nav('today')}>{t('common.state.notfound.action')}</Button>
       </div>
     );
   }
 
-  const pack = getPack(session.packId);
-  const dimension = pack.dimensions.find((d) => d.id === probe.dimensionId);
-  const states: Verdict[] = session.probes.map((p) => (p.committedAt ? verdictOf(p) : 'none'));
-  const committed = session.probes[index];
+  const verdict = verdictOf(committed);
+  const hasJudgment = Boolean(committed.ai) || committed.manualScore !== undefined;
+  const oneLine = committed.ai?.verdictLine
+    ?? (committed.manualScore !== undefined
+      ? t(committed.manualScore >= 2 ? 'run4.oneLineHeld' : committed.manualScore === 1 ? 'run4.oneLineHalf' : 'run4.oneLineSlipped')
+      : scoreError || t('run4.scoreFailed'));
+  const showQuestion = phase === 'answering' || phase === 'blankplan';
 
   return (
-    <div className="col-read stack viva">
-      <div className="stack-tight">
-        <div className="row-between wrap" style={{ gap: 'var(--space-3)' }}>
-          <div className="row" style={{ gap: 'var(--space-3)' }}>
-            <button type="button" className="viva-leave" onClick={() => nav('home')}>
-              {t('viva.leave')}
-            </button>
-            <span className="t-small ink-3">{t('viva.of', { n: index + 1, total })}</span>
-          </div>
-          <div className="row" style={{ gap: 'var(--space-3)' }}>
-            <Tag mono>{pack.shortName}</Tag>
-            {dimension && <Tag>{dimension.label}</Tag>}
-            <Tag mono tone="neutral">{probe.kind}</Tag>
-          </div>
-        </div>
-        <SegmentStrip total={total} current={index} states={states} />
+    <main className="run-screen page-enter" data-testid="run-screen">
+      <header className="run-topbar">
+        <button type="button" className="run-leave" onClick={() => nav('today')}><ArrowLeft size={16} />{t('run4.leave')}</button>
+        <span className="t-small ink-3">{t('run4.questionOf', { n: index + 1, total })}</span>
+      </header>
+
+      <div className="run-progress" aria-label={t('run4.questionOf', { n: index + 1, total })}>
+        {session.probes.map((item, itemIndex) => (
+          <span key={item.id} data-state={itemIndex < index ? 'done' : itemIndex === index ? 'current' : 'later'} />
+        ))}
       </div>
 
-      {/* P3 §6: the source span sits ABOVE the question, clamped to a few
-          lines with a "show more" affordance — it is context, not the task. */}
-      {probe.anchor.placed && probe.anchor.start !== undefined && (() => {
-        const from = Math.max(0, probe.anchor.start! - 260);
-        const to = Math.min(session.material.length, (probe.anchor.end ?? probe.anchor.start!) + 260);
-        return (
-          <Sheet elevation={0} padding="var(--space-4) var(--space-5)">
-            <span className="t-micro ink-3">{t('viva.sourceLabel')}</span>
-            <div className="probe-source" data-expanded={sourceOpen}>
-              <AnchoredText
-                text={`${from > 0 ? '…' : ''}${session.material.slice(from, to)}${to < session.material.length ? '…' : ''}`}
-                mode={session.materialKind === 'code' ? 'code' : 'prose'}
-                anchors={[{
-                  id: probe.id,
-                  start: (from > 0 ? 1 : 0) + probe.anchor.start! - from,
-                  end: (from > 0 ? 1 : 0) + (probe.anchor.end ?? probe.anchor.start!) - from,
-                  verdict: 'none',
-                }]}
-              />
-            </div>
-            <button type="button" className="viva-leave" onClick={() => setSourceOpen((o) => !o)}>
-              {sourceOpen ? t('viva.sourceLess') : t('viva.sourceMore')}
-            </button>
-          </Sheet>
-        );
-      })()}
-      {!probe.anchor.placed && probe.anchor.quote && (
-        <Sheet elevation={0} padding="var(--space-4) var(--space-5)">
-          <span className="t-micro ink-3">{t('viva.sourceLabel')}</span>
-          <p className="t-mono t-small">{probe.anchor.quote}</p>
-        </Sheet>
+      {showQuestion && (
+        <div className="run-question-stack stack">
+          {source?.text && (
+            <Sheet elevation={0} className="run-source" padding="var(--space-4) var(--space-5)">
+              <span className="t-micro ink-3">{t('run4.source')}</span>
+              <div data-expanded={sourceOpen}>
+                {source.anchor
+                  ? <AnchoredText text={source.text} mode={session.materialKind === 'code' ? 'code' : 'prose'} anchors={[source.anchor]} />
+                  : <p className="t-small ink-2">{source.text}</p>}
+              </div>
+              {source.text.length > 260 && <button type="button" className="text-action" onClick={() => setSourceOpen((value) => !value)}>{sourceOpen ? t('run4.sourceLess') : t('run4.sourceMore')}</button>}
+            </Sheet>
+          )}
+          <p className="run-question t-question measure">{probe.question}</p>
+        </div>
       )}
 
-      {/* THE PROBE. P3 §6: the probe question is the largest text on screen,
-          and never in the display face — corpus 04 §C1: "never set a probe in
-          a personality font — it reads as the app being cute about something
-          serious". In v2 the largest element on this screen was an empty
-          textarea and the question was body text in a card. */}
-      <Sheet elevation={1}>
-        <div className="stack-tight">
-          <div className="row-between">
-            <span className="t-micro ink-3">{t('viva.probeLabel')}</span>
-            {settings.timersEnabled && phase === 'answering' && (
-              <button
-                type="button"
-                className="timer-btn"
-                onClick={() => setPaused((p) => !p)}
-                aria-label={paused ? 'resume timer' : 'pause timer'}
-              >
-                <TimerRing totalSec={probe.timerSec} remainingSec={remaining} paused={paused} />
-              </button>
-            )}
-          </div>
-          <p className="probe-question measure">{probe.question}</p>
-        </div>
-      </Sheet>
-
       {phase === 'answering' && (
-        <div className="stack-tight">
-          {/* Voice is the default input. Where the browser has no recogniser
-              the UI says so plainly instead of hiding the feature. */}
+        <section className="run-answer stack-tight">
           {settings.voiceEnabled && (
             <div className="voice-slot">
               {speechAvailable ? (
                 <>
-                  <button
-                    type="button"
-                    className="mic-btn"
-                    data-recording={recording}
-                    onClick={toggleDictation}
-                    aria-pressed={recording}
-                    aria-label={recording ? t('viva.voiceStop') : t('viva.voiceAnswer')}
-                  >
-                    {recording ? <Square size={22} /> : <Mic size={26} />}
+                  <button type="button" className="mic-btn" data-recording={recording} onClick={toggleVoice} aria-pressed={recording} aria-label={recording ? t('run4.voiceStop') : t('run4.voiceStart')}>
+                    {recording ? <Square size={21} /> : <Mic size={25} />}
                   </button>
-                  <div className="stack-tight grow">
-                    <span className="t-body-strong">
-                      {recording ? t('viva.voiceListening') : t('viva.voiceAnswer')}
-                    </span>
-                    <span className="t-small ink-3">
-                      {recording ? t('viva.voiceSilence') : t('viva.voiceReview')}
-                    </span>
-                  </div>
+                  <span className="t-small ink-2">{recording ? t('run4.voiceListening') : t('run4.voiceStart')}</span>
                 </>
-              ) : (
-                <span className="t-small ink-3 measure">{t('viva.voiceUnsupported')}</span>
-              )}
+              ) : <span className="t-small ink-3">{t('run4.voiceUnsupported')}</span>}
             </div>
           )}
-          {voiceError && voiceError !== 'unsupported' && (
-            <Callout tone="danger">{t('common.error.network')}</Callout>
-          )}
-
-          {/* The transcript is ALWAYS shown as editable text before it is
-              committed. Corpus 05 §2.1: articulating under pressure is the
-              difficulty, not knowing the material. */}
-          <label className="field-label" htmlFor="viva-answer">
-            {voiceOn && usedVoice.current ? t('viva.voiceReview') : t('viva.answerLabel')}
-          </label>
-          <textarea
-            id="viva-answer"
-            ref={answerRef}
-            className="control viva-answer"
-            rows={3}
-            value={answer}
-            onChange={(e) => setAnswer(e.target.value)}
-            placeholder="…"
-          />
-          <p className="field-hint">{t('viva.answerHint')}</p>
-          <div className="row wrap">
-            <Button variant="primary" size="lg" onClick={commit} disabled={!answer.trim()}>
-              {t('viva.commit')}
-            </Button>
-            <Button variant="ghost" onClick={() => { setAnswer(''); commit(); }}>
-              {t('viva.skip')}
-            </Button>
+          {voiceError && voiceError !== 'unsupported' && <p className="t-small ink-3">{t('run4.voiceUnsupported')}</p>}
+          <label className="field-label" htmlFor="run-answer">{t('run4.answer')}</label>
+          <textarea id="run-answer" className="control run-answer-box" rows={5} value={answer} onChange={(event) => setAnswer(event.target.value)} />
+          <p className="field-hint">{t('run4.answerHint')}</p>
+          <div className="run-actions">
+            <Button size="lg" variant="primary" onClick={commitAnswer} disabled={!answer.trim()}>{t('run4.commit')}</Button>
+            <Button variant="ghost" onClick={() => { stopVoice(); setPhase('blankplan'); }}>{t('run4.blank')}</Button>
           </div>
-        </div>
+        </section>
       )}
 
-      {/* SELF-GRADE BEFORE ANY VERDICT. Full-bleed, one question, nothing else
-          on screen. Corpus 04 §E1 — "no Next button visible until they commit"
-          — because a carelessly-given self-grade destroys the measurement, and
-          the measurement is the entire product. */}
-      {phase === 'selfgrade' && (
-        <Sheet elevation={1}>
-          <div className="selfgrade">
-            <p className="t-title measure">{t('viva.selfTitleV3')}</p>
-            <div className="selfgrade-opts">
-              {([
-                ['owned', t('viva.selfOwned')],
-                ['shaky', t('viva.selfShaky')],
-                ['notmine', t('viva.selfNotmine')],
-              ] as [SelfGrade, string][]).map(([value, label]) => (
-                <button
-                  key={value}
-                  type="button"
-                  className="selfgrade-opt"
-                  aria-pressed={committed.selfGrade === value}
-                  onClick={() => applySelfGrade(value)}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
-            <p className="t-small ink-3 measure">{t('viva.selfWhy')}</p>
+      {phase === 'blankplan' && (
+        <section className="run-focus-card stack">
+          <div className="stack-tight">
+            <h1 className="t-sentence-small">{t('run4.blankTitle')}</h1>
+            <p className="t-body ink-2 measure">{t('run4.blankBody')}</p>
           </div>
-        </Sheet>
+          <textarea className="control run-answer-box" rows={5} value={blankPlan} placeholder={t('run4.blankPlaceholder')} onChange={(event) => setBlankPlan(event.target.value)} autoFocus />
+          <div className="run-actions"><Button size="lg" variant="primary" disabled={!blankPlan.trim()} onClick={commitBlankPlan}>{t('run4.blankCommit')}</Button></div>
+        </section>
+      )}
+
+      {phase === 'selfgrade' && (
+        <section className="run-focus-card selfgrade stack">
+          <div className="stack-tight">
+            <h1 className="t-sentence-small">{t('run4.self')}</h1>
+            <p className="t-small ink-3 measure">{t('run4.selfWhy')}</p>
+          </div>
+          <blockquote className="answer-quote">“{answer}”</blockquote>
+          <div className="selfgrade-opts">
+            {([
+              ['owned', t('run4.holds')],
+              ['shaky', t('run4.unsure')],
+              ['notmine', t('run4.slips')],
+            ] as [SelfGrade, string][]).map(([value, label]) => (
+              <button type="button" className="selfgrade-opt" key={value} onClick={() => void chooseSelfGrade(value)}>{label}</button>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {phase === 'scoring' && (
+        <section className="run-focus-card run-wait stack">
+          <Spinner label={t('run4.marking')} />
+          <blockquote className="answer-quote">“{answer}”</blockquote>
+        </section>
+      )}
+
+      {phase === 'manualgrade' && (
+        <section className="run-focus-card stack">
+          <div className="stack-tight">
+            <h1 className="t-sentence-small">{t('run4.manualTitle')}</h1>
+            <p className="t-small ink-3 measure">{t('run4.manualBody')}</p>
+          </div>
+          <div className="rubric-quiet">
+            <p className="t-body-strong">{probe.reference.ownedLooksLike}</p>
+            <ul className="reference-list">{probe.reference.keyPoints.map((point, pointIndex) => <li key={pointIndex}>{point}</li>)}</ul>
+          </div>
+          <div className="manualgrade-opts">
+            <button type="button" onClick={() => manualMark(3)}>{t('run4.manualHeld')}</button>
+            <button type="button" onClick={() => manualMark(1)}>{t('run4.manualHalf')}</button>
+            <button type="button" onClick={() => manualMark(0)}>{t('run4.manualSlipped')}</button>
+          </div>
+        </section>
       )}
 
       {phase === 'revealed' && (
-        <div className="stack-tight">
-          <Sheet elevation={1}>
-            <div className="stack-tight">
-              <div className="row-between wrap" style={{ gap: 'var(--space-3)' }}>
-                <span className="t-micro ink-3">{t('viva.reveal')}</span>
-                <div className="row" style={{ gap: 'var(--space-3)' }}>
-                  <Mark verdict={verdictOf(committed)} />
-                  {committed.ai && <ScorePip score={committed.ai.score} />}
-                </div>
-              </div>
-
-              {scoring && <Spinner label={t('viva.committing')} />}
-              {scoreError && <Callout tone="danger">{t('viva.scoreFailed')}</Callout>}
-              {!hasKey && <p className="t-small ink-3">{t('viva.noScore')}</p>}
-
-              {committed.ai && (
-                <div className="stack-tight">
-                  <p className="t-body-strong">{committed.ai.verdictLine}</p>
-                  {committed.ai.evidence.present.length > 0 && (
-                    <ul className="evidence evidence-present">
-                      {committed.ai.evidence.present.map((e, i) => <li key={i} className="t-small">{e}</li>)}
-                    </ul>
-                  )}
-                  {committed.ai.evidence.missing.length > 0 && (
-                    <ul className="evidence evidence-missing">
-                      {committed.ai.evidence.missing.map((e, i) => <li key={i} className="t-small">{e}</li>)}
-                    </ul>
-                  )}
-                  {committed.ai.examinerFollowUp && (
-                    <Callout tone="action" title={t('viva.followUp')}>{committed.ai.examinerFollowUp}</Callout>
-                  )}
-                </div>
-              )}
-
-              <div className="stack-tight">
-                <span className="t-micro ink-3">{t('viva.whyAsked')}</span>
-                <p className="t-small ink-2 measure">{probe.whyThisProbe}</p>
-              </div>
-
-              <div className="stack-tight">
-                <span className="t-micro ink-3">{t('viva.reference')}</span>
-                <ul className="reference-list">
-                  {probe.reference.keyPoints.map((k, i) => <li key={i} className="t-small">{k}</li>)}
-                </ul>
-                {probe.reference.ownedLooksLike && (
-                  <p className="t-small ink-3 measure"><em>{probe.reference.ownedLooksLike}</em></p>
-                )}
-              </div>
-
-              {session.packId === 'med' && <p className="t-micro ink-3">{MED_SAFETY_NOTE}</p>}
-            </div>
-          </Sheet>
-
-          <div className="row">
-            <Button variant="primary" size="lg" onClick={next}>
-              {index + 1 < total ? t('viva.next') : t('viva.finish')}
-            </Button>
+        <section className="run-reveal stack">
+          <div className="one-line-verdict run-feedback-line" data-verdict={verdict}>
+            <Mark verdict={verdict} />
+            <p>{oneLine}</p>
           </div>
-        </div>
+          {scoreError && !hasJudgment && (
+            <Button variant="secondary" onClick={() => setPhase('manualgrade')}>{t('run4.markMyself')}</Button>
+          )}
+          <details className="run-details">
+            <summary>{t('run4.details')}<ChevronDown size={17} aria-hidden /></summary>
+            <div className="stack">
+              <div className="stack-tight"><span className="t-micro ink-3">{t('run4.answer')}</span><blockquote className="answer-quote">“{committed.answer}”</blockquote></div>
+              <div className="stack-tight"><span className="t-micro ink-3">{t('run4.why')}</span><p className="t-small ink-2 measure">{probe.whyThisProbe}</p></div>
+              <div className="stack-tight"><span className="t-micro ink-3">{t('run4.standard')}</span><ul className="reference-list">{probe.reference.keyPoints.map((point, pointIndex) => <li key={pointIndex}>{point}</li>)}</ul></div>
+            </div>
+          </details>
+          {hasJudgment && (
+            <Button size="lg" variant="primary" iconRight={<ArrowRight size={18} />} onClick={next}>
+              {index < total - 1 ? t('run4.next') : t('run4.finish')}
+            </Button>
+          )}
+        </section>
       )}
-    </div>
+    </main>
   );
 }

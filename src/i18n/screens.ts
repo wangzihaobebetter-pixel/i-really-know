@@ -273,9 +273,6 @@ registerStrings('settings', {
     count: 'Questions per run-through',
     preset: 'Default preset',
     difficulty: 'Default difficulty',
-    scoreOnCommit: 'Mark each answer as I commit it',
-    scoreOnCommitHint: 'Off: everything is marked at the end of the run-through instead.',
-    timers: 'Show a timer on each question',
     voice: 'Offer voice answers where supported',
     appearanceTitle: 'Appearance',
     theme: 'Theme',
@@ -304,9 +301,6 @@ registerStrings('settings', {
     count: '每次出几道题',
     preset: '默认档位',
     difficulty: '默认难度',
-    scoreOnCommit: '每提交一题就判一题',
-    scoreOnCommitHint: '关闭后改为全部答完再统一评分。',
-    timers: '每题显示计时',
     voice: '在支持的环境下提供语音作答',
     appearanceTitle: '外观',
     theme: '主题',
@@ -325,7 +319,7 @@ registerStrings('settings', {
 registerStrings('class', {
   en: {
     title: 'Class mode',
-    subtitle: 'Generate one run-through per submission, then see what the cohort as a whole cannot defend.',
+    subtitle: 'Prepare one run-through per submission, then see which concepts do not hold across the cohort.',
     newCohort: 'New cohort',
     name: 'Cohort name',
     addSubmission: 'Add a submission',

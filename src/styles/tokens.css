@@ -36,6 +36,7 @@
   --half-held: #8A5A06;
   --slipped: #4C4E7A;
   --held-more: #0B6079;
+  --underclaimed: var(--held-more);
 
   /* --- Axis B · divergence (You tab only) --- */
   --over: #9C1458;
@@ -55,10 +56,24 @@
   --half-held-wash: #EFE8DC;
   --slipped-wash: #E6E6EC;
   --held-more-wash: #DDE9EC;
+  --underclaimed-wash: var(--held-more-wash);
   --over-wash: #F1DEE8;
   --under-wash: #DDE9EC;
   --accent-wash: #F2E2D7;
   --danger-wash: #F4E1DF;
+
+  /* Compatibility aliases used by the shared primitives and v4 surfaces. */
+  --paper: var(--app);
+  --paper-2: var(--app-2);
+  --action: var(--accent);
+  --action-ink: var(--accent-ink);
+  --action-wash: var(--accent-wash);
+  --defended: var(--held);
+  --partial: var(--half-held);
+  --undefended: var(--slipped);
+  --defended-wash: var(--held-wash);
+  --partial-wash: var(--half-held-wash);
+  --undefended-wash: var(--slipped-wash);
 
   /* --- Glass (chrome only; never over the student's text — P3 §2.5.3) --- */
   --glass: rgba(255, 255, 255, 0.85);
@@ -108,6 +123,7 @@
   --t-question: 1.5rem;
   --t-title: 1.25rem;
   --t-body: 1.0625rem;
+  --t-body-lg: var(--t-body);
   --t-body-mobile: 0.96875rem;
   --t-small: 0.875rem;
   --t-micro: 0.75rem;
@@ -152,6 +168,7 @@
   --half-held: #E3A84A;
   --slipped: #A0A2E0;
   --held-more: #5FC8E8;
+  --underclaimed: var(--held-more);
 
   --over: #F07AB4;
   --under: #5FC8E8;
@@ -166,6 +183,7 @@
   --half-held-wash: #453C2D;
   --slipped-wash: #383B4B;
   --held-more-wash: #2B424D;
+  --underclaimed-wash: var(--held-more-wash);
   --over-wash: #483342;
   --under-wash: #2B424D;
   --accent-wash: #4A3829;

@@ -58,10 +58,11 @@ function body(kind, user) {
         detectedDiscipline: { packId: 'cs', confidence: 0.82 },
         probes: quotes.slice(0, count).map((q, i) => ({
           dimensionId: DIMS[i % DIMS.length],
+          concept: `Mock course concept ${i + 1}`,
           kind: ['concept', 'method', 'provenance', 'counterfactual', 'blindspot', 'alternative'][i % 6],
           anchor: { quote: q },
           question: `Mock probe ${i + 1}: justify this choice against the obvious alternative.`,
-          whyThisProbe: 'A borrowed decision has no alternative attached to it.',
+          whyThisProbe: 'A decision is understood when its alternative and trade-off can be named.',
           reference: {
             keyPoints: ['Names the alternative', 'Gives the cost on this input', 'Knows when it flips'],
             ownedLooksLike: 'Names the alternative and its concrete cost here.',
@@ -100,9 +101,10 @@ function body(kind, user) {
     case 'VARIANT':
       return JSON.stringify({
         dimensionId: 'invariants', kind: 'counterfactual',
+        concept: 'Update-order invariant',
         anchor: { quote: 'reused' },
         question: 'Mock variant: same target, different angle — move the update and trace it.',
-        whyThisProbe: 'The prior answer parroted; this one demands a trace.',
+        whyThisProbe: 'The prior answer described the code; this angle asks for a concrete trace.',
         reference: { keyPoints: ['Traces concretely'], ownedLooksLike: 'Walks a tiny input.', surfaceLooksLike: 'Describes the code.' },
         timerSec: 120, difficulty: 'standard',
       });
@@ -165,6 +167,10 @@ const server = createServer((req, res) => {
     if (model.includes('fault-401')) {
       res.writeHead(401, { 'Content-Type': 'application/json', ...cors });
       return res.end(JSON.stringify({ error: { message: 'Invalid API key' } }));
+    }
+    if (model.includes('fault-score-500') && kind === 'SCORE') {
+      res.writeHead(500, { 'Content-Type': 'application/json', ...cors });
+      return res.end(JSON.stringify({ error: { message: 'Score unavailable' } }));
     }
     if (model.includes('fault-429-once') && nth === 1) {
       res.writeHead(429, { 'Content-Type': 'application/json', ...cors });

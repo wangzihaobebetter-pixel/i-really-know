@@ -29,6 +29,7 @@ export const graphSample: SampleDef = {
   probes: [
     {
       dimensionId: 'invariants',
+      concept: 'Pointer-array allocation size',
       kind: 'blindspot',
       quote: '*allNodes = (char **)malloc(count * sizeof(char));',
       question: 'This line allocates count * sizeof(char) for a char**. Walk me through what that actually buys you on a 64-bit machine.',
@@ -48,6 +49,7 @@ export const graphSample: SampleDef = {
     },
     {
       dimensionId: 'edges',
+      concept: 'Handling a failed allocation',
       kind: 'counterfactual',
       quote: 'if ((*allNodes)[i] == NULL)',
       question: 'This detects a failed allocation and then prints. Execution continues to the next line. What happens next, and what did you intend to happen?',
@@ -62,6 +64,7 @@ export const graphSample: SampleDef = {
     },
     {
       dimensionId: 'design',
+      concept: 'Buffer length and the NUL terminator',
       kind: 'method',
       quote: 'malloc(sizeof(char) * 31)',
       question: 'Why 31? Name what that number encodes, and what happens to a node name that needs 31 characters.',
@@ -181,6 +184,7 @@ export const tuberculosisSample: SampleDef = {
   probes: [
     {
       dimensionId: 'limits',
+      concept: 'Direction of bias from non-random missingness',
       kind: 'counterfactual',
       quote: 'some observations are excluded in analysis due to missing values, which may introduce bias if some regions are more prone to missing data',
       question: 'Which regions were dropped, how many country-years, and which direction would that push your ANOVA?',
@@ -199,6 +203,7 @@ export const tuberculosisSample: SampleDef = {
     },
     {
       dimensionId: 'assumptions',
+      concept: 'Multiple comparisons after ANOVA',
       kind: 'method',
       quote: 'one-way ANOVA, pairwise t-tests, and linear regression inference',
       question: 'You ran an ANOVA and then pairwise t-tests across regions. How many comparisons was that, and what did you do about it?',
@@ -213,6 +218,7 @@ export const tuberculosisSample: SampleDef = {
     },
     {
       dimensionId: 'interpretation',
+      concept: 'Shared-denominator correlation',
       kind: 'concept',
       quote: 'demonstrates an overall strong negative correlation between detection rate and mortality',
       question: 'Detection rate is a ratio whose denominator is estimated incidence. Mortality is also scaled by that same estimate. What does that shared denominator do to a correlation between them?',

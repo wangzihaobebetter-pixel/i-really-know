@@ -6,7 +6,9 @@
  *   Owned     both >= 2
  *   Borrowed  both <= 1
  *   Half-held everything else
- * Self-grade maps Owned=3, Shaky=1.5, Not mine=0.
+ * Self-grade maps Holds=3, Not sure=1.5, Wouldn't hold=0. A pre-judgment
+ * self-grade alone is never promoted into a verdict; a model or explicit
+ * post-rubric manual mark is required.
  *
  * This exists because that function was rewritten once by an unattended agent.
  * A commit message claiming "verified" is not verification.
@@ -18,7 +20,7 @@ import { execSync } from 'node:child_process';
 // code that actually ships. esbuild comes with vite.
 mkdirSync('.tmp-divergence', { recursive: true });
 execSync('npx esbuild src/lib/analysis.ts --format=esm --outfile=.tmp-divergence/analysis.mjs', { stdio: 'pipe' });
-const { classifyDivergence } = await import('./.tmp-divergence/analysis.mjs');
+const { classifyDivergence, divergence, calibration } = await import('./.tmp-divergence/analysis.mjs');
 
 const SELF = { owned: 3, shaky: 1.5, notmine: 0 };
 const probe = (selfGrade, aiScore) => ({
@@ -29,8 +31,7 @@ const probe = (selfGrade, aiScore) => ({
 function expected(selfGrade, ai) {
   const self = selfGrade === undefined ? undefined : SELF[selfGrade];
   if (ai === undefined) {
-    if (self === undefined) return 'unscored';
-    return self >= 2.5 ? 'owned' : self >= 1 ? 'halfheld' : 'borrowed';
+    return 'unscored';
   }
   if (self === undefined) return ai >= 2 ? 'owned' : ai === 1 ? 'halfheld' : 'borrowed';
   if (self >= 2.5 && ai <= 1) return 'illusion';
@@ -62,6 +63,11 @@ const reachable = {
 for (const [want, got] of Object.entries(reachable)) {
   if (got !== want) fails.push(`headline class "${want}" is unreachable — its canonical case returns ${got}`);
 }
+
+const manualProbe = { id: 'manual', dimensionId: 'reason', selfGrade: 'shaky', manualScore: 3 };
+if (classifyDivergence(manualProbe) !== 'undersold') fails.push('post-rubric manual mark does not produce the honest before/after class');
+if (divergence([manualProbe])?.delta !== 1) fails.push('post-rubric manual mark is missing from the signed before/after count');
+if (calibration([manualProbe]) === undefined) fails.push('post-rubric manual mark is missing from calibration');
 
 rmSync('.tmp-divergence', { recursive: true, force: true });
 

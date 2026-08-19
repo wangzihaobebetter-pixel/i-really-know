@@ -43,6 +43,7 @@ export const antepartumSample: SampleDef = {
   probes: [
     {
       dimensionId: 'findings',
+      concept: 'Physiologic anaemia in twin pregnancy',
       kind: 'concept',
       quote: 'Hgb 10 g/dl, Hct 32%',
       question: 'Hgb 10, Hct 32 in a twin pregnancy at 13 weeks — is that a finding, or is that normal? What would change your answer?',
@@ -61,6 +62,7 @@ export const antepartumSample: SampleDef = {
     },
     {
       dimensionId: 'patho',
+      concept: 'Scleroderma management in pregnancy',
       kind: 'blindspot',
       quote: 'She also has scleroderma with contracted elbow and fingers.',
       question: 'Scleroderma is one clause in your history and never appears again. Name one way it changes the management of this specific pregnancy, and one way it changes the delivery plan.',
@@ -75,6 +77,7 @@ export const antepartumSample: SampleDef = {
     },
     {
       dimensionId: 'risk',
+      concept: 'BMI-stratified weight gain for twins',
       kind: 'counterfactual',
       quote: 'BP: 110/60, weight 120lbs, (a gain of 5 lbs)',
       question: 'A 5 lb gain by 13 weeks in a di-di twin pregnancy with a BMI of 18.4. Is that adequate? Tell me the number you are comparing it against and where it comes from.',
@@ -89,6 +92,7 @@ export const antepartumSample: SampleDef = {
     },
     {
       dimensionId: 'provenance',
+      concept: 'What a restated clinical notation adds',
       kind: 'provenance',
       quote: 'which means she is at 13 weeks gestation',
       question: 'This sentence restates the notation immediately before it. What did you intend it to establish for the reader that the notation did not?',
@@ -103,6 +107,7 @@ export const antepartumSample: SampleDef = {
     },
     {
       dimensionId: 'investigation',
+      concept: 'Rubella vaccination timing in pregnancy',
       kind: 'method',
       quote: 'She is rubella equivocal.',
       question: 'An equivocal rubella result at 13 weeks. What do you do with it during this pregnancy, and what do you do about it afterwards?',

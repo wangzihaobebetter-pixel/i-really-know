@@ -5,8 +5,7 @@
  *
  * v3 IA collapse (FABLE-REDESIGN.md §4.2). 13 screens → 9. Five tabs collapse
  * to three (Today · Work · You) plus a gear. Packs, record, transcript, import,
- * map, queue, devUi routes are gone; their screens are deleted or replaced by
- * placeholders. Instructor class/... routes remain reachable by URL and from
+ * map, queue and devUi routes are gone. Instructor class/... routes remain reachable by URL and from
  * Settings but are off the student tab bar.
  */
 import { useSyncExternalStore, useCallback } from 'react';
@@ -15,6 +14,7 @@ export type RouteName =
   | 'today' | 'bring' | 'read' | 'run' | 'result' | 'work' | 'workDetail'
   | 'you' | 'followups' | 'welcome'
   | 'class' | 'cohort' | 'studentSheet' | 'reteach'
+  | 'join' | 'return'
   | 'settings' | 'notfound';
 
 export interface Route {
@@ -28,13 +28,15 @@ interface Pattern { name: RouteName; segments: string[] }
 const PATTERNS: Pattern[] = [
   { name: 'today',        segments: [] },
   { name: 'bring',        segments: ['bring'] },
-  { name: 'read',         segments: ['read', ':id'] },
+  { name: 'read',         segments: ['read', ':sessionId'] },
   { name: 'run',          segments: ['run', ':sessionId'] },
-  { name: 'result',       segments: ['result', ':id'] },
+  { name: 'result',       segments: ['result', ':sessionId'] },
   { name: 'work',         segments: ['work'] },
-  { name: 'workDetail',   segments: ['work', ':id'] },
+  { name: 'workDetail',   segments: ['work', ':sessionId'] },
   { name: 'you',          segments: ['you'] },
   { name: 'followups',    segments: ['followups'] },
+  { name: 'join',         segments: ['join', ':ticket'] },
+  { name: 'return',       segments: ['return', ':ticket'] },
   { name: 'welcome',      segments: ['welcome'] },
   { name: 'class',        segments: ['class'] },
   { name: 'cohort',       segments: ['class', ':cohortId'] },
@@ -53,7 +55,10 @@ export function parseHash(hash: string): Route {
     let ok = true;
     for (let i = 0; i < parts.length; i++) {
       const seg = pattern.segments[i];
-      if (seg.startsWith(':')) params[seg.slice(1)] = decodeURIComponent(parts[i]);
+      if (seg.startsWith(':')) {
+        try { params[seg.slice(1)] = decodeURIComponent(parts[i]); }
+        catch { ok = false; break; }
+      }
       else if (seg !== parts[i]) { ok = false; break; }
     }
     if (ok) return { name: pattern.name, params, hash };
@@ -115,6 +120,8 @@ export const ROUTE_GROUP: Record<RouteName, 'today' | 'work' | 'you' | 'followup
   workDetail: 'work',
   you: 'you',
   welcome: 'none',
+  join: 'none',
+  return: 'none',
   class: 'class',
   cohort: 'class',
   studentSheet: 'class',

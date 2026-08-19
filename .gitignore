@@ -1,7 +1,9 @@
 node_modules/
 dist/
-.DS_Store
+artifacts/
+*.tsbuildinfo
 *.log
 verify-shots/
 shot-*.png
-.tmp-divergence/
+.tmp-*/
+.DS_Store

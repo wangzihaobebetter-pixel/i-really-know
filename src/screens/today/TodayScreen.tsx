@@ -1,208 +1,138 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { useStore, selectHasKey, selectRealSessions, selectDueTargets } from '../../store';
-import { SAMPLES, DEMO_SAMPLES, buildSampleSession, buildWorkedSession, sampleSessionId } from '../../samples';
-import { getPack, dimensionLabel } from '../../packs';
-import { navigate } from '../../router';
-import { useT, useLang } from '../../i18n';
-import { AnchoredText, Button, Sheet, Tag, Mark, DivergenceHero } from '../../ui';
-import type { TextAnchor } from '../../ui';
-import { divergence, verdictOf } from '../../lib/analysis';
-import { formatDate } from '../../lib/session-ops';
+import React from 'react';
+import { ArrowRight, BookOpen, CalendarClock, Plus, RotateCcw } from 'lucide-react';
+import { selectDueTargets, selectRealSessions, useStore } from '../../store';
+import { useNavigate } from '../../router';
+import { useLang, useT } from '../../i18n';
+import { Button, Sheet, Tag } from '../../ui';
+import { SAMPLES, buildSampleSession } from '../../samples';
+import { getPack } from '../../packs';
+import { formatDate, studentDestination } from '../../lib/session-ops';
 
-/**
- * Home. P2 §1 and F3.
- *
- * v2 opened on philosophy and an API-key banner — a wall between a first-time
- * visitor and any evidence the thing works. v3 opens on the product working:
- * a real sourced submission, already examined, the Painted Page inking itself
- * span by span, and the divergence number underneath it.
- *
- * The registers stay separate (P3 §1): the page around it is expressive, the
- * artifact inside the sheet is a document.
- */
-export default function HomeScreen() {
+export default function TodayScreen() {
   const t = useT();
   const lang = useLang();
-  const hasKey = useStore(selectHasKey);
+  const nav = useNavigate();
   const sessions = useStore(selectRealSessions);
   const due = useStore(selectDueTargets());
   const upsertSession = useStore((s) => s.upsertSession);
-  const allSessions = useStore((s) => s.sessions);
+  const lastId = useStore((s) => s.ui.lastSessionId);
 
-  /* Rotate the demo between runs so a returning visitor does not see the same
-     page twice. Index is derived, not random, so it is stable within a mount. */
-  const [demoIndex, setDemoIndex] = useState(0);
-  const demoDef = DEMO_SAMPLES[demoIndex % DEMO_SAMPLES.length];
-  const demo = useMemo(() => buildWorkedSession(demoDef), [demoDef]);
-  const demoDiv = useMemo(() => divergence(demo.probes), [demo]);
-  const demoAnchors: TextAnchor[] = useMemo(
-    () => demo.probes
-      .filter((p) => p.anchor.placed && p.anchor.start !== undefined)
-      .map((p) => ({ id: p.id, start: p.anchor.start!, end: p.anchor.end!, verdict: verdictOf(p) }))
-      .sort((a, b) => a.start - b.start),
-    [demo],
-  );
+  const real = sessions.filter((s) => !s.sampleId);
+  const recent = [...real].sort((a, b) => (b.completedAt ?? b.createdAt) - (a.completedAt ?? a.createdAt));
+  const unfinished = recent.find((s) => s.status !== 'complete');
+  const remembered = sessions.find((s) => s.id === lastId) ?? recent[0];
+  const completedExample = remembered?.sampleId && remembered.status === 'complete' ? remembered : undefined;
+  const first = real.length === 0;
 
-  /* Re-key the demo periodically so the page is visibly alive on arrival
-     rather than a screenshot of itself. */
-  const [inkKey, setInkKey] = useState(0);
-  useEffect(() => {
-    const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-    if (reduced) return;
-    const h = window.setInterval(() => setInkKey((k) => k + 1), 9000);
-    return () => window.clearInterval(h);
-  }, []);
-
-  const recent = useMemo(() => sessions.slice(0, 3), [sessions]);
-
-  function openSample(sampleId: string) {
-    const existing = allSessions.find((s) => s.id === sampleSessionId(sampleId));
-    if (!existing) {
-      const def = SAMPLES.find((s) => s.id === sampleId)!;
-      upsertSession(buildSampleSession(def));
-    }
-    navigate(existing?.status === 'complete' ? 'map' : 'run', { sessionId: sampleSessionId(sampleId) });
+  function trySample() {
+    const session = buildSampleSession(SAMPLES[0]);
+    upsertSession(session);
+    nav('run', { sessionId: session.id });
   }
 
   return (
-    <div className="col-read stack">
-      {/* ---- The claim, in one line. No "verify" — that word is taken. ---- */}
-      <header className="stack-tight">
-        <h1 className="t-display">
-          {t('home.heroA')}<em className="ink-over" style={{ fontStyle: 'normal' }}> {t('home.heroEm')} </em>{t('home.heroB')}
-        </h1>
-        <p className="t-body-lg measure ink-2">{t('home.lede')}</p>
-        <p className="t-small measure ink-3">{t('home.sub')}</p>
+    <div className="col-read stack page-enter today-page" data-testid="today-screen">
+      <header className="stack-tight today-intro">
+        <span className="t-micro ink-accent">{t('today4.eyebrow')}</span>
+        <h1 className="t-sentence">{first ? t('today4.firstTitle') : t('today4.returningTitle')}</h1>
+        <p className="t-body-lg ink-2 measure">{t('today4.firstBody')}</p>
       </header>
 
-      {/* ---- THE DEMO, FIRST. A real submission, mid-examination. ---- */}
-      <section className="stack-tight">
-        <div className="demo-caption">
-          <span className="t-micro ink-3">{t('home.demoLabel')}</span>
-          <Tag mono tone="action">{getPack(demo.packId).shortName}</Tag>
-        </div>
-        <div className="demo-sheet">
-          <div className="stack-tight">
-            <span className="t-body-strong">{demoDef.title}</span>
-            <span className="t-small ink-3 measure">{t('home.demoHint')}</span>
-          </div>
-          <div style={{ marginTop: 'var(--space-5)' }}>
-            <AnchoredText
-              key={inkKey}
-              text={demo.material}
-              mode={demo.materialKind === 'code' ? 'code' : 'prose'}
-              anchors={demoAnchors}
-              staggered
-            />
-          </div>
-          <p className="demo-source" style={{ marginTop: 'var(--space-5)' }}>
-            {t('home.demoSource')}: {demoDef.source.corpus} · {demoDef.source.who} ·{' '}
-            <a href={demoDef.source.url} target="_blank" rel="noreferrer noopener">{demoDef.source.url}</a>
-            {' · '}{t('home.demoExcerpt')} ({demoDef.source.originalLength})
-          </p>
-        </div>
-
-        {demoDiv && <DivergenceHero key={`h${inkKey}`} divergence={demoDiv} />}
-
-        <div className="row wrap" style={{ gap: 'var(--space-3)' }}>
-          <Button variant="primary" size="lg" onClick={() => openSample(demoDef.id)}>
-            {t('home.ctaTry')}
+      <section className="today-main-action" aria-label={t('today4.newRun')}>
+        <button className="hero-action" type="button" onClick={() => nav('bring')}>
+          <span className="hero-action-icon" aria-hidden><Plus size={24} /></span>
+          <span className="grow">
+            <strong>{t('today4.newRun')}</strong>
+            <small>{lang === 'zh-CN' ? '原文 · 场合 · 日期' : 'Your words · the room · the date'}</small>
+          </span>
+          <ArrowRight size={21} aria-hidden />
+        </button>
+        {first && !completedExample && (
+          <Button variant="ghost" onClick={() => nav('welcome')} icon={<BookOpen size={17} />}>
+            {t('today4.watch')}
           </Button>
-          <Button variant="secondary" size="lg" onClick={() => navigate('import')}>
-            {t('home.ctaOwnV3')}
-          </Button>
-          {DEMO_SAMPLES.length > 1 && (
-            <Button variant="ghost" onClick={() => setDemoIndex((i) => i + 1)}>
-              {t('home.demoNext')}
-            </Button>
-          )}
-        </div>
+        )}
       </section>
 
-      {/* ---- The return hook (F5). Not a streak, not guilt — the content. ---- */}
+      {completedExample && (
+        <button className="memory-card" type="button" onClick={() => nav('result', { sessionId: completedExample.id })}>
+          <span className="memory-line" aria-hidden />
+          <span className="stack-nano grow minw0">
+            <span className="t-micro ink-3">{t('today4.justFinished')}</span>
+            <strong className="t-body truncate">{completedExample.title}</strong>
+          </span>
+          <ArrowRight size={19} aria-hidden />
+        </button>
+      )}
+
+      {unfinished && (
+        <button className="memory-card" type="button" onClick={() => nav(studentDestination(unfinished), { sessionId: unfinished.id })}>
+          <span className="memory-line" aria-hidden />
+          <span className="stack-nano grow">
+            <span className="t-micro ink-3">{t('today4.continue', { title: unfinished.title })}</span>
+            <strong className="t-body">{unfinished.probes.filter((p) => p.committedAt).length} / {unfinished.probes.length || '…'}</strong>
+          </span>
+          <ArrowRight size={19} aria-hidden />
+        </button>
+      )}
+
       {due.length > 0 && (
-        <section className="stack-tight">
-          <h2 className="t-title">{t('home.queueTitle')}</h2>
-          <p className="t-small ink-3 measure">
-            {t('home.queueLede')} {t(due.length === 1 ? 'home.queueOne' : 'home.queueMany', { n: due.length })}
-          </p>
-          <div className="queue-strip">
-            {due.slice(0, 6).map((target) => (
-              <button key={target.id} type="button" className="queue-chip"
-                      onClick={() => navigate('queue')}>
-                <Tag mono>{getPack(target.packId).shortName}</Tag>
-                <span className="t-small ink-2">{dimensionLabel(target.packId, target.dimensionId)}</span>
-                <span className="t-small">{target.anchor.quote.slice(0, 70)}…</span>
-              </button>
-            ))}
+        <Sheet elevation={0} className="care-card" padding="var(--space-5)">
+          <div className="row" style={{ alignItems: 'flex-start' }}>
+            <span className="care-icon" aria-hidden><RotateCcw size={18} /></span>
+            <div className="stack-tight grow">
+              <h2 className="t-title">{t('today4.dueTitle')}</h2>
+              <p className="t-small ink-2 measure">{t('today4.dueBody')}</p>
+              <div><Button size="sm" variant="secondary" onClick={() => nav('followups')}>{t('today4.dueAction')}</Button></div>
+            </div>
           </div>
-          <div className="row">
-            <Button variant="secondary" onClick={() => navigate('queue')}>{t('home.queueOpen')}</Button>
-          </div>
-        </section>
+        </Sheet>
       )}
 
       {recent.length > 0 && (
         <section className="stack-tight">
-          <h2 className="t-title">{t('home.yourRuns')}</h2>
-          {recent.map((s) => {
-            const d = divergence(s.probes);
-            const done = s.status === 'complete';
-            return (
-              <Sheet key={s.id} elevation={1} padding="var(--space-4) var(--space-5)">
-                <div className="row-between wrap" style={{ gap: 'var(--space-4)' }}>
-                  <div className="stack-tight grow" style={{ minWidth: '14rem' }}>
-                    <div className="row wrap" style={{ gap: 'var(--space-2)' }}>
-                      <span className="t-body-strong">{s.title}</span>
-                      <Tag mono>{getPack(s.packId).shortName}</Tag>
-                    </div>
-                    <span className="t-small ink-3">
-                      {formatDate(s.createdAt, lang)}
-                      {d ? ` · ${t('map.divergenceClaim', { claimed: d.claimed, defended: d.defended })}` : ''}
-                    </span>
-                  </div>
-                  <Button size="sm" variant={done ? 'ghost' : 'secondary'}
-                          onClick={() => navigate(done ? 'map' : 'run', { sessionId: s.id })}>
-                    {done ? t('home.review') : t('home.resume')}
-                  </Button>
-                </div>
-              </Sheet>
-            );
-          })}
+          <div className="row-between">
+            <h2 className="t-title">{t('today4.recent')}</h2>
+            <button className="text-action" type="button" onClick={() => nav('work')}>{t('today4.openWork')}</button>
+          </div>
+          <div className="piece-list">
+            {recent.slice(0, 3).map((session) => (
+              <button
+                type="button"
+                className="piece-row"
+                key={session.id}
+                onClick={() => nav(studentDestination(session), { sessionId: session.id })}
+              >
+                <span className="piece-glyph" data-pack={session.packId} aria-hidden />
+                <span className="stack-nano grow minw0">
+                  <strong className="t-body truncate">{session.title}</strong>
+                  <span className="t-small ink-3 row wrap">
+                    <span>{getPack(session.packId).shortName}</span>
+                    {session.occasionAt && <><span aria-hidden>·</span><span>{formatDate(session.occasionAt, lang)}</span></>}
+                  </span>
+                </span>
+                <ArrowRight size={18} aria-hidden />
+              </button>
+            ))}
+          </div>
         </section>
       )}
 
-      <section className="stack-tight">
-        <h2 className="t-title">{t('home.samplesTitleV3')}</h2>
-        <p className="t-small ink-3 measure">{t('home.samplesHintV3')}</p>
-        <div className="sample-grid">
-          {SAMPLES.map((def) => {
-            const pack = getPack(def.packId);
-            const existing = allSessions.find((s) => s.id === sampleSessionId(def.id));
-            const done = existing?.status === 'complete';
-            return (
-              <button key={def.id} type="button" className="sample-card" onClick={() => openSample(def.id)}>
-                <div className="row-between" style={{ gap: 'var(--space-3)' }}>
-                  <Tag mono tone="action">{pack.shortName}</Tag>
-                  {done && <Mark verdict="defended" showWord={false} size={14} />}
-                </div>
-                <span className="t-body-strong sample-card-title">{def.title}</span>
-                <span className="t-small ink-3">{def.blurb}</span>
-                <span className="t-mono-small ink-3">
-                  {def.probes.length} probes · {def.source.corpus.split('—')[0].trim()}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-      </section>
-
-      {!hasKey && (
-        <p className="t-small ink-3 measure">
-          {t('home.keyNote')}{' '}
-          <a href="#/settings">{t('home.keyNoteAction')}</a>
-        </p>
+      {first && !completedExample && (
+        <section className="sample-ribbon stack-tight">
+          <div className="row" style={{ gap: 'var(--space-2)' }}>
+            <CalendarClock size={16} aria-hidden />
+            <span className="t-micro ink-3">{t('today4.sample')}</span>
+          </div>
+          <button className="sample-ribbon-card" type="button" onClick={trySample}>
+            <Tag mono>{getPack(SAMPLES[0].packId).shortName}</Tag>
+            <span className="grow t-body-strong">{SAMPLES[0].title}</span>
+            <ArrowRight size={18} aria-hidden />
+          </button>
+        </section>
       )}
+
+      {remembered && !unfinished && !first && <span className="visually-hidden">{remembered.title}</span>}
     </div>
   );
 }

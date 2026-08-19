@@ -14,7 +14,7 @@ export const PROVIDER_PRESETS: ProviderPreset[] = [
   { id: 'custom',      label: 'Custom',      apiBase: '',                              model: '' },
 ];
 
-export const PRESET_COUNTS: Record<RunPreset, 4 | 6 | 10> = { quick: 4, standard: 6, defense: 10 };
+export const PRESET_COUNTS: Record<RunPreset, 4 | 6 | 7> = { quick: 4, standard: 6, defense: 7 };
 export const PRESET_MINUTES: Record<RunPreset, number> = { quick: 3, standard: 6, defense: 12 };
 export const PRESET_DIFFICULTY: Record<RunPreset, Difficulty> = {
   quick: 'foundations', standard: 'standard', defense: 'defense',

@@ -22,14 +22,10 @@ export function selfGradeAsScore(g: SelfGrade | undefined): number | undefined {
  * `illusion` (thought owned, wasn't) is the rare, loud one.
  */
 export function classifyDivergence(probe: Probe): DivergenceClass {
-  const ai = probe.ai?.score;
+  const ai = probe.ai?.score ?? probe.manualScore;
   const self = probe.selfGrade ? SELF_AS_SCORE[probe.selfGrade] : undefined;
 
-  if (ai === undefined) {
-    if (self === undefined) return 'unscored';
-    // Keyless run: the self-grade alone carries the verdict.
-    return self >= 2.5 ? 'owned' : self >= 1 ? 'halfheld' : 'borrowed';
-  }
+  if (ai === undefined) return 'unscored';
   if (self === undefined) return ai >= 2 ? 'owned' : ai === 1 ? 'halfheld' : 'borrowed';
 
   // Spec §4.4, in the spec's own order — Illusion wins, then Undersold, then the honest cases.
@@ -150,22 +146,22 @@ export function calibrationBand(delta: number): DivergenceDirection {
  * the same object. A percentage invites disputing the number; a count invites
  * asking WHICH THREE — which is the action this product wants.
  *
- * Returns undefined when no probe carries both tracks. A keyless run has a
- * claimed count and no demonstrated count; inventing one would fake the only
- * signal this product has.
+ * Returns undefined when no probe carries both tracks. In a keyless example,
+ * the second track is the student’s explicit post-rubric mark — never an
+ * invented model judgement — so the before/after comparison remains honest.
  */
 export function divergence(probes: Probe[]): Divergence | undefined {
   const pairs: SlopePair[] = [];
   for (const p of probes) {
     const self = selfGradeAsScore(p.selfGrade);
-    const ai = p.ai?.score;
-    if (self === undefined || ai === undefined) continue;
-    const delta = ai - self;
+    const demonstrated = p.ai?.score ?? p.manualScore;
+    if (self === undefined || demonstrated === undefined) continue;
+    const delta = demonstrated - self;
     pairs.push({
       probeId: p.id,
       dimensionId: p.dimensionId,
       claimed: self,
-      demonstrated: ai,
+      demonstrated,
       delta,
       direction: directionOf(delta),
     });
@@ -202,10 +198,7 @@ export function ownershipIndex(probes: Probe[]): number | undefined {
   const vals: number[] = [];
   for (const p of probes) {
     if (p.ai) vals.push(p.ai.score);
-    else {
-      const s = selfGradeAsScore(p.selfGrade);
-      if (s !== undefined) vals.push(s);
-    }
+    else if (p.manualScore !== undefined) vals.push(p.manualScore);
   }
   if (!vals.length) return undefined;
   const mean = vals.reduce((a, b) => a + b, 0) / vals.length;
@@ -217,9 +210,9 @@ export function ownershipIndex(probes: Probe[]): number | undefined {
  * Only defined when both tracks exist for at least one probe.
  */
 export function calibration(probes: Probe[]): number | undefined {
-  const pairs = probes.filter((p) => p.ai && p.selfGrade);
+  const pairs = probes.filter((p) => p.selfGrade && (p.ai || p.manualScore !== undefined));
   if (!pairs.length) return undefined;
-  const err = pairs.reduce((acc, p) => acc + Math.abs(SELF_AS_SCORE[p.selfGrade!] - p.ai!.score), 0) / pairs.length;
+  const err = pairs.reduce((acc, p) => acc + Math.abs(SELF_AS_SCORE[p.selfGrade!] - (p.ai?.score ?? p.manualScore!)), 0) / pairs.length;
   return Math.round((1 - err / 3) * 100);
 }
 
@@ -325,7 +318,9 @@ export function dimensionLedger(probes: Probe[]): LedgerRow[] {
     byDim.set(p.dimensionId, arr);
   }
   return [...byDim.entries()].map(([dimensionId, ps]) => {
-    const scores = ps.map((p) => (p.ai ? p.ai.score : selfGradeAsScore(p.selfGrade))).filter((v): v is number => v !== undefined);
+    const scores: number[] = ps
+      .map<number | undefined>((p) => (p.ai ? p.ai.score : p.manualScore))
+      .filter((v): v is number => v !== undefined);
     const selfs = ps.map((p) => selfGradeAsScore(p.selfGrade)).filter((v): v is number => v !== undefined);
     return {
       dimensionId,

@@ -29,7 +29,7 @@ export type Verdict = 'defended' | 'partial' | 'undefended' | 'underclaimed' | '
 export type DivergenceDirection = 'over' | 'under' | 'accurate' | 'unknown';
 export type DivergenceClass =
   | 'illusion' | 'undersold' | 'owned' | 'borrowed' | 'halfheld' | 'unscored';
-export type SessionStatus = 'generating' | 'ready' | 'running' | 'complete' | 'abandoned';
+export type SessionStatus = 'generating' | 'ready' | 'running' | 'complete' | 'abandoned' | 'error';
 export type SessionMode = 'viva' | 'retrain' | 'sample' | 'class';
 export type MaterialKind = 'code' | 'prose' | 'mixed';
 export type Score = 0 | 1 | 2 | 3;
@@ -63,6 +63,8 @@ export interface AiScore {
 export interface Probe {
   id: string;
   dimensionId: string;
+  /** Stable, human-readable course concept for instructor reteach aggregation. */
+  concept?: string;
   kind: ProbeKind;
   anchor: Anchor;
   question: string;
@@ -77,6 +79,9 @@ export interface Probe {
   committedAt?: number;
   timeUsedSec?: number;
   selfGrade?: SelfGrade;
+  /** Keyless marking happens after the pre-verdict self read. Keeping the two
+   * fields separate prevents the app from inventing a calibration result. */
+  manualScore?: Score;
   ai?: AiScore;
   divergence?: DivergenceClass;
 
@@ -107,6 +112,9 @@ export interface Session {
   material: string;
   materialKind: MaterialKind;
   materialLanguage?: string;
+  /** The real room this run-through is preparing the student for. */
+  occasion?: string;
+  occasionAt?: number;
   createdAt: number;
   completedAt?: number;
   status: SessionStatus;
@@ -135,17 +143,20 @@ export interface RetrainTarget {
   dimensionId: string;
   anchor: Anchor;
   packId: PackId;
-  /** 0=new, 1=1d, 2=3d, 3=7d, 4=21d → retired after passing at 4. */
+  /** 1=1d, 2=3d, 3=7d. Legacy stores may still contain 0/4. */
   stage: 0 | 1 | 2 | 3 | 4;
   dueAt: number;
   passesInRow: number;
-  history: { at: number; probeId: string; score?: number; selfGrade?: SelfGrade }[];
+  history: { at: number; probeId: string; question?: string; answer?: string; score?: number; selfGrade?: SelfGrade }[];
+  draft?: { prompt: Probe; answer: string; selfGrade?: SelfGrade };
   retired: boolean;
 }
 
 export interface Submission {
   id: string;
   label: string;
+  studentName?: string;
+  studentRef?: string;
   material: string;
   materialKind: MaterialKind;
   /** The generated probe set lives as a Session with mode 'class'. */
@@ -153,6 +164,9 @@ export interface Submission {
   status: 'pending' | 'generating' | 'ready' | 'error';
   error?: string;
   result?: ResultTicket;
+  /** Returned result links are student-controlled until the instructor reviews them. */
+  resultReview?: 'unverified' | 'reviewed';
+  resultReviewedAt?: number;
 }
 
 export interface Cohort {
@@ -162,6 +176,8 @@ export interface Cohort {
   preset: RunPreset;
   difficulty: Difficulty;
   createdAt: number;
+  occasion?: string;
+  occasionAt?: number;
   submissions: Submission[];
   aggregate?: Aggregate;
   isDemo?: boolean;
@@ -178,8 +194,8 @@ export interface Aggregate {
 export interface ResultTicket {
   v: 2; kind: 'result';
   submissionId: string; cohortId: string;
-  probes: Pick<Probe, 'id' | 'dimensionId' | 'selfGrade' | 'ai' | 'divergence'>[];
-  ownershipIndex: number; calibration: number; at: number;
+  probes: Pick<Probe, 'id' | 'answer' | 'answerMode' | 'committedAt' | 'selfGrade' | 'manualScore' | 'ai' | 'divergence'>[];
+  at: number;
 }
 
 export interface StudentTicket {
@@ -200,15 +216,12 @@ export interface Settings {
   apiBase: string;
   apiKey: string;
   model: string;
-  count: 4 | 6 | 8 | 10 | 12;
+  count: 4 | 5 | 6 | 7;
   preset: RunPreset;
   difficulty: Difficulty;
   theme: 'paper' | 'slate' | 'system';
   language: 'en' | 'zh-CN' | 'auto';
   voiceEnabled: boolean;
-  timersEnabled: boolean;
-  /** false → score every probe at the end of the run instead of on commit. */
-  scoreOnCommit: boolean;
 }
 
 export interface UiState {
@@ -216,6 +229,7 @@ export interface UiState {
   lastRoute?: string;
   keyBannerDismissedAt?: number;
   migratedV1?: boolean;
+  lastSessionId?: string;
 }
 
 export interface StoreV2 {

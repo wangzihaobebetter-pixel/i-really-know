@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useState } from 'react';
 import { useStore, selectCohort } from '../../store';
 import { dimensionLabel } from '../../packs';
 import { useRoute, useNavigate } from '../../router';
@@ -6,6 +6,7 @@ import { useT, useLang } from '../../i18n';
 import { AnchoredText, Button, Callout, Mark, MarginNote } from '../../ui';
 import { divergence, verdictOf } from '../../lib/analysis';
 import { formatDate } from '../../lib/session-ops';
+import { exportElementPdf } from '../../lib/pdf';
 
 /**
  * THE EVIDENCE SHEET (P3 §5.3). One per student.
@@ -27,11 +28,15 @@ export default function StudentSheetScreen() {
   const t = useT();
   const lang = useLang();
   const nav = useNavigate();
+  const documentRef = useRef<HTMLElement>(null);
+  const [pdfBusy, setPdfBusy] = useState(false);
+  const [pdfError, setPdfError] = useState('');
   const { cohortId, submissionId } = useRoute().params;
 
   const cohort = useStore(selectCohort(cohortId));
   const submission = cohort?.submissions.find((s) => s.id === submissionId);
   const session = useStore((s) => s.sessions.find((x) => x.id === submission?.sessionId));
+  const updateSubmission = useStore((s) => s.updateSubmission);
 
   if (!cohort || !submission || !session) {
     return (
@@ -64,23 +69,54 @@ export default function StudentSheetScreen() {
       : p.selfGrade === 'notmine' ? t('viva.selfNotmine')
       : t('sheet.notClaimed');
 
+  async function downloadPdf() {
+    if (!documentRef.current || !submission) return;
+    setPdfBusy(true);
+    setPdfError('');
+    try {
+      await exportElementPdf(documentRef.current, `${submission.studentName || submission.label}-evidence-sheet.pdf`);
+    } catch {
+      setPdfError(t('teacher4.pdfError'));
+    } finally {
+      setPdfBusy(false);
+    }
+  }
+
+  function markReviewed() {
+    if (!cohort || !submission) return;
+    updateSubmission(cohort.id, submission.id, { resultReview: 'reviewed', resultReviewedAt: Date.now() });
+  }
+
   return (
     <div className="col-doc stack">
       <div className="row-between no-print">
         <Button variant="ghost" onClick={() => nav('cohort', { cohortId: cohort.id })}>
           {t('common.action.back')}
         </Button>
-        <Button variant="secondary" onClick={() => window.print()}>{t('sheet.print')}</Button>
+        <div className="row wrap">
+          <Button variant="secondary" onClick={() => window.print()}>{t('sheet.print')}</Button>
+          <Button variant="primary" disabled={pdfBusy} onClick={() => void downloadPdf()}>{pdfBusy ? t('teacher4.pdfMaking') : t('teacher4.pdf')}</Button>
+        </div>
       </div>
+      {pdfError && <Callout tone="danger">{pdfError}</Callout>}
+      {submission.result && submission.resultReview !== 'reviewed' && (
+        <Callout
+          tone="action"
+          title={t('teacher4.reviewTitle')}
+          action={<Button size="sm" onClick={markReviewed}>{t('teacher4.reviewAction')}</Button>}
+        >
+          {t('teacher4.reviewBody')}
+        </Callout>
+      )}
 
-      <article className="doc">
+      <article className="doc" ref={documentRef}>
         {/* 1 — Masthead */}
         <header className="doc-masthead">
           <p className="t-micro" style={{ letterSpacing: '.08em' }}>{t('sheet.title')}</p>
           <h1 className="t-title" style={{ marginTop: 'var(--space-2)' }}>{submission.label}</h1>
           <dl className="t-small" style={{ marginTop: 'var(--space-4)', display: 'grid', gridTemplateColumns: 'auto 1fr', columnGap: 'var(--space-5)', rowGap: 'var(--space-2)' }}>
             <dt className="t-micro">{t('sheet.course')}</dt><dd>{cohort.name}</dd>
-            <dt className="t-micro">{t('sheet.student')}</dt><dd>{submission.label}</dd>
+            <dt className="t-micro">{t('sheet.student')}</dt><dd>{submission.studentName || submission.label}{submission.studentRef ? ` · ${submission.studentRef}` : ''}</dd>
             <dt className="t-micro">{t('sheet.date')}</dt><dd>{formatDate(session.completedAt ?? session.createdAt, lang)}</dd>
           </dl>
         </header>
@@ -88,6 +124,14 @@ export default function StudentSheetScreen() {
         {cohort.isDemo && (
           <p className="doc-method t-small" style={{ marginBottom: 'var(--space-5)' }}>
             {t('sheet.illustrative')}
+          </p>
+        )}
+
+        {submission.result && (
+          <p className="doc-method t-small" style={{ marginBottom: 'var(--space-5)' }}>
+            {submission.resultReview === 'reviewed' && submission.resultReviewedAt
+              ? t('teacher4.docReviewed', { date: formatDate(submission.resultReviewedAt, lang) })
+              : t('teacher4.docUnverified')}
           </p>
         )}
 

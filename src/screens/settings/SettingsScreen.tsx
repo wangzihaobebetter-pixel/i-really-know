@@ -2,6 +2,7 @@ import React, { useRef, useState } from 'react';
 import { useStore } from '../../store';
 import { PROVIDER_PRESETS } from '../../store/presets';
 import { useT } from '../../i18n';
+import { useNavigate } from '../../router';
 import {
   Button, Callout, Input, Segmented, Select, Sheet, Spinner, Toggle, useToast,
 } from '../../ui';
@@ -10,6 +11,7 @@ import type { Difficulty, ProviderId, RunPreset, Settings, StoreV2 } from '../..
 
 export default function SettingsScreen() {
   const t = useT();
+  const nav = useNavigate();
   const toast = useToast();
   const settings = useStore((s) => s.settings);
   const setSettings = useStore((s) => s.setSettings);
@@ -124,7 +126,7 @@ export default function SettingsScreen() {
               label={t('settings.count')}
               value={String(settings.count)}
               onChange={(e) => set('count', Number(e.target.value) as Settings['count'])}
-              options={[4, 6, 8, 10, 12].map((n) => ({ value: String(n), label: String(n) }))}
+              options={[4, 5, 6, 7].map((n) => ({ value: String(n), label: String(n) }))}
             />
             <div className="stack-tight">
               <span className="field-label">{t('settings.preset')}</span>
@@ -144,13 +146,6 @@ export default function SettingsScreen() {
                 options={(['foundations', 'standard', 'defense'] as Difficulty[]).map((d) => ({ value: d, label: t(`common.difficulty.${d}`) }))}
               />
             </div>
-            <Toggle
-              label={t('settings.scoreOnCommit')}
-              hint={t('settings.scoreOnCommitHint')}
-              checked={settings.scoreOnCommit}
-              onChange={(v) => set('scoreOnCommit', v)}
-            />
-            <Toggle label={t('settings.timers')} checked={settings.timersEnabled} onChange={(v) => set('timersEnabled', v)} />
             <Toggle label={t('settings.voice')} checked={settings.voiceEnabled} onChange={(v) => set('voiceEnabled', v)} />
           </div>
         </Sheet>
@@ -186,6 +181,16 @@ export default function SettingsScreen() {
                 ]}
               />
             </div>
+          </div>
+        </Sheet>
+      </section>
+
+      <section className="stack-tight teacher-entrance">
+        <h2 className="t-title">{t('teacher4.entranceTitle')}</h2>
+        <Sheet elevation={1}>
+          <div className="stack-tight">
+            <p className="t-body ink-2 measure">{t('teacher4.entranceBody')}</p>
+            <Button variant="secondary" onClick={() => nav('class')}>{t('teacher4.entranceAction')}</Button>
           </div>
         </Sheet>
       </section>

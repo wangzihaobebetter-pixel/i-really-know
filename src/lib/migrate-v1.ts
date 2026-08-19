@@ -118,9 +118,7 @@ export function migrateV1(): V1MigrationResult | null {
         model: state.settings.model,
         difficulty,
         provider: inferProvider(state.settings.apiBase),
-        count: ([4, 6, 8, 10, 12] as const).includes(state.settings.count as 4)
-          ? (state.settings.count as 4 | 6 | 8 | 10 | 12)
-          : 6,
+        count: Math.max(4, Math.min(7, Number(state.settings.count) || 6)) as Settings['count'],
       }
     : undefined;
 

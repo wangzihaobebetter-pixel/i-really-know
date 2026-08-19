@@ -21,9 +21,11 @@ export default function ClassScreen() {
 
   const [name, setName] = useState('');
   const [packId, setPackId] = useState<PackId>('cs');
+  const [occasion, setOccasion] = useState('');
+  const [occasionDate, setOccasionDate] = useState('');
 
   function create() {
-    if (!name.trim()) return;
+    if (!name.trim() || !occasion.trim() || !occasionDate) return;
     const cohort: Cohort = {
       id: id('c'),
       name: name.trim(),
@@ -31,10 +33,14 @@ export default function ClassScreen() {
       preset: settings.preset,
       difficulty: settings.difficulty,
       createdAt: now(),
+      occasion: occasion.trim(),
+      occasionAt: new Date(`${occasionDate}T12:00:00`).getTime(),
       submissions: [],
     };
     upsertCohort(cohort);
     setName('');
+    setOccasion('');
+    setOccasionDate('');
     nav('cohort', { cohortId: cohort.id });
   }
 
@@ -47,10 +53,15 @@ export default function ClassScreen() {
 
   return (
     <div className="col-read stack">
-      <header className="stack-tight">
-        <h1 className="t-display-2">{t('class.title')}</h1>
-        <p className="t-body ink-2 measure">{t('class.subtitle')}</p>
+      <header className="row-between wrap" style={{ alignItems: 'flex-start' }}>
+        <div className="stack-tight">
+          <h1 className="t-display-2">{t('class.title')}</h1>
+          <p className="t-body ink-2 measure">{t('class.subtitle')}</p>
+        </div>
+        <Button variant="ghost" onClick={() => nav('settings')}>{t('common.action.back')}</Button>
       </header>
+
+      <Callout tone="neutral">{t('teacher4.local')}</Callout>
 
       {/* The instructor tier is the business, so it has to be reviewable
           before anyone spends a token on it. */}
@@ -75,8 +86,18 @@ export default function ClassScreen() {
             onChange={(e) => setPackId(e.target.value as PackId)}
             options={PACKS.map((p) => ({ value: p.id, label: p.name }))}
           />
+          <Input
+            label={t('teacher4.event')}
+            value={occasion}
+            onChange={(e) => setOccasion(e.target.value)}
+            placeholder={t('bring4.occasionCustom')}
+          />
+          <label className="stack-tight">
+            <span className="field-label">{t('teacher4.eventDate')}</span>
+            <input className="control" type="date" value={occasionDate} onChange={(e) => setOccasionDate(e.target.value)} />
+          </label>
           <div className="row">
-            <Button variant="primary" onClick={create} disabled={!name.trim()}>{t('class.newCohort')}</Button>
+            <Button variant="primary" onClick={create} disabled={!name.trim() || !occasion.trim() || !occasionDate}>{t('class.newCohort')}</Button>
           </div>
         </div>
       </Sheet>

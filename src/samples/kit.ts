@@ -2,6 +2,8 @@ import type { Difficulty, PackId, ProbeKind, RunPreset, SelfGrade, Score } from 
 
 export interface SampleProbeDef {
   dimensionId: string;
+  /** Specific course concept for the instructor reteach map. */
+  concept?: string;
   kind: ProbeKind;
   quote: string;
   question: string;

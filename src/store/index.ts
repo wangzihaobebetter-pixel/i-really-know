@@ -25,12 +25,6 @@ export const DEFAULT_SETTINGS: Settings = {
   theme: 'system',
   language: 'auto',
   voiceEnabled: true,
-  /* P3 §6 and corpus 05 §2.1: silence is thinking time. v2 shipped a visible
-     countdown at 1:30 on the viva screen; a student watching a ring drain is
-     being pressured, not examined. The timer stays available in Settings for
-     anyone rehearsing a real timed viva, but it is OFF by default. */
-  timersEnabled: false,
-  scoreOnCommit: true,
 };
 
 const DEFAULT_UI: UiState = { firstOpenSeen: false };
@@ -110,6 +104,8 @@ export const useStore = create<Store>()(
           material: init.material,
           materialKind: init.materialKind ?? 'prose',
           materialLanguage: init.materialLanguage,
+          occasion: init.occasion,
+          occasionAt: init.occasionAt,
           createdAt: init.createdAt ?? now(),
           status: init.status ?? 'generating',
           mode: init.mode ?? 'viva',
@@ -169,6 +165,7 @@ export const useStore = create<Store>()(
           calibration: calibration(probes),
         };
         set({ sessions: get().sessions.map((x) => (x.id === sessionId ? next : x)) });
+        set({ ui: { ...get().ui, lastSessionId: sessionId } });
         return next;
       },
 
@@ -239,7 +236,10 @@ export const useStore = create<Store>()(
       },
 
       wipeAll: () =>
-        set({ sessions: [], cohorts: [], queue: [], ui: { ...DEFAULT_UI, firstOpenSeen: true } }),
+        set({
+          settings: { ...get().settings, apiKey: '' },
+          sessions: [], cohorts: [], queue: [], ui: { ...DEFAULT_UI, firstOpenSeen: true },
+        }),
 
       runV1Migration: () => {
         if (get().ui.migratedV1) return 0;

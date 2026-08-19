@@ -8,8 +8,11 @@
  *    new deploy is never hidden behind a stale cache. Falling back to the cached
  *    index.html keeps deep links working with no connection.
  */
-const CACHE = 'irk-v3';
-const CORE = ['./', './index.html', './manifest.webmanifest'];
+const CACHE = 'irk-__BUILD_ID__';
+// build-sw.mjs replaces the marker in dist/sw.js with every emitted lazy
+// chunk, font and icon. That makes a first successful load a complete offline
+// install rather than an offline shell with dead routes.
+const CORE = ['./', './index.html', './manifest.webmanifest', /*__PRECACHE__*/];
 
 const isImmutable = (url) =>
   url.pathname.includes('/assets/') && /-[A-Za-z0-9_-]{8,}\.(js|css|woff2?)$/.test(url.pathname);
@@ -17,9 +20,7 @@ const isImmutable = (url) =>
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE)
-      .then((c) => c.addAll(CORE))
-      .catch(() => undefined)
-      .then(() => self.skipWaiting()),
+      .then((c) => c.addAll(CORE)),
   );
 });
 

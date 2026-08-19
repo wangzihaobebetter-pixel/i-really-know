@@ -435,6 +435,16 @@ table.dt tbody tr:hover td { background: var(--paper-2); }
 .doc {
   background: #FFFFFF;
   color: #14161A;
+  --held: #10704B;
+  --half-held: #8A5A06;
+  --slipped: #4C4E7A;
+  --held-more: #0B6079;
+  --underclaimed: #0B6079;
+  --held-wash: #DEEBE6;
+  --half-held-wash: #EFE8DC;
+  --slipped-wash: #E6E6EC;
+  --held-more-wash: #DDE9EC;
+  --underclaimed-wash: #DDE9EC;
   border-radius: var(--r-control);
   border: 1px solid #D8D8D4;
   padding: var(--space-8) var(--space-7);

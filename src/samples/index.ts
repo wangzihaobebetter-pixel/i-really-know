@@ -48,6 +48,7 @@ export function buildSampleSession(def: SampleDef): Session {
   const probes: Probe[] = def.probes.map((p, i) => ({
     id: `${def.id}_p${i + 1}`,
     dimensionId: p.dimensionId,
+    concept: p.concept,
     kind: p.kind,
     anchor: { quote: p.quote, placed: false },
     question: p.question,
@@ -181,6 +182,8 @@ export function buildDemoCohort(): { cohort: Cohort; sessions: Session[] } {
       preset: 'standard',
       difficulty: 'standard',
       createdAt: now(),
+      occasion: 'seminar discussion',
+      occasionAt: now() + 7 * 86_400_000,
       isDemo: true,
       submissions: built.map(({ def, session }) => ({
         id: `sub_${def.id}`,

@@ -82,14 +82,15 @@ const GENERATE_SCHEMA = `OUTPUT — a single JSON object, exactly this shape:
   "probes": [
     {
       "dimensionId": "<one of the dimension ids above>",
+      "concept": "<canonical course concept or named choice, 2-8 words; use the same phrase when two submissions target the same concept>",
       "kind": "concept|method|provenance|counterfactual|blindspot|alternative",
       "anchor": { "quote": "<verbatim substring of the material, <=200 chars>" },
       "question": "<the probe, addressed to the student as 'you'>",
       "whyThisProbe": "<one sentence: what this reveals. Shown only after they commit an answer>",
       "reference": {
         "keyPoints": ["<=25 words", "<=25 words", "<=25 words"],
-        "ownedLooksLike": "<what a fully owned answer contains>",
-        "surfaceLooksLike": "<what a surface answer sounds like>"
+        "ownedLooksLike": "<what a fully held answer contains>",
+        "surfaceLooksLike": "<what a thin answer sounds like>"
       },
       "timerSec": <integer>,
       "difficulty": "foundations|standard|defense"
@@ -99,7 +100,7 @@ const GENERATE_SCHEMA = `OUTPUT — a single JSON object, exactly this shape:
 }
 
 Minimal example of one probe object:
-{"dimensionId":"provenance","kind":"provenance","anchor":{"quote":"threshold = 0.62"},"question":"Where did 0.62 come from, and what happens at 0.55?","whyThisProbe":"A borrowed constant has no story; an owned one has a tuning history.","reference":{"keyPoints":["Constant should trace to a validation choice","Sensitivity matters more than the value"],"ownedLooksLike":"Names how it was chosen and how sensitive the result is.","surfaceLooksLike":"Says it worked well."},"timerSec":75,"difficulty":"standard"}`;
+{"dimensionId":"provenance","concept":"decision-threshold selection","kind":"provenance","anchor":{"quote":"threshold = 0.62"},"question":"Where did 0.62 come from, and what happens at 0.55?","whyThisProbe":"A constant with no story behind it slips the first time someone asks where it came from.","reference":{"keyPoints":["Constant should trace to a validation choice","Sensitivity matters more than the value"],"ownedLooksLike":"Names how it was chosen and how sensitive the result is.","surfaceLooksLike":"Says it worked well."},"timerSec":75,"difficulty":"standard"}`;
 
 export function buildGeneratePrompt(
   session: Session, count: number, difficulty: Difficulty, uiLanguage: string,
@@ -144,7 +145,7 @@ Score what they demonstrated, not what they might know. Do not teach, do not cor
 
 WHAT THIS PROBE TARGETS: ${probe.whyThisProbe}
 
-REFERENCE (what an owned answer contains — for your judgement only, never quote it back):
+REFERENCE (what a held answer contains — for your judgement only, never quote it back):
 ${probe.reference.keyPoints.map((k) => `- ${k}`).join('\n')}
 
 RELEVANT EXCERPT OF THE STUDENT'S OWN SUBMISSION:
@@ -158,7 +159,7 @@ ${answer.slice(0, 6000)}
 ANSWER>>>
 
 OUTPUT — a single JSON object:
-{"score":0|1|2|3,"verdictLine":"<=18 words, second person (you/your), plain language. NAME WHAT HELD FIRST if anything held (e.g. \"Held. You gave the mechanism and what it beats.\"); otherwise name what was missing (e.g. \"Slipped here — you named the method, not the reason it beats X.\"). NEVER use any of: borrowed, illusion, not yours, wrong about yourself, accuse, AI-written, detected. Student-facing vocabulary the student sees: held / half-held / slipped / held — more than you thought. Instructor register (defended / partially defended / could not defend / not claimed) belongs on the instructor aggregate, never here.","evidence":{"present":["what they actually showed"],"missing":["what an owned answer would have contained"]},"parroting":true|false,"confidence":"low"|"med"|"high","examinerFollowUp":"<optional one-sentence follow-up question>"}`,
+{"score":0|1|2|3,"verdictLine":"<=18 words, second person (you/your), plain language. NAME WHAT HELD FIRST if anything held (e.g. \"Held. You gave the mechanism and what it beats.\"); otherwise name what was missing (e.g. \"Slipped here — you named the method, not the reason it beats X.\"). NEVER use any of: borrowed, illusion, not yours, wrong about yourself, accuse, AI-written, detected. Student-facing vocabulary the student sees: held / half-held / slipped / held — more than you thought. Instructor register (defended / partially defended / could not defend / not claimed) belongs on the instructor aggregate, never here.","evidence":{"present":["what they actually showed"],"missing":["what a held answer would have contained"]},"parroting":true|false,"confidence":"low"|"med"|"high","examinerFollowUp":"<optional one-sentence follow-up question>"}`,
   };
 }
 
@@ -173,7 +174,7 @@ export function buildDiagnosePrompt(session: Session, uiLanguage: string): { sys
 
 This function is now used ONLY by the instructor aggregate path (buildAggregatePrompt's neighbours), not by the student closing summary. The student-facing diagnose prompt was retired (FABLE-REDESIGN §8, row M11). You are writing the cohort summary of oral examinations across ${pack.name} submissions.
 Dimensions in play: ${pack.dimensions.map((d) => `${d.id} (${d.label})`).join(', ')}.
-Be direct and unsentimental. No praise, no encouragement, no next-steps that amount to doing the work for them. Under 180 words total. Write in ${uiLanguage}.
+Be candid, calm and specific. Acknowledge what the evidence supports without empty praise. Never offer next steps that amount to doing the work for them. Under 180 words total. Write in ${uiLanguage}.
 Use the closed INSTRUCTOR outcome vocabulary only: defended / partially defended / could not defend / not claimed. NEVER use any of: borrowed, illusion, not yours, wrong about yourself, accuse, AI-written — these were retired from the student register and do not belong on the instructor sheet either. "Could not defend" replaces what earlier drafts called "borrowed"; "rated high but could not defend" replaces what earlier drafts called "illusion".`,
     user: `PER-PROBE RESULTS:
 ${table}
@@ -184,9 +185,10 @@ OUTPUT — a single JSON object:
 }
 
 export function buildVariantPrompt(
-  session: Session, probe: Probe, uiLanguage: string,
+  session: Session, probe: Probe, uiLanguage: string, priorQuestions: string[] = [],
 ): { system: string; user: string } {
   const pack = getPack(session.packId);
+  const previous = priorQuestions.filter(Boolean).slice(-6);
   return {
     system: `${BASE_INVARIANTS}\n\n${packBlock(pack)}\n\nYou are producing ONE retraining probe. Same dimensionId, same anchor, DIFFERENT kind and a different angle of attack. If the prior answer parroted the material, demand mechanism. If it failed a perturbation, change the lever. Write in ${uiLanguage}.`,
     user: `ORIGINAL PROBE: ${probe.question}
@@ -194,8 +196,10 @@ DIMENSION: ${probe.dimensionId}
 ANCHOR (reuse verbatim): ${probe.anchor.quote}
 THEIR PRIOR ANSWER: ${(probe.answer ?? '(no answer)').slice(0, 1500)}
 PRIOR SCORE: ${probe.ai?.score ?? 'unscored'}${probe.ai ? ` — ${probe.ai.verdictLine}` : ''}
+PREVIOUS RETRAINING QUESTIONS — do not repeat or lightly paraphrase any of these:
+${previous.length ? previous.map((question, index) => `${index + 1}. ${question.slice(0, 2_000)}`).join('\n') : '(none yet)'}
 
-OUTPUT — a single probe object with the same shape as GENERATE's probe entries (dimensionId, kind, anchor, question, whyThisProbe, reference, timerSec, difficulty).`,
+OUTPUT — a single probe object with the same shape as GENERATE's probe entries (dimensionId, concept, kind, anchor, question, whyThisProbe, reference, timerSec, difficulty).`,
   };
 }
 

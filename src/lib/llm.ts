@@ -183,10 +183,11 @@ function normaliseProbe(raw: unknown, packId: PackId, difficulty: Difficulty, ma
   return {
     id: id('p'),
     dimensionId,
+    concept: str(r.concept).trim().slice(0, 80) || undefined,
     kind,
     anchor: placeAnchor(material, { quote, placed: false }),
     question,
-    whyThisProbe: str(r.whyThisProbe, 'Tests whether this is owned or borrowed.'),
+    whyThisProbe: str(r.whyThisProbe, 'Tests whether the reasoning behind this choice can be explained.'),
     reference: {
       keyPoints: strList(ref.keyPoints).slice(0, 3),
       ownedLooksLike: str(ref.ownedLooksLike),
@@ -275,9 +276,10 @@ export async function diagnose(
 }
 
 export async function variant(
-  settings: Settings, session: Session, probe: Probe, uiLanguage: string, opts: CallOpts = {},
+  settings: Settings, session: Session, probe: Probe, uiLanguage: string,
+  priorQuestions: string[] = [], opts: CallOpts = {},
 ): Promise<Probe> {
-  const { system, user } = buildVariantPrompt(session, probe, uiLanguage);
+  const { system, user } = buildVariantPrompt(session, probe, uiLanguage, priorQuestions);
   const raw = await chat(settings, { system, user, temperature: 0.8, maxTokens: 900, json: true }, opts);
   const d = await parseOrRepair(settings, raw, opts);
   const next = normaliseProbe(d, session.packId, probe.difficulty, session.material);
