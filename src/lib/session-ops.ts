@@ -96,24 +96,46 @@ export function localFollowupVariant(probe: Probe, target: RetrainTarget, lang: 
     'Take this part of your work from the other direction: what would have to change for its reasoning no longer to hold?',
     'Explain the mechanism behind this part without repeating its wording. Where is the nearest boundary case?',
     'State the claim in different words, then name one weakness or exception it does not cover.',
+    'What evidence would make you revise this part, and why would that evidence matter?',
+    'Compare this part with the nearest similar idea. What distinction keeps the two from collapsing into one?',
   ];
   const zh = [
     '从相反方向看这部分：什么条件一变，这里的推理就不再成立？',
     '不要复述原句，说明这部分背后的机制；离它最近的边界情况是什么？',
     '换一种说法讲出这里的主张，再指出它没有覆盖的一个弱点或例外。',
+    '什么证据会让你修改这里的说法？为什么那条证据足以改变判断？',
+    '把这部分和最接近的另一个概念比较：哪一个区别让它们不能混为一谈？',
   ];
   const attempt = target.history.length;
-  const supplied = attempt === 0 && probe.variant?.question.trim() && probe.variant.question.trim() !== probe.question.trim()
-    ? probe.variant
-    : undefined;
-  const fallbackIndex = probe.variant ? Math.max(0, attempt - 1) % en.length : attempt % en.length;
+  const normalize = (value: string | undefined) => value?.trim().replace(/\s+/g, ' ').toLocaleLowerCase() ?? '';
+  const original = normalize(probe.question);
+  const suppliedQuestion = probe.variant?.question.trim();
+  const suppliedMatchesLanguage = suppliedQuestion
+    ? (lang === 'zh-CN' ? /[\u3400-\u9fff]/.test(suppliedQuestion) : !/[\u3400-\u9fff]/.test(suppliedQuestion))
+    : false;
+  const whyThisProbe = lang === 'zh-CN'
+    ? '同一概念，换一个机制、扰动或边界角度再问。'
+    : 'The same concept, returned through a mechanism, perturbation, or boundary angle.';
+  const rawCandidates = [
+    ...(suppliedQuestion && suppliedMatchesLanguage && normalize(suppliedQuestion) !== original ? [probe.variant!] : []),
+    ...(lang === 'zh-CN' ? zh : en).map((question) => ({ question, whyThisProbe })),
+  ];
+  const seen = new Set([original]);
+  const candidates = rawCandidates.filter((candidate) => {
+    const question = normalize(candidate.question);
+    if (!question || seen.has(question)) return false;
+    seen.add(question);
+    return true;
+  });
+  const used = new Set(target.history.map((item) => normalize(item.question)).filter(Boolean));
+  const selected = candidates.find((candidate) => !used.has(normalize(candidate.question)))
+    ?? candidates[attempt % Math.max(1, candidates.length)]
+    ?? { question: (lang === 'zh-CN' ? zh : en)[0], whyThisProbe };
   return {
     ...probe,
     id: `${probe.id}_again_${attempt}`,
-    question: supplied?.question ?? (lang === 'zh-CN' ? zh : en)[fallbackIndex],
-    whyThisProbe: supplied?.whyThisProbe ?? (lang === 'zh-CN'
-      ? '同一概念，换一个机制、扰动或边界角度再问。'
-      : 'The same concept, returned through a mechanism, perturbation, or boundary angle.'),
+    question: selected.question,
+    whyThisProbe: selected.whyThisProbe ?? whyThisProbe,
   };
 }
 
@@ -136,7 +158,7 @@ export function gradeTarget(
     passesInRow,
     stage,
     dueAt: now() + STAGE_DAYS[stage] * DAY_MS,
-    retired: target.stage >= 3 && passesInRow >= 3,
+    retired: passesInRow >= 2,
   };
 }
 

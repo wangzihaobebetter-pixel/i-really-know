@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { ArrowLeft, ArrowRight, ChevronDown, Mic, Square } from 'lucide-react';
+import { ArrowLeft, ArrowRight, ArrowUp, ChevronDown, Mic, Square } from 'lucide-react';
 import { selectHasKey, selectSession, useStore } from '../../store';
 import { useNavigate, useRoute } from '../../router';
 import { useLang, useT } from '../../i18n';
@@ -7,6 +7,7 @@ import { AnchoredText, Button, Mark, Sheet, Spinner } from '../../ui';
 import { verdictOf } from '../../lib/analysis';
 import { describeError, score as scoreProbe } from '../../lib/llm';
 import { isSpeechSupported, startDictation, type Dictation } from '../../lib/speech';
+import { targetsFromSession } from '../../lib/session-ops';
 import type { Score, SelfGrade } from '../../types';
 
 type Phase = 'answering' | 'blankplan' | 'selfgrade' | 'scoring' | 'manualgrade' | 'revealed';
@@ -22,6 +23,7 @@ export default function VivaScreen() {
   const updateSession = useStore((state) => state.updateSession);
   const updateProbe = useStore((state) => state.updateProbe);
   const finalizeSession = useStore((state) => state.finalizeSession);
+  const addTargets = useStore((state) => state.addTargets);
 
   const [index, setIndex] = useState(0);
   const [phase, setPhase] = useState<Phase>('answering');
@@ -175,7 +177,8 @@ export default function VivaScreen() {
       setIndex((value) => value + 1);
       return;
     }
-    finalizeSession(session.id);
+    const completed = finalizeSession(session.id);
+    if (completed) addTargets(targetsFromSession(completed));
     nav('result', { sessionId: session.id });
   }
 
@@ -194,59 +197,64 @@ export default function VivaScreen() {
     ?? (committed.manualScore !== undefined
       ? t(committed.manualScore >= 2 ? 'run4.oneLineHeld' : committed.manualScore === 1 ? 'run4.oneLineHalf' : 'run4.oneLineSlipped')
       : scoreError || t('run4.scoreFailed'));
-  const showQuestion = phase === 'answering' || phase === 'blankplan';
+  const showExchange = phase === 'answering' || phase === 'blankplan' || phase === 'revealed';
 
   return (
-    <main className="run-screen page-enter" data-testid="run-screen">
-      <header className="run-topbar">
-        <button type="button" className="run-leave" onClick={() => nav('today')}><ArrowLeft size={16} />{t('run4.leave')}</button>
-        <span className="t-small ink-3">{t('run4.questionOf', { n: index + 1, total })}</span>
+    <main className="run-v5 page-enter" data-testid="run-screen">
+      <header className="v5-run-top">
+        <button type="button" className="run-leave" onClick={() => nav('today')}><ArrowLeft size={17} />{t('v5.runLeave')}</button>
+        <span className="visually-hidden">{t('run4.questionOf', { n: index + 1, total })}</span>
       </header>
 
-      <div className="run-progress" aria-label={t('run4.questionOf', { n: index + 1, total })}>
+      <div className="v5-run-progress" style={{ gridTemplateColumns: `repeat(${Math.max(1, total)}, minmax(20px, 1fr))` }} aria-label={t('run4.questionOf', { n: index + 1, total })}>
         {session.probes.map((item, itemIndex) => (
           <span key={item.id} data-state={itemIndex < index ? 'done' : itemIndex === index ? 'current' : 'later'} />
         ))}
       </div>
 
-      {showQuestion && (
-        <div className="run-question-stack stack">
+      {showExchange && (
+        <div className="v5-exchange">
           {source?.text && (
-            <Sheet elevation={0} className="run-source" padding="var(--space-4) var(--space-5)">
-              <span className="t-micro ink-3">{t('run4.source')}</span>
+            <Sheet elevation={0} className={`v5-run-source living-source ${phase === 'revealed' ? `is-${verdict}` : ''}`} padding="var(--space-4) var(--space-5)">
+              <span className="v5-source-label">{t('v5.runSource')}</span>
               <div data-expanded={sourceOpen}>
                 {source.anchor
-                  ? <AnchoredText text={source.text} mode={session.materialKind === 'code' ? 'code' : 'prose'} anchors={[source.anchor]} />
+                  ? <AnchoredText text={source.text} mode={session.materialKind === 'code' ? 'code' : 'prose'} anchors={[phase === 'revealed' ? { ...source.anchor, verdict } : source.anchor]} />
                   : <p className="t-small ink-2">{source.text}</p>}
               </div>
               {source.text.length > 260 && <button type="button" className="text-action" onClick={() => setSourceOpen((value) => !value)}>{sourceOpen ? t('run4.sourceLess') : t('run4.sourceMore')}</button>}
             </Sheet>
           )}
-          <p className="run-question t-question measure">{probe.question}</p>
+          <section className="v5-question-block">
+            <p className="run-question">{probe.question}</p>
+            <p className="v5-question-guidance">{t('v5.runGuidance')}</p>
+          </section>
         </div>
       )}
 
       {phase === 'answering' && (
-        <section className="run-answer stack-tight">
-          {settings.voiceEnabled && (
-            <div className="voice-slot">
-              {speechAvailable ? (
-                <>
-                  <button type="button" className="mic-btn" data-recording={recording} onClick={toggleVoice} aria-pressed={recording} aria-label={recording ? t('run4.voiceStop') : t('run4.voiceStart')}>
-                    {recording ? <Square size={21} /> : <Mic size={25} />}
-                  </button>
-                  <span className="t-small ink-2">{recording ? t('run4.voiceListening') : t('run4.voiceStart')}</span>
-                </>
-              ) : <span className="t-small ink-3">{t('run4.voiceUnsupported')}</span>}
-            </div>
-          )}
-          {voiceError && voiceError !== 'unsupported' && <p className="t-small ink-3">{t('run4.voiceUnsupported')}</p>}
-          <label className="field-label" htmlFor="run-answer">{t('run4.answer')}</label>
-          <textarea id="run-answer" className="control run-answer-box" rows={5} value={answer} onChange={(event) => setAnswer(event.target.value)} />
-          <p className="field-hint">{t('run4.answerHint')}</p>
-          <div className="run-actions">
-            <Button size="lg" variant="primary" onClick={commitAnswer} disabled={!answer.trim()}>{t('run4.commit')}</Button>
-            <Button variant="ghost" onClick={() => { stopVoice(); setPhase('blankplan'); }}>{t('run4.blank')}</Button>
+        <section className="v5-answer-dock">
+          <div className="v5-answer-row">
+            {settings.voiceEnabled && speechAvailable ? (
+              <button type="button" className="v5-mic" data-recording={recording} onClick={toggleVoice} aria-pressed={recording} aria-label={recording ? t('run4.voiceStop') : t('run4.voiceStart')}>
+                {recording ? <Square size={19} /> : <Mic size={23} />}
+              </button>
+            ) : <span className="v5-mic is-disabled" aria-hidden><Mic size={22} /></span>}
+            <textarea
+              id="run-answer"
+              className="v5-answer-input"
+              rows={1}
+              value={answer}
+              placeholder={t('v5.runPlaceholder')}
+              onChange={(event) => setAnswer(event.target.value)}
+              aria-label={t('run4.answer')}
+            />
+            <button type="button" className="v5-send" onClick={commitAnswer} disabled={!answer.trim()} aria-label={t('run4.commit')}><ArrowUp size={22} /></button>
+          </div>
+          {voiceError && voiceError !== 'unsupported' && <p className="v5-dock-error">{t('run4.voiceUnsupported')}</p>}
+          <div className="v5-dock-meta">
+            <span>{t('v5.runSavedAfter')}</span>
+            <button type="button" onClick={() => { stopVoice(); setPhase('blankplan'); }}>{t('v5.runBlank')}</button>
           </div>
         </section>
       )}
@@ -263,36 +271,36 @@ export default function VivaScreen() {
       )}
 
       {phase === 'selfgrade' && (
-        <section className="run-focus-card selfgrade stack">
-          <div className="stack-tight">
-            <h1 className="t-sentence-small">{t('run4.self')}</h1>
-            <p className="t-small ink-3 measure">{t('run4.selfWhy')}</p>
-          </div>
-          <blockquote className="answer-quote">“{answer}”</blockquote>
-          <div className="selfgrade-opts">
+        <section className="v5-self-read">
+          <span className="v5-eyebrow">{t('v5.selfEyebrow')}</span>
+          <h1>{t('v5.selfTitle')}</h1>
+          <div className="v5-self-options">
             {([
-              ['owned', t('run4.holds')],
-              ['shaky', t('run4.unsure')],
-              ['notmine', t('run4.slips')],
+              ['owned', t('v5.selfHeld')],
+              ['shaky', t('v5.selfUnsure')],
+              ['notmine', t('v5.selfSlipped')],
             ] as [SelfGrade, string][]).map(([value, label]) => (
-              <button type="button" className="selfgrade-opt" key={value} onClick={() => void chooseSelfGrade(value)}>{label}</button>
+              <button type="button" key={value} onClick={() => void chooseSelfGrade(value)}><span>{label}</span><ArrowRight size={20} /></button>
             ))}
           </div>
+          <p>{t('v5.selfHint')}</p>
         </section>
       )}
 
       {phase === 'scoring' && (
-        <section className="run-focus-card run-wait stack">
-          <Spinner label={t('run4.marking')} />
+        <section className="v5-reading-answer">
+          <span className="living-typing" aria-hidden><i /><i /><i /></span>
+          <Spinner label={t('v5.scoring')} />
           <blockquote className="answer-quote">“{answer}”</blockquote>
         </section>
       )}
 
       {phase === 'manualgrade' && (
-        <section className="run-focus-card stack">
-          <div className="stack-tight">
-            <h1 className="t-sentence-small">{t('run4.manualTitle')}</h1>
-            <p className="t-small ink-3 measure">{t('run4.manualBody')}</p>
+        <section className="v5-manual-mark">
+          <div>
+            <span className="v5-eyebrow">{t('v5.manualEyebrow')}</span>
+            <h1>{t('v5.manualTitle')}</h1>
+            <p>{t('v5.manualBody')}</p>
           </div>
           <div className="rubric-quiet">
             <p className="t-body-strong">{probe.reference.ownedLooksLike}</p>
@@ -307,16 +315,16 @@ export default function VivaScreen() {
       )}
 
       {phase === 'revealed' && (
-        <section className="run-reveal stack">
-          <div className="one-line-verdict run-feedback-line" data-verdict={verdict}>
+        <section className="v5-reply-state">
+          <div className="v5-reply-line" data-verdict={verdict}>
             <Mark verdict={verdict} />
             <p>{oneLine}</p>
           </div>
           {scoreError && !hasJudgment && (
             <Button variant="secondary" onClick={() => setPhase('manualgrade')}>{t('run4.markMyself')}</Button>
           )}
-          <details className="run-details">
-            <summary>{t('run4.details')}<ChevronDown size={17} aria-hidden /></summary>
+          <details className="run-details v5-reply-details">
+            <summary>{t('v5.replyDetails')}<ChevronDown size={17} aria-hidden /></summary>
             <div className="stack">
               <div className="stack-tight"><span className="t-micro ink-3">{t('run4.answer')}</span><blockquote className="answer-quote">“{committed.answer}”</blockquote></div>
               <div className="stack-tight"><span className="t-micro ink-3">{t('run4.why')}</span><p className="t-small ink-2 measure">{probe.whyThisProbe}</p></div>
@@ -324,8 +332,8 @@ export default function VivaScreen() {
             </div>
           </details>
           {hasJudgment && (
-            <Button size="lg" variant="primary" iconRight={<ArrowRight size={18} />} onClick={next}>
-              {index < total - 1 ? t('run4.next') : t('run4.finish')}
+            <Button size="lg" block variant="primary" iconRight={<ArrowRight size={18} />} onClick={next}>
+              {index < total - 1 ? t('v5.replyNext') : t('v5.replyFinish')}
             </Button>
           )}
         </section>

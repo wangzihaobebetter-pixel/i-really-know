@@ -74,6 +74,18 @@ async function measureSet(page, theme, surface, samples, rows) {
   }
 }
 
+async function chooseTheme(page, theme) {
+  await page.goto(`${APP}#/settings`, { waitUntil: 'networkidle0' });
+  await page.waitForSelector('.settings-v5');
+  const label = theme === 'slate' ? 'Night' : 'Sunlit';
+  await page.evaluate((wanted) => {
+    const button = [...document.querySelectorAll('button')].find((item) => item.textContent.trim() === wanted);
+    if (!button) throw new Error(`Missing theme button ${wanted}`);
+    button.click();
+  }, label);
+  await page.waitForFunction((expected) => document.documentElement.dataset.theme === expected, {}, theme);
+}
+
 (async () => {
   const browser = await puppeteer.launch({ executablePath: CHROME, headless: true, userDataDir: profile, args: ['--lang=en-US'] });
   const rows = [];
@@ -82,17 +94,17 @@ async function measureSet(page, theme, surface, samples, rows) {
     await page.evaluateOnNewDocument(() => Object.defineProperty(navigator, 'language', { get: () => 'en-US' }));
     await page.setViewport({ width: 390, height: 844, isMobile: true, hasTouch: true });
     for (const theme of ['paper', 'slate']) {
-      await page.emulateMediaFeatures([{ name: 'prefers-color-scheme', value: theme === 'slate' ? 'dark' : 'light' }]);
+      await chooseTheme(page, theme);
       await page.goto(`${APP}#/welcome`, { waitUntil: 'networkidle0' });
       await page.waitForSelector('[data-testid="welcome-screen"]');
       await page.waitForFunction((expected) => document.documentElement.dataset.theme === expected, {}, theme);
       await measureSet(page, theme, 'welcome', [
-        ['sentence', '.welcome-copy .t-sentence'],
-        ['body', '.welcome-copy .t-body-lg'],
-        ['source label', '.welcome-paper .t-micro'],
-        ['source excerpt', '.welcome-paper p'],
-        ['skip action', '.welcome-topbar button'],
-        ['primary action', '.welcome-actions .btn-primary'],
+        ['sentence', '.welcome-v5-copy h1'],
+        ['body', '.welcome-v5-copy p'],
+        ['source label', '.welcome-passage > span'],
+        ['source excerpt', '.welcome-passage p'],
+        ['own-work action', '.welcome-v5-top > button'],
+        ['primary action', '.welcome-primary'],
       ], rows);
 
       await page.evaluate(() => {
@@ -105,7 +117,9 @@ async function measureSet(page, theme, surface, samples, rows) {
           <span class="ink-slipped">Slipped</span><span class="ink-held-more">Steadier</span>
           <span class="ink-accent">Action link</span><span class="ink-2">Secondary</span><span class="ink-3">Tertiary</span>
           <span class="bg-held">Held wash</span><span class="bg-half-held">Half wash</span>
-          <span class="bg-slipped">Slipped wash</span><span class="bg-held-more">Steadier wash</span>`;
+          <span class="bg-slipped">Slipped wash</span><span class="bg-held-more">Steadier wash</span>
+          <div class="next-room-card"><span class="next-room-top">Room date</span><span class="next-room-copy"><small>Saved place</small></span></div>
+          <div class="held-voice-card"><span>Own words label</span><small>Source line</small></div>`;
         document.body.appendChild(fixture);
       });
       await measureSet(page, theme, 'state-tokens', [
@@ -114,6 +128,8 @@ async function measureSet(page, theme, surface, samples, rows) {
         ['action', '#contrast-fixtures .ink-accent'], ['secondary', '#contrast-fixtures .ink-2'], ['tertiary', '#contrast-fixtures .ink-3'],
         ['held wash', '#contrast-fixtures .bg-held'], ['half wash', '#contrast-fixtures .bg-half-held'],
         ['slipped wash', '#contrast-fixtures .bg-slipped'], ['steadier wash', '#contrast-fixtures .bg-held-more'],
+        ['room meta', '#contrast-fixtures .next-room-top'], ['room detail', '#contrast-fixtures .next-room-copy small'],
+        ['own-words label', '#contrast-fixtures .held-voice-card > span'], ['own-words source', '#contrast-fixtures .held-voice-card small'],
       ], rows);
     }
 
@@ -123,7 +139,7 @@ async function measureSet(page, theme, surface, samples, rows) {
     await page.evaluate(() => [...document.querySelectorAll('button')].find((button) => button.textContent.includes('Load a demo cohort')).click());
     await page.waitForSelector('.teacher-list');
     for (const theme of ['paper', 'slate']) {
-      await page.emulateMediaFeatures([{ name: 'prefers-color-scheme', value: theme === 'slate' ? 'dark' : 'light' }]);
+      await chooseTheme(page, theme);
       await page.goto(`${APP}#/class/cohort_demo/s/sub_nur-antepartum`, { waitUntil: 'networkidle0' });
       await page.waitForSelector('article.doc');
       await page.waitForFunction((expected) => document.documentElement.dataset.theme === expected, {}, theme);
@@ -145,5 +161,5 @@ async function measureSet(page, theme, surface, samples, rows) {
     failures.forEach((failure) => console.error('  ✗ ' + failure));
     process.exit(1);
   }
-  console.log('verify-contrast: every sampled v4 surface meets WCAG AA ✓');
+  console.log('verify-contrast: every sampled v5 surface meets WCAG AA ✓');
 })();

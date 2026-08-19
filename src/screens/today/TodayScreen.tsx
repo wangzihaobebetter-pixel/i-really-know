@@ -1,12 +1,22 @@
 import React from 'react';
-import { ArrowRight, BookOpen, CalendarClock, Plus, RotateCcw } from 'lucide-react';
+import { ArrowRight, Plus, RotateCcw } from 'lucide-react';
 import { selectDueTargets, selectRealSessions, useStore } from '../../store';
 import { useNavigate } from '../../router';
 import { useLang, useT } from '../../i18n';
-import { Button, Sheet, Tag } from '../../ui';
-import { SAMPLES, buildSampleSession } from '../../samples';
-import { getPack } from '../../packs';
+import { buildFeaturedSampleSession } from '../../samples';
 import { formatDate, studentDestination } from '../../lib/session-ops';
+
+function occasionText(value: string | undefined, lang: 'en' | 'zh-CN') {
+  const labels: Record<string, [string, string]> = {
+    lab: ['Lab meeting', '组会'],
+    defense: ['Defence', '答辩'],
+    review: ['Code review', '代码 review'],
+    exam: ['Exam', '考试'],
+    other: ['Just checking', '就想看看'],
+  };
+  const pair = value ? labels[value] : undefined;
+  return pair ? pair[lang === 'zh-CN' ? 1 : 0] : (value || (lang === 'zh-CN' ? '就想看看' : 'Just checking'));
+}
 
 export default function TodayScreen() {
   const t = useT();
@@ -14,125 +24,121 @@ export default function TodayScreen() {
   const nav = useNavigate();
   const sessions = useStore(selectRealSessions);
   const due = useStore(selectDueTargets());
-  const upsertSession = useStore((s) => s.upsertSession);
-  const lastId = useStore((s) => s.ui.lastSessionId);
+  const upsertSession = useStore((state) => state.upsertSession);
+  const lastId = useStore((state) => state.ui.lastSessionId);
 
-  const real = sessions.filter((s) => !s.sampleId);
+  const real = sessions.filter((session) => !session.sampleId);
   const recent = [...real].sort((a, b) => (b.completedAt ?? b.createdAt) - (a.completedAt ?? a.createdAt));
-  const unfinished = recent.find((s) => s.status !== 'complete');
-  const remembered = sessions.find((s) => s.id === lastId) ?? recent[0];
+  const unfinished = recent.find((session) => session.status !== 'complete');
+  const remembered = sessions.find((session) => session.id === lastId) ?? recent[0];
   const completedExample = remembered?.sampleId && remembered.status === 'complete' ? remembered : undefined;
+  const dueSession = sessions.find((session) => session.id === due[0]?.sessionId);
   const first = real.length === 0;
+  const lead = unfinished ?? recent.find((session) => session.occasionAt && session.occasionAt > Date.now());
+  const left = unfinished ? Math.max(0, unfinished.probes.length - unfinished.probes.filter((probe) => probe.committedAt).length) : 0;
+  const leadMinutes = Math.max(2, Math.ceil(left * 1.6));
 
   function trySample() {
-    const session = buildSampleSession(SAMPLES[0]);
+    const session = buildFeaturedSampleSession(lang);
     upsertSession(session);
     nav('run', { sessionId: session.id });
   }
 
   return (
-    <div className="col-read stack page-enter today-page" data-testid="today-screen">
-      <header className="stack-tight today-intro">
-        <span className="t-micro ink-accent">{t('today4.eyebrow')}</span>
-        <h1 className="t-sentence">{first ? t('today4.firstTitle') : t('today4.returningTitle')}</h1>
-        <p className="t-body-lg ink-2 measure">{t('today4.firstBody')}</p>
+    <div className="col-read today-v5 page-enter" data-testid="today-screen">
+      <header className="product-wordmark" aria-label={t('v5.brand')}>
+        <span className="living-mark" aria-hidden />
+        <strong>{t('v5.brand')}</strong>
       </header>
 
-      <section className="today-main-action" aria-label={t('today4.newRun')}>
-        <button className="hero-action" type="button" onClick={() => nav('bring')}>
-          <span className="hero-action-icon" aria-hidden><Plus size={24} /></span>
-          <span className="grow">
-            <strong>{t('today4.newRun')}</strong>
-            <small>{lang === 'zh-CN' ? '原文 · 场合 · 日期' : 'Your words · the room · the date'}</small>
-          </span>
-          <ArrowRight size={21} aria-hidden />
-        </button>
-        {first && !completedExample && (
-          <Button variant="ghost" onClick={() => nav('welcome')} icon={<BookOpen size={17} />}>
-            {t('today4.watch')}
-          </Button>
-        )}
+      <section className="today-opening">
+        <span className="v5-eyebrow">{first ? t('v5.todayFirstKicker') : t('v5.todayReturnKicker')}</span>
+        <h1>{first ? t('v5.todayFirstTitle') : t('v5.todayReturnTitle')}</h1>
+        <p>{first ? t('v5.todayFirstBody') : t('v5.todayReturnBody')}</p>
       </section>
 
-      {completedExample && (
-        <button className="memory-card" type="button" onClick={() => nav('result', { sessionId: completedExample.id })}>
-          <span className="memory-line" aria-hidden />
-          <span className="stack-nano grow minw0">
-            <span className="t-micro ink-3">{t('today4.justFinished')}</span>
-            <strong className="t-body truncate">{completedExample.title}</strong>
+      {lead ? (
+        <button
+          className="next-room-card"
+          data-long={lead.title.length > 24}
+          type="button"
+          onClick={() => nav(studentDestination(lead), { sessionId: lead.id })}
+        >
+          <span className="next-room-top">
+            <span className="room-date">
+              {lead.occasionAt ? formatDate(lead.occasionAt, lang) : t('v5.nextRoom')} · {occasionText(lead.occasion, lang)}
+            </span>
+            {unfinished && <span>{t('v5.questionsLeft', { n: left })}</span>}
           </span>
-          <ArrowRight size={19} aria-hidden />
+          <span className="next-room-copy">
+            <strong>{lead.title}</strong>
+            <small>{unfinished
+              ? (lang === 'zh-CN' ? '上次停下的地方已经替你留好' : 'Your place from last time is saved')
+              : (lang === 'zh-CN' ? '标过的原文和站住的话都在' : 'Your marked page and held words are here')}</small>
+          </span>
+          <span className="room-orbit" aria-hidden><i /></span>
+          <span className="room-commit">
+            <span>{unfinished ? t('v5.continue', { n: leadMinutes }) : t('v5.openHeld')}</span>
+            <ArrowRight size={21} aria-hidden />
+          </span>
         </button>
-      )}
-
-      {unfinished && (
-        <button className="memory-card" type="button" onClick={() => nav(studentDestination(unfinished), { sessionId: unfinished.id })}>
-          <span className="memory-line" aria-hidden />
-          <span className="stack-nano grow">
-            <span className="t-micro ink-3">{t('today4.continue', { title: unfinished.title })}</span>
-            <strong className="t-body">{unfinished.probes.filter((p) => p.committedAt).length} / {unfinished.probes.length || '…'}</strong>
+      ) : (
+        <button className="new-room-card" type="button" onClick={() => nav('bring')}>
+          <span className="new-room-glyph" aria-hidden><Plus size={24} /></span>
+          <span className="new-room-copy">
+            <strong>{t('v5.newPieceTitle')}</strong>
+            <small>{t('v5.newPieceBody')}</small>
           </span>
-          <ArrowRight size={19} aria-hidden />
+          <span className="new-room-action">{t('v5.newPieceAction')} <ArrowRight size={19} /></span>
         </button>
       )}
 
       {due.length > 0 && (
-        <Sheet elevation={0} className="care-card" padding="var(--space-5)">
-          <div className="row" style={{ alignItems: 'flex-start' }}>
-            <span className="care-icon" aria-hidden><RotateCcw size={18} /></span>
-            <div className="stack-tight grow">
-              <h2 className="t-title">{t('today4.dueTitle')}</h2>
-              <p className="t-small ink-2 measure">{t('today4.dueBody')}</p>
-              <div><Button size="sm" variant="secondary" onClick={() => nav('followups')}>{t('today4.dueAction')}</Button></div>
-            </div>
-          </div>
-        </Sheet>
-      )}
-
-      {recent.length > 0 && (
-        <section className="stack-tight">
-          <div className="row-between">
-            <h2 className="t-title">{t('today4.recent')}</h2>
-            <button className="text-action" type="button" onClick={() => nav('work')}>{t('today4.openWork')}</button>
-          </div>
-          <div className="piece-list">
-            {recent.slice(0, 3).map((session) => (
-              <button
-                type="button"
-                className="piece-row"
-                key={session.id}
-                onClick={() => nav(studentDestination(session), { sessionId: session.id })}
-              >
-                <span className="piece-glyph" data-pack={session.packId} aria-hidden />
-                <span className="stack-nano grow minw0">
-                  <strong className="t-body truncate">{session.title}</strong>
-                  <span className="t-small ink-3 row wrap">
-                    <span>{getPack(session.packId).shortName}</span>
-                    {session.occasionAt && <><span aria-hidden>·</span><span>{formatDate(session.occasionAt, lang)}</span></>}
-                  </span>
-                </span>
-                <ArrowRight size={18} aria-hidden />
-              </button>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {first && !completedExample && (
-        <section className="sample-ribbon stack-tight">
-          <div className="row" style={{ gap: 'var(--space-2)' }}>
-            <CalendarClock size={16} aria-hidden />
-            <span className="t-micro ink-3">{t('today4.sample')}</span>
-          </div>
-          <button className="sample-ribbon-card" type="button" onClick={trySample}>
-            <Tag mono>{getPack(SAMPLES[0].packId).shortName}</Tag>
-            <span className="grow t-body-strong">{SAMPLES[0].title}</span>
+        <section className="today-kept">
+          <div className="v5-section-head"><h2>{t('v5.remembered')}</h2><span>{due.length}</span></div>
+          <button className="kept-question" type="button" onClick={() => nav('followups')}>
+            <span className="return-tile" aria-hidden><RotateCcw size={21} /></span>
+            <span className="kept-copy">
+              <strong>{t('v5.dueDifferent')}</strong>
+              <small>{t('v5.dueFrom', { title: dueSession?.title ?? remembered?.title ?? '' })}</small>
+            </span>
             <ArrowRight size={18} aria-hidden />
           </button>
         </section>
       )}
 
-      {remembered && !unfinished && !first && <span className="visually-hidden">{remembered.title}</span>}
+      {completedExample && !lead && (
+        <button className="held-memory" type="button" onClick={() => nav('result', { sessionId: completedExample.id })}>
+          <span className="held-memory-line" aria-hidden />
+          <span><small>{lang === 'zh-CN' ? '刚才有一句站住了' : 'Something just held'}</small><strong>{completedExample.title}</strong></span>
+          <ArrowRight size={18} aria-hidden />
+        </button>
+      )}
+
+      {(lead || due.length > 0) && (
+        <button className="bring-quiet" type="button" onClick={() => nav('bring')}>
+          <Plus size={17} aria-hidden />{t('v5.bringNew')}
+        </button>
+      )}
+
+      {first && !completedExample && (
+        <button className="sample-invitation" type="button" onClick={trySample}>
+          <span>{lang === 'zh-CN' ? '还不想交自己的？先过一份真实作业' : 'Not ready to bring yours? Try a real piece first'}</span>
+          <ArrowRight size={17} aria-hidden />
+        </button>
+      )}
+
+      {recent.length > 0 && (
+        <section className="today-recent">
+          <div className="v5-section-head"><h2>{lang === 'zh-CN' ? '最近带来的' : 'Recently brought'}</h2><button type="button" onClick={() => nav('work')}>{lang === 'zh-CN' ? '全部' : 'All'}</button></div>
+          {recent.slice(0, 2).map((session) => (
+            <button className="recent-piece" type="button" key={session.id} onClick={() => nav(studentDestination(session), { sessionId: session.id })}>
+              <span><strong>{session.title}</strong><small>{occasionText(session.occasion, lang)}{session.occasionAt ? ` · ${formatDate(session.occasionAt, lang)}` : ''}</small></span>
+              <ArrowRight size={17} aria-hidden />
+            </button>
+          ))}
+        </section>
+      )}
     </div>
   );
 }

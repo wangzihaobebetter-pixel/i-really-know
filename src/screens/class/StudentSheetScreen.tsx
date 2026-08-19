@@ -122,13 +122,13 @@ export default function StudentSheetScreen() {
         </header>
 
         {cohort.isDemo && (
-          <p className="doc-method t-small" style={{ marginBottom: 'var(--space-5)' }}>
+          <p className="doc-demo-note t-small" style={{ marginBottom: 'var(--space-5)' }}>
             {t('sheet.illustrative')}
           </p>
         )}
 
         {submission.result && (
-          <p className="doc-method t-small" style={{ marginBottom: 'var(--space-5)' }}>
+          <p className="doc-review-note t-small" style={{ marginBottom: 'var(--space-5)' }}>
             {submission.resultReview === 'reviewed' && submission.resultReviewedAt
               ? t('teacher4.docReviewed', { date: formatDate(submission.resultReviewedAt, lang) })
               : t('teacher4.docUnverified')}
@@ -138,7 +138,7 @@ export default function StudentSheetScreen() {
         {/* 2 — The method statement. Always present. This paragraph is what
                makes the sheet survive an appeal, and it is the document's most
                important element (P3 §5.3.2). */}
-        <section className="doc-method">
+        <section className="doc-method doc-method-statement">
           <p className="t-micro">{t('sheet.methodTitle')}</p>
           <p className="t-small" style={{ marginTop: 'var(--space-3)' }}>{t('sheet.method')}</p>
         </section>

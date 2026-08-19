@@ -1,10 +1,11 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { ArrowRight, Check, Circle, RotateCw } from 'lucide-react';
+import { ArrowRight, RotateCw } from 'lucide-react';
 import { selectSession, useStore } from '../../store';
 import { useNavigate, useRoute } from '../../router';
 import { useLang, useT } from '../../i18n';
 import { Button } from '../../ui';
 import { describeError, generate } from '../../lib/llm';
+import { PRESET_COUNTS } from '../../store/presets';
 
 const pending = new Map<string, Promise<void>>();
 
@@ -34,7 +35,7 @@ export default function ReadScreen() {
         const result = await generate(
           settings,
           session,
-          Math.min(7, Math.max(4, settings.count)),
+          PRESET_COUNTS[session.preset],
           session.difficulty,
           lang,
         );
@@ -85,24 +86,22 @@ export default function ReadScreen() {
   const failed = session.status === 'error' || Boolean(error);
 
   return (
-    <main className="reading-room page-enter" data-testid="read-screen">
-      <div className="col-read reading-layout">
-        <header className="stack-tight">
-          <span className="t-micro ink-accent">{t('read4.eyebrow')}</span>
-          <h1 className="t-sentence">{t('read4.title')}</h1>
-          <p className="t-small ink-3 truncate">{session.title}</p>
+    <main className="reading-v5 page-enter" data-testid="read-screen">
+      <div className="col-read reading-v5-layout">
+        <header className="reading-v5-head">
+          <span className="product-wordmark"><span className="living-mark" aria-hidden /><strong>{t('v5.brand')}</strong></span>
+          <span className="v5-eyebrow">{t('read4.eyebrow')}</span>
+          <h1>{t('read4.title')}</h1>
+          <p>{session.title}</p>
         </header>
 
-        <div className="reading-progress" aria-live="polite">
-          {stages.map((label, index) => (
-            <div className="reading-step" data-state={stage > index || ready ? 'done' : stage === index ? 'active' : 'later'} key={label}>
-              <span aria-hidden>{stage > index || ready ? <Check size={15} /> : <Circle size={13} />}</span>
-              <span>{label}</span>
-            </div>
-          ))}
+        <div className="reading-now" aria-live="polite">
+          <span className="reading-now-dot" data-ready={ready} aria-hidden />
+          <strong>{ready ? t('read4.ready') : stages[Math.min(stage, stages.length - 1)]}</strong>
+          <span>{ready ? `${session.probes.length}` : `${Math.min(stage + 1, stages.length)} / ${stages.length}`}</span>
         </div>
 
-        <div className="scan-page" aria-hidden>
+        <div className="scan-page reading-page-v5" aria-hidden>
           <div className="scan-beam" style={{ '--scan-stage': Math.min(stage, 2) } as React.CSSProperties} />
           {excerpt.map((line, index) => (
             <p key={`${index}-${line.slice(0, 12)}`} data-found={index < (stage + 1) * 3}>{line}</p>
@@ -110,22 +109,20 @@ export default function ReadScreen() {
         </div>
 
         {failed ? (
-          <section className="reading-finish stack-tight" role="alert">
-            <h2 className="t-title">{t('read4.error')}</h2>
-            <p className="t-small ink-2 measure">{error}</p>
+          <section className="reading-finish-v5" role="alert">
+            <h2>{t('read4.error')}</h2>
+            <p>{error}</p>
             <div className="row wrap">
               <Button variant="primary" icon={<RotateCw size={17} />} onClick={() => void readWork()}>{t('read4.retry')}</Button>
               <Button variant="ghost" onClick={() => nav('settings')}>{t('read4.settings')}</Button>
             </div>
           </section>
         ) : ready ? (
-          <section className="reading-finish stack-tight m-page-turn-in">
-            <h2 className="t-title">{t('read4.ready')}</h2>
-            <Button size="lg" variant="primary" block iconRight={<ArrowRight size={19} />} onClick={() => nav('run', { sessionId: session.id })}>
-              {t('read4.start')}
-            </Button>
+          <section className="reading-finish-v5 is-ready m-page-turn-in">
+            <p>{lang === 'zh-CN' ? `找到 ${session.probes.length} 处值得亲口讲清的地方。` : `Found ${session.probes.length} places worth explaining out loud.`}</p>
+            <Button size="lg" variant="primary" block iconRight={<ArrowRight size={19} />} onClick={() => nav('run', { sessionId: session.id })}>{t('read4.start')}</Button>
           </section>
-        ) : null}
+        ) : <p className="reading-patience">{lang === 'zh-CN' ? '不是在概括。是在找哪里值得问一个「为什么」。' : 'Not summarising. Looking for the places that deserve a “why.”'}</p>}
       </div>
     </main>
   );

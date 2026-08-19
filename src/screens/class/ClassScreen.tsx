@@ -52,7 +52,7 @@ export default function ClassScreen() {
   }
 
   return (
-    <div className="col-read stack">
+    <div className="col-data stack teacher-home-v5">
       <header className="row-between wrap" style={{ alignItems: 'flex-start' }}>
         <div className="stack-tight">
           <h1 className="t-display-2">{t('class.title')}</h1>

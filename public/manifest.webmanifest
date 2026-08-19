@@ -1,7 +1,7 @@
 {
   "name": "I Really Know · 我真会",
   "short_name": "我真会",
-  "description": "Learning verification, not learning acceleration. Submit work you have already written and find out how much of it you can actually defend.",
+  "description": "Bring work you already made. Hear the hard question before the room, and keep the words that held.",
   "lang": "en",
   "id": "./",
   "start_url": "./",
@@ -9,8 +9,8 @@
   "display": "standalone",
   "display_override": ["standalone", "minimal-ui"],
   "orientation": "portrait-primary",
-  "background_color": "#FAF8F3",
-  "theme_color": "#FAF8F3",
+  "background_color": "#F6F3EA",
+  "theme_color": "#F6F3EA",
   "categories": ["education", "productivity"],
   "icons": [
     { "src": "./icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },

@@ -7,20 +7,19 @@ import { resolveLang, setLang } from '../i18n';
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const theme = useStore((s) => s.settings.theme);
   const language = useStore((s) => s.settings.language);
+  const setSettings = useStore((s) => s.setSettings);
 
   useEffect(() => {
-    const mq = window.matchMedia('(prefers-color-scheme: dark)');
-    const apply = () => {
-      const resolved = theme === 'system' ? (mq.matches ? 'slate' : 'paper') : theme;
-      document.documentElement.dataset.theme = resolved;
-      document.querySelector('meta[name="theme-color"]')?.setAttribute(
-        'content', resolved === 'slate' ? '#141518' : '#F5F2EA',
-      );
-      writeUiSlice({ theme });
-    };
-    apply();
-    mq.addEventListener('change', apply);
-    return () => mq.removeEventListener('change', apply);
+    if (theme === 'system') setSettings({ theme: 'paper' });
+  }, [theme, setSettings]);
+
+  useEffect(() => {
+    const resolved = theme === 'slate' ? 'slate' : 'paper';
+    document.documentElement.dataset.theme = resolved;
+    document.querySelector('meta[name="theme-color"]')?.setAttribute(
+      'content', resolved === 'slate' ? '#17181B' : '#F6F3EA',
+    );
+    writeUiSlice({ theme: resolved });
   }, [theme]);
 
   useEffect(() => {
@@ -32,4 +31,4 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 }
 
 /** Read once at module load so the very first render already matches the pre-paint theme. */
-export const bootTheme = readUiSlice().theme ?? 'system';
+export const bootTheme = readUiSlice().theme === 'slate' ? 'slate' : 'paper';

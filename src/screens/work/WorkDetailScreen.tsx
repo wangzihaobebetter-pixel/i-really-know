@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
-import { selectSession, useStore } from '../../store';
+import { selectHasKey, selectSession, useStore } from '../../store';
 import { useNavigate, useRoute } from '../../router';
 import { useLang, useT } from '../../i18n';
 import { AnchoredText, Button, Mark, Sheet, Tag } from '../../ui';
@@ -16,6 +16,8 @@ export default function WorkDetailScreen() {
   const sessionId = useRoute().params.sessionId;
   const session = useStore(selectSession(sessionId));
   const sessions = useStore((state) => state.sessions);
+  const createSession = useStore((state) => state.createSession);
+  const hasKey = useStore(selectHasKey);
   const [activeId, setActiveId] = useState<string | undefined>();
 
   const anchors: TextAnchor[] = useMemo(() => session?.probes
@@ -23,13 +25,35 @@ export default function WorkDetailScreen() {
     .map((probe) => ({ id: probe.id, start: probe.anchor.start!, end: probe.anchor.end!, verdict: verdictOf(probe) })) ?? [], [session]);
 
   if (!session) return <div className="col-read stack"><p>{t('common.state.notfound.title')}</p><Button onClick={() => nav('work')}>{t('common.action.back')}</Button></div>;
+  const current = session;
+  const rootId = current.parentSessionId ?? current.id;
   const history = sessions
-    .filter((candidate) => candidate.title.trim().toLocaleLowerCase() === session.title.trim().toLocaleLowerCase())
+    .filter((candidate) => candidate.id === rootId || candidate.parentSessionId === rootId)
     .sort((a, b) => b.createdAt - a.createdAt);
   const activeProbe = session.probes.find((probe) => probe.id === activeId);
 
+  function runAgain() {
+    if (!hasKey) { nav('settings'); return; }
+    const next = createSession({
+      parentSessionId: rootId,
+      title: current.title,
+      material: current.material,
+      materialKind: current.materialKind,
+      materialLanguage: current.materialLanguage,
+      packId: current.packId,
+      detected: current.detected,
+      occasion: current.occasion,
+      occasionAt: current.occasionAt,
+      preset: current.preset,
+      difficulty: current.difficulty,
+      status: 'generating',
+      mode: 'viva',
+    });
+    nav('read', { sessionId: next.id });
+  }
+
   return (
-    <div className="col-doc stack page-enter" data-testid="work-detail-screen">
+    <div className="col-doc stack page-enter work-detail-v5" data-testid="work-detail-screen">
       <button type="button" className="text-action row" onClick={() => nav('work')}><ArrowLeft size={16} />{t('common.action.back')}</button>
       <header className="stack-tight">
         <div className="row wrap"><Tag mono>{getPack(session.packId).shortName}</Tag><span className="t-small ink-3">{history.length} {lang === 'zh-CN' ? '次过一遍' : 'run-throughs'}</span></div>
@@ -71,9 +95,14 @@ export default function WorkDetailScreen() {
         </div>
       </section>
 
-      {session.status === 'complete'
-        ? <Button variant="primary" onClick={() => nav('result', { sessionId: session.id })}>{t('work4.open')}</Button>
-        : <Button variant="primary" onClick={() => nav(studentDestination(session), { sessionId: session.id })}>{t('work4.incomplete')}</Button>}
+      <div className="row wrap">
+        {session.status === 'complete' ? (
+          <>
+            <Button variant="primary" onClick={runAgain}>{hasKey ? t('v5.runAgain') : t('v5.connectAgain')}</Button>
+            <Button variant="secondary" onClick={() => nav('result', { sessionId: session.id })}>{t('work4.open')}</Button>
+          </>
+        ) : <Button variant="primary" onClick={() => nav(studentDestination(session), { sessionId: session.id })}>{t('work4.incomplete')}</Button>}
+      </div>
     </div>
   );
 }

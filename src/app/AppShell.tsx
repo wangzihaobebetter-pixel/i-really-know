@@ -1,6 +1,6 @@
 import React, { Suspense, useEffect, useState } from 'react';
 import { useRoute, navigate, type Route } from '../router';
-import { NavRail, TabBar } from './Nav';
+import { NavRail, SettingsOrb, TabBar } from './Nav';
 import { ThemeProvider } from './theme';
 import { ToastHost, Skeleton, EmptyState, Button, useToast } from '../ui';
 import { useStore } from '../store';
@@ -19,7 +19,7 @@ function useViewport() {
 }
 
 /** Routes that take over the screen: no rail, no tab bar (§2.2). */
-const IMMERSIVE = new Set(['run', 'read', 'welcome', 'join']);
+const IMMERSIVE = new Set(['bring', 'run', 'read', 'result', 'followups', 'welcome', 'join']);
 const INSTRUCTOR = new Set(['class', 'cohort', 'studentSheet', 'reteach', 'return']);
 
 class RouteBoundary extends React.Component<{ children: React.ReactNode; onReset: () => void; errorTitle: string; errorAction: string }, { error: Error | null }> {
@@ -77,7 +77,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     <ThemeProvider>
       <ToastHost>
         {hydrated && <V1MigrationGate />}
-        {showStudentNav && (wide ? <NavRail route={route} /> : <TabBar route={route} />)}
+        {showStudentNav && (wide ? <NavRail route={route} /> : <><TabBar route={route} />{route.name !== 'settings' && <SettingsOrb />}</>)}
         <main
           data-surface={instructor ? 'instructor' : immersive ? 'immersive' : 'student'}
           style={{

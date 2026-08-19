@@ -19,6 +19,7 @@ import './i18n/common';
 import './i18n/screens';
 import './i18n/v3';
 import './i18n/v4';
+import './i18n/v5';
 
 // --- Student tabs / surfaces ---------------------------------------------
 const TodayScreen       = lazy(() => import('./screens/today/TodayScreen'));

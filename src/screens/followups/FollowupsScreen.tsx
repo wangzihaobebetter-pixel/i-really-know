@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { ArrowLeft, ArrowRight, ChevronDown, RotateCcw } from 'lucide-react';
+import { ArrowLeft, ArrowRight, ArrowUp, ChevronDown, RotateCcw } from 'lucide-react';
 import { selectHasKey, useStore } from '../../store';
 import { useNavigate } from '../../router';
 import { useLang, useT } from '../../i18n';
@@ -124,7 +124,7 @@ export default function FollowupsScreen() {
 
   if (!queue.length || (!due.length && phase === 'idle')) {
     return (
-      <div className="col-read stack page-enter" data-testid="followups-screen">
+      <div className="col-read stack page-enter followup-empty-v5" data-testid="followups-screen">
         <button type="button" className="text-action row" onClick={() => nav('today')}><ArrowLeft size={16} />{t('follow4.back')}</button>
         <header className="stack-tight">
           <span className="t-micro ink-accent">{t('follow4.eyebrow')}</span>
@@ -148,14 +148,14 @@ export default function FollowupsScreen() {
     const first = due[0];
     const found = probeForTarget(first);
     return (
-      <div className="col-read stack page-enter" data-testid="followups-screen">
+      <div className="col-read stack page-enter followup-door-v5" data-testid="followups-screen">
         <button type="button" className="text-action row" onClick={() => nav('today')}><ArrowLeft size={16} />{t('follow4.back')}</button>
         <header className="stack-tight">
           <span className="t-micro ink-accent">{t('follow4.eyebrow')}</span>
           <h1 className="t-sentence">{t('follow4.title')}</h1>
           <p className="t-body-lg ink-2 measure">{t('follow4.body')}</p>
         </header>
-        <Sheet elevation={1} className="return-card" padding="var(--space-6)">
+        <Sheet elevation={1} className="followup-card-v5" padding="var(--space-6)">
           <div className="stack">
             <span className="return-icon" aria-hidden><RotateCcw size={22} /></span>
             <p className="t-small ink-3">{t('follow4.from', { title: found.session?.title ?? '' })}</p>
@@ -168,44 +168,51 @@ export default function FollowupsScreen() {
   }
 
   return (
-    <main className="run-screen followup-run page-enter" data-testid="followups-screen">
-      <header className="run-topbar">
+    <main className="run-v5 followup-run-v5 page-enter" data-testid="followups-screen">
+      <header className="v5-run-top">
         <button type="button" className="run-leave" onClick={() => nav('today')}><ArrowLeft size={16} />{t('follow4.back')}</button>
         {source.session && <span className="t-small ink-3 truncate">{source.session.title}</span>}
       </header>
 
-      {phase === 'preparing' && <section className="run-focus-card"><Spinner label={t('follow4.preparing')} /></section>}
+      {phase === 'preparing' && <section className="v5-reading-answer"><span className="living-typing" aria-hidden><i /><i /><i /></span><Spinner label={t('follow4.preparing')} /></section>}
 
       {phase === 'answering' && prompt && (
-        <section className="stack">
-          <Sheet elevation={0} className="run-source" padding="var(--space-4) var(--space-5)">
-            <span className="t-micro ink-3">{t('follow4.from', { title: source.session?.title ?? '' })}</span>
-            <p className="t-small ink-2">{prompt.anchor.quote}</p>
-          </Sheet>
-          <p className="run-question measure">{prompt.question}</p>
-          <label className="field-label" htmlFor="follow-answer">{t('follow4.answer')}</label>
-          <textarea id="follow-answer" className="control run-answer-box" rows={5} value={answer} onChange={(event) => setAnswer(event.target.value)} />
-          <Button size="lg" variant="primary" disabled={!answer.trim()} onClick={commit}>{t('follow4.commit')}</Button>
-        </section>
+        <>
+          <section className="v5-exchange">
+            <Sheet elevation={0} className="v5-run-source living-source" padding="var(--space-4) var(--space-5)">
+              <span className="v5-source-label">{t('follow4.from', { title: source.session?.title ?? '' })}</span>
+              <div data-expanded="true"><p className="t-small ink-2">{prompt.anchor.quote}</p></div>
+            </Sheet>
+            <section className="v5-question-block"><p className="run-question">{prompt.question}</p><p className="v5-question-guidance">{t('follow4.body')}</p></section>
+          </section>
+          <section className="v5-answer-dock">
+            <div className="v5-answer-row is-text-only">
+              <textarea id="follow-answer" className="v5-answer-input" rows={1} value={answer} placeholder={t('v5.runPlaceholder')} onChange={(event) => setAnswer(event.target.value)} />
+              <button type="button" className="v5-send" disabled={!answer.trim()} onClick={commit} aria-label={t('follow4.commit')}><ArrowUp size={22} /></button>
+            </div>
+            <div className="v5-dock-meta"><span>{t('v5.runSavedAfter')}</span></div>
+          </section>
+        </>
       )}
 
       {phase === 'selfgrade' && (
-        <section className="run-focus-card selfgrade stack">
-          <h1 className="t-sentence-small">{t('follow4.self')}</h1>
-          <blockquote className="answer-quote">“{answer}”</blockquote>
-          <div className="selfgrade-opts">
-            <button type="button" className="selfgrade-opt" onClick={() => void chooseSelf('owned')}>{t('run4.holds')}</button>
-            <button type="button" className="selfgrade-opt" onClick={() => void chooseSelf('shaky')}>{t('run4.unsure')}</button>
-            <button type="button" className="selfgrade-opt" onClick={() => void chooseSelf('notmine')}>{t('run4.slips')}</button>
+        <section className="v5-self-read">
+          <span className="v5-eyebrow">{t('v5.selfEyebrow')}</span>
+          <h1>{t('follow4.self')}</h1>
+          <div className="v5-self-options">
+            <button type="button" onClick={() => void chooseSelf('owned')}><span>{t('v5.selfHeld')}</span><ArrowRight size={20} /></button>
+            <button type="button" onClick={() => void chooseSelf('shaky')}><span>{t('v5.selfUnsure')}</span><ArrowRight size={20} /></button>
+            <button type="button" onClick={() => void chooseSelf('notmine')}><span>{t('v5.selfSlipped')}</span><ArrowRight size={20} /></button>
           </div>
+          <p>{t('v5.selfHint')}</p>
         </section>
       )}
 
-      {phase === 'scoring' && <section className="run-focus-card"><Spinner label={t('run4.marking')} /></section>}
+      {phase === 'scoring' && <section className="v5-reading-answer"><span className="living-typing" aria-hidden><i /><i /><i /></span><Spinner label={t('v5.scoring')} /></section>}
 
       {phase === 'manualgrade' && prompt && (
-        <section className="run-focus-card stack">
-          <h1 className="t-sentence-small">{t('follow4.manual')}</h1>
+        <section className="v5-manual-mark">
+          <div><span className="v5-eyebrow">{t('v5.manualEyebrow')}</span><h1>{t('follow4.manual')}</h1><p>{t('v5.manualBody')}</p></div>
           <div className="rubric-quiet"><p className="t-body-strong">{prompt.reference.ownedLooksLike}</p><ul className="reference-list">{prompt.reference.keyPoints.map((point, index) => <li key={index}>{point}</li>)}</ul></div>
           <div className="manualgrade-opts">
             <button type="button" onClick={() => manualMark(3)}>{t('follow4.held')}</button>
@@ -216,12 +223,12 @@ export default function FollowupsScreen() {
       )}
 
       {phase === 'revealed' && prompt && (
-        <section className="run-reveal stack">
-          <div className="one-line-verdict" data-verdict={mark === null ? 'none' : mark >= 2 ? 'defended' : mark === 1 ? 'partial' : 'undefended'}><p>{line}</p></div>
+        <section className="v5-reply-state">
+          <div className="v5-reply-line" data-verdict={mark === null ? 'none' : mark >= 2 ? 'defended' : mark === 1 ? 'partial' : 'undefended'}><p>{line}</p></div>
           {modelError && <Button variant="secondary" onClick={() => setPhase('manualgrade')}>{t('run4.markMyself')}</Button>}
-          <details className="run-details"><summary>{t('follow4.details')}<ChevronDown size={17} /></summary><div className="rubric-quiet"><p>{prompt.reference.ownedLooksLike}</p><ul className="reference-list">{prompt.reference.keyPoints.map((point, index) => <li key={index}>{point}</li>)}</ul></div></details>
+          <details className="run-details v5-reply-details"><summary>{t('follow4.details')}<ChevronDown size={17} /></summary><div className="rubric-quiet"><p>{prompt.reference.ownedLooksLike}</p><ul className="reference-list">{prompt.reference.keyPoints.map((point, index) => <li key={index}>{point}</li>)}</ul></div></details>
           {mark !== null && (
-            <Button size="lg" variant="primary" iconRight={<ArrowRight size={18} />} onClick={closeAttempt}>{due.some((target) => target.id !== activeId) ? t('follow4.next') : t('follow4.finish')}</Button>
+            <Button size="lg" block variant="primary" iconRight={<ArrowRight size={18} />} onClick={closeAttempt}>{due.some((target) => target.id !== activeId) ? t('follow4.next') : t('follow4.finish')}</Button>
           )}
         </section>
       )}

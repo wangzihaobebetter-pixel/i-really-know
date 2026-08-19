@@ -54,10 +54,9 @@ async function bodyText(page) { return page.evaluate(() => document.body.innerTe
 
     const selects = await page.$$('select');
     await selects[0].select('custom');
-    await selects[1].select('4');
-    await setNth(page, 'input.control', 0, `${MOCK}/v1`);
-    await setNth(page, 'input.control', 1, '[REDACTED]');
-    await setNth(page, 'input.control', 2, 'mock-v4');
+    await setNth(page, 'input.control', 0, '[REDACTED]');
+    await setNth(page, 'input.control', 1, 'mock-v5');
+    await setNth(page, 'input.control', 2, `${MOCK}/v1`);
     await clickText(page, 'Test connection');
     await page.waitForFunction(() => document.body.innerText.includes('Connection works.'), { timeout: 10000 });
 
@@ -67,7 +66,8 @@ async function bodyText(page) { return page.evaluate(() => document.body.innerTe
     await setNth(page, 'input[type="date"]', 0, date);
     await setNth(page, 'input.control:not([type="date"])', 0, 'Return-schedule implementation');
     const source = readFileSync(join(process.cwd(), 'src/lib/session-ops.ts'), 'utf8');
-    await setNth(page, 'textarea', 0, source.slice(source.indexOf('export function targetsFromSession'), source.indexOf('export function probeForTarget')));
+    await setNth(page, '#bring-material', 0, source.slice(source.indexOf('export function targetsFromSession'), source.indexOf('export function probeForTarget')));
+    await page.click('.pace-v5 button:nth-child(1)');
     await clickText(page, 'Read it');
     await page.waitForSelector('[data-testid="read-screen"]', { timeout: 10000 });
     await page.waitForFunction(() => document.body.innerText.includes('Start the questions'), { timeout: 15000 });
@@ -77,24 +77,24 @@ async function bodyText(page) { return page.evaluate(() => document.body.innerTe
     for (let i = 0; i < 4; i += 1) {
       await page.waitForSelector('#run-answer');
       await page.type('#run-answer', `The alternative changes the cost and invariant at this step; I would trace a tiny input and compare the boundary case ${i + 1}.`);
-      await clickText(page, 'That is my answer');
-      await page.waitForSelector('.selfgrade-opts');
+      await page.click('.v5-send');
+      await page.waitForSelector('.v5-self-options');
       const before = await bodyText(page);
       check(!before.includes('You gave the mechanism') && !before.includes('You restated the submission'), `question ${i + 1}: verdict appeared before self-grade`);
-      await clickText(page, 'Holds');
-      await page.waitForSelector('.run-feedback-line', { timeout: 15000 });
+      await clickText(page, 'stand behind it');
+      await page.waitForSelector('.v5-reply-line', { timeout: 15000 });
       check((await page.$$('details[open]')).length === 0, `question ${i + 1}: details opened automatically`);
-      await clickText(page, i === 3 ? 'See what held' : 'Next question');
+      await clickText(page, i === 3 ? 'See what you can take with you' : 'Next question');
     }
 
     await page.waitForSelector('[data-testid="result-screen"]');
     const result = await bodyText(page);
     check(!result.includes('No model verdict was invented'), 'keyed result was mislabeled as self-marked');
     check(result.includes('Your page, marked'), 'keyed result lost its anchored page');
-    check(result.includes('coming back from another angle'), 'weak keyed answers were not scheduled for return');
+    check((await page.$$('.return-promise-v5')).length === 1, 'weak keyed answers were not scheduled for return');
     const productText = await page.evaluate(() => {
       const clone = document.querySelector('[data-testid="result-screen"]')?.cloneNode(true);
-      clone?.querySelector('.marked-page')?.remove();
+      clone?.querySelector('.result-marked-v5')?.remove();
       return clone?.innerText || '';
     });
     check(!/confidence|dimensionId|counterfactual|blindspot/.test(productText), 'internal model terms leaked outside the student’s own marked source');

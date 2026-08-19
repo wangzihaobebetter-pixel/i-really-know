@@ -78,50 +78,50 @@ async function waitForDownload(previous, timeoutMs = 20000) {
     await page.evaluate(() => document.fonts.ready);
     evidence.welcome = await shot(page, '01-mobile-welcome.png');
     const welcomeText = await text(page);
-    check(welcomeText.includes('Bring one sentence that matters'), 'cold start did not state the value proposition');
+    check(welcomeText.includes('Hear the question here'), 'cold start did not state the value proposition');
+    check((await page.$$('.welcome-primary')).length === 1, 'cold start did not expose one primary action');
 
-    for (let i = 0; i < 5; i += 1) {
-      await clickText(page, 'Next');
-      await new Promise((resolve) => setTimeout(resolve, 80));
-    }
-    check((await text(page)).includes('Try the question yourself'), '60-second welcome did not end in one real question');
-    await clickText(page, 'Try the question yourself');
+    await clickText(page, 'Find the hard question');
+    await page.waitForFunction(() => document.body.innerText.includes('The answer is not sitting in the excerpt'));
+    check((await text(page)).includes('Not answerable by copying'), 'welcome did not demonstrate the non-copyable mechanism');
+    await clickText(page, 'Try this one question');
     await page.waitForSelector('[data-testid="run-screen"]', { timeout: 10000 });
     evidence.question = await shot(page, '02-mobile-question.png');
     check((await page.$$('.run-question')).length === 1, 'run-through showed more or fewer than one question');
 
     const answer = 'I would check whether the stated association survives adjustment for the variables that could affect both exposure and outcome, then compare the estimate and uncertainty rather than treating the raw pattern as causal.';
     await page.type('#run-answer', answer);
-    await clickText(page, 'That is my answer');
-    await page.waitForSelector('.selfgrade-opts');
+    await page.click('.v5-send');
+    await page.waitForSelector('.v5-self-options');
     evidence.selfgrade = await shot(page, '03-mobile-selfgrade.png');
-    check(!(await text(page)).includes('Held — more than you thought'), 'judgment appeared before self-grade');
+    check(!(await text(page)).includes('Something you said, and stood behind'), 'judgment appeared before self-read');
     await clickText(page, 'Not sure');
     await page.waitForSelector('.manualgrade-opts');
     await clickText(page, 'It held');
-    await page.waitForSelector('.run-feedback-line');
-    check((await page.$$('.run-feedback-line')).length === 1, 'answer did not receive exactly one immediate line');
-    await clickText(page, 'See what held');
+    await page.waitForSelector('.v5-reply-line');
+    check((await page.$$('.v5-reply-line')).length === 1, 'answer did not receive exactly one immediate line');
+    await clickText(page, 'See what you can take with you');
     await page.waitForSelector('[data-testid="result-screen"]');
     evidence.result = await shot(page, '04-mobile-result.png');
     const resultText = await text(page);
-    check(resultText.includes('Held — more than you thought'), 'underclaim was not given first-class result treatment');
+    check((await page.$$('.held-voice-card')).length === 1, 'underclaim did not preserve the student’s held words as the lead object');
     check(resultText.includes('Your page, marked'), 'marked original page is missing');
-    check(resultText.includes('That is enough for this time'), 'result has no structural ending');
+    check(resultText.includes('That is enough for this run-through'), 'result has no structural ending');
 
-    const headings = await page.$$eval('.result-group-heading', (els) => els.map((el) => getComputedStyle(el).fontSize));
+    await page.click('.result-all-v5 > summary');
+    const headings = await page.$$eval('.result-group-heading', (elements) => elements.map((element) => getComputedStyle(element).fontSize));
     check(headings.length >= 1 && new Set(headings).size === 1, 'result outcome headings are not equal-size');
     await page.evaluate(() => window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'instant' }));
     evidence.resultEnd = await shot(page, '04b-mobile-result-ending.png');
 
-    await clickText(page, 'Finish here');
+    await clickText(page, 'Put it down for now');
     await page.waitForSelector('[data-testid="today-screen"]');
     evidence.today = await shot(page, '05-mobile-today.png');
 
     // No-key submission of a real artifact from this repository: it must end in a transparent choice, not a dead end.
     await page.evaluate(() => { location.hash = '#/bring'; });
     await page.waitForSelector('[data-testid="bring-screen"]');
-    await page.$$eval('.occasion-chip', (buttons) => buttons[buttons.length - 1].click());
+    await page.$$eval('.occasion-row button', (buttons) => buttons[buttons.length - 1].click());
     await setNth(page, 'input.control:not([type="date"])', 0, 'Pull request code review');
     const tomorrow = new Date(Date.now() + 86_400_000).toISOString().slice(0, 10);
     await setNth(page, 'input[type="date"]', 0, tomorrow);
@@ -129,7 +129,7 @@ async function waitForDownload(previous, timeoutMs = 20000) {
     const realSource = readFileSync(join(process.cwd(), 'src/lib/session-ops.ts'), 'utf8');
     const realMaterial = realSource.slice(realSource.indexOf('export function gradeTarget'), realSource.indexOf('export function probeForTarget'));
     check(realMaterial.includes('gradeTarget'), 'QA could not load the real repository artifact');
-    await setNth(page, 'textarea', 0, realMaterial);
+    await setNth(page, '#bring-material', 0, realMaterial);
     await clickText(page, 'Read it');
     await page.waitForSelector('[role="dialog"]');
     evidence.noKey = await shot(page, '06-mobile-no-key-choice.png');
@@ -173,17 +173,17 @@ async function waitForDownload(previous, timeoutMs = 20000) {
     });
     await clickText(joinPage, 'Save it here and begin');
     await joinPage.waitForSelector('[data-testid="run-screen"]');
-    const returnedCount = (await joinPage.$$('.run-progress span')).length;
+    const returnedCount = (await joinPage.$$('.v5-run-progress span')).length;
     for (let index = 0; index < returnedCount; index += 1) {
       await joinPage.waitForSelector('#run-answer');
       await joinPage.type('#run-answer', `Student answer for returned question ${index + 1}: I would name the choice, trace the mechanism, and check the boundary case.`);
-      await clickText(joinPage, 'That is my answer');
-      await joinPage.waitForSelector('.selfgrade-opts');
+      await joinPage.click('.v5-send');
+      await joinPage.waitForSelector('.v5-self-options');
       await clickText(joinPage, 'Not sure');
       await joinPage.waitForSelector('.manualgrade-opts');
       await clickText(joinPage, index === 0 ? 'It slipped' : 'It held');
-      await joinPage.waitForSelector('.run-feedback-line');
-      await clickText(joinPage, index === returnedCount - 1 ? 'See what held' : 'Next question');
+      await joinPage.waitForSelector('.v5-reply-line');
+      await clickText(joinPage, index === returnedCount - 1 ? 'See what you can take with you' : 'Next question');
     }
     await joinPage.waitForSelector('[data-testid="result-screen"]');
     await clickText(joinPage, 'Copy the result link');

@@ -30,6 +30,16 @@ export function getPack(id: PackId | undefined): DisciplinePack {
   return (id && BY_ID.get(id)) || generalPack;
 }
 
+const ZH_PACK_NAMES: Record<PackId, string> = {
+  cs: '计算机', bio: '生物', med: '医学', math: '数学', stats: '统计', ml: '机器学习',
+  chem: '化学', epi: '流行病学', phys: '物理', essay: '议论文', general: '通用',
+};
+
+export function packLabel(id: PackId | undefined, lang: 'en' | 'zh-CN'): string {
+  const resolved = id ?? 'general';
+  return lang === 'zh-CN' ? ZH_PACK_NAMES[resolved] : getPack(resolved).name;
+}
+
 export function dimensionsOf(packId: PackId): ProbeDimension[] {
   return getPack(packId).dimensions;
 }

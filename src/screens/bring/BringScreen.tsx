@@ -1,13 +1,14 @@
 import React, { useMemo, useState } from 'react';
-import { ArrowRight, LockKeyhole, Sparkles } from 'lucide-react';
+import { ArrowLeft, ArrowRight, LockKeyhole, Sparkles } from 'lucide-react';
 import { useStore, selectHasKey } from '../../store';
 import { useNavigate } from '../../router';
-import { useT } from '../../i18n';
-import { BottomSheet, Button, FileDrop, Input, Segmented, Textarea } from '../../ui';
-import { detectPack, getPack, PACKS } from '../../packs';
+import { useLang, useT } from '../../i18n';
+import { BottomSheet, Button, FileDrop, Input } from '../../ui';
+import { detectPack, packLabel, PACKS } from '../../packs';
 import { detectMaterialKind, titleFromMaterial } from '../../lib/analysis';
-import { buildSampleSession, SAMPLES } from '../../samples';
-import type { PackId } from '../../types';
+import { buildFeaturedSampleSession } from '../../samples';
+import { PRESET_DIFFICULTY } from '../../store/presets';
+import type { PackId, RunPreset } from '../../types';
 
 const OCCASIONS = ['lab', 'defense', 'review', 'exam', 'other'] as const;
 type Occasion = typeof OCCASIONS[number];
@@ -27,17 +28,18 @@ function parseNotebook(raw: string) {
 
 export default function BringScreen() {
   const t = useT();
+  const lang = useLang();
   const nav = useNavigate();
-  const createSession = useStore((s) => s.createSession);
-  const upsertSession = useStore((s) => s.upsertSession);
+  const createSession = useStore((state) => state.createSession);
+  const upsertSession = useStore((state) => state.upsertSession);
   const hasKey = useStore(selectHasKey);
-  const settings = useStore((s) => s.settings);
 
   const [material, setMaterial] = useState('');
   const [title, setTitle] = useState('');
   const [occasion, setOccasion] = useState<Occasion>('lab');
   const [customOccasion, setCustomOccasion] = useState('');
   const [date, setDate] = useState('');
+  const [pace, setPace] = useState<RunPreset>('standard');
   const detected = useMemo(() => detectPack(material), [material]);
   const [overridePack, setOverridePack] = useState<PackId | null>(null);
   const [packOpen, setPackOpen] = useState(false);
@@ -52,6 +54,11 @@ export default function BringScreen() {
     { value: 'exam' as const, label: t('bring4.occasionExam') },
     { value: 'other' as const, label: t('bring4.occasionOther') },
   ];
+  const paceOptions: { value: RunPreset; label: string }[] = [
+    { value: 'quick', label: t('v5.bringPace5') },
+    { value: 'standard', label: t('v5.bringPace10') },
+    { value: 'defense', label: t('v5.bringPace15') },
+  ];
 
   async function loadFile(file: File) {
     const raw = await file.text();
@@ -61,7 +68,7 @@ export default function BringScreen() {
   }
 
   function useExample() {
-    const session = buildSampleSession(SAMPLES[0]);
+    const session = buildFeaturedSampleSession(lang);
     upsertSession(session);
     setConnectOpen(false);
     nav('run', { sessionId: session.id });
@@ -69,18 +76,12 @@ export default function BringScreen() {
 
   function submit() {
     setError('');
-    if (material.trim().length < 80) {
-      setError(t('bring4.tooShort'));
-      return;
-    }
+    if (material.trim().length < 80) { setError(t('bring4.tooShort')); return; }
     if (!date || (occasion === 'other' && !customOccasion.trim())) {
       setError(occasion === 'other' && !customOccasion.trim() ? t('bring4.occasionCustom') : t('bring4.date'));
       return;
     }
-    if (!hasKey) {
-      setConnectOpen(true);
-      return;
-    }
+    if (!hasKey) { setConnectOpen(true); return; }
     const session = createSession({
       title: title.trim() || titleFromMaterial(material),
       material: material.slice(0, 50000),
@@ -89,8 +90,8 @@ export default function BringScreen() {
       detected: { packId: detected.packId, confidence: detected.confidence },
       occasion: occasion === 'other' ? customOccasion.trim() : occasion,
       occasionAt: new Date(`${date}T12:00:00`).getTime(),
-      preset: settings.preset,
-      difficulty: settings.difficulty,
+      preset: pace,
+      difficulty: PRESET_DIFFICULTY[pace],
       status: 'generating',
       mode: 'viva',
     });
@@ -98,96 +99,64 @@ export default function BringScreen() {
   }
 
   return (
-    <div className="col-read stack page-enter bring-page" data-testid="bring-screen">
-      <header className="stack-tight">
-        <span className="t-micro ink-accent">{t('bring4.eyebrow')}</span>
-        <h1 className="t-sentence">{t('bring4.title')}</h1>
-        <p className="t-body-lg ink-2 measure">{t('bring4.body')}</p>
+    <div className="col-read bring-v5 page-enter" data-testid="bring-screen">
+      <header className="bring-v5-top">
+        <button type="button" onClick={() => nav('today')}><ArrowLeft size={17} />{t('v5.bringBack')}</button>
+        <span className="product-wordmark"><span className="living-mark" aria-hidden /><strong>{t('v5.brand')}</strong></span>
       </header>
 
-      <section className="bring-section stack-tight">
-        <span className="field-label">{t('bring4.occasion')}</span>
-        <div className="occasion-grid" role="group" aria-label={t('bring4.occasion')}>
-          {occasionOptions.map((option) => (
-            <button
-              type="button"
-              className="occasion-chip"
-              aria-pressed={occasion === option.value}
-              key={option.value}
-              onClick={() => setOccasion(option.value)}
-            >
-              {option.label}
-            </button>
-          ))}
-        </div>
-        {occasion === 'other' && (
-          <Input label={t('bring4.occasionCustom')} value={customOccasion} onChange={(event) => setCustomOccasion(event.target.value)} />
-        )}
-        <Input label={t('bring4.date')} type="date" value={date} onChange={(event) => setDate(event.target.value)} />
+      <section className="bring-v5-opening">
+        <span className="v5-eyebrow">{t('v5.bringEyebrow')}</span>
+        <h1>{t('v5.bringTitle')}</h1>
+        <p>{t('v5.bringBody')}</p>
       </section>
 
-      <section className="bring-section stack-tight">
-        <Input
-          label={t('bring4.titleLabel')}
-          placeholder={t('bring4.titlePlaceholder')}
-          value={title}
-          maxLength={72}
-          onChange={(event) => setTitle(event.target.value)}
-        />
-        <Textarea
-          label={t('bring4.material')}
-          hint={t('bring4.materialHint')}
-          value={material}
-          rows={10}
-          maxLength={50000}
-          autogrow
-          onChange={(event) => setMaterial(event.target.value)}
-        />
+      <section className="room-picker-v5">
+        <div className="occasion-row" role="group" aria-label={t('bring4.occasion')}>
+          {occasionOptions.map((option) => (
+            <button type="button" aria-pressed={occasion === option.value} key={option.value} onClick={() => setOccasion(option.value)}>{option.label}</button>
+          ))}
+        </div>
+        <div className="bring-date-row">
+          {occasion === 'other' && <Input label={t('bring4.occasionCustom')} value={customOccasion} onChange={(event) => setCustomOccasion(event.target.value)} />}
+          <Input label={t('bring4.date')} type="date" value={date} onChange={(event) => setDate(event.target.value)} />
+        </div>
+      </section>
+
+      <section className="material-v5">
+        <div className="material-v5-head"><div><h2>{t('v5.bringMaterialTitle')}</h2><p>{t('v5.bringMaterialBody')}</p></div><button type="button" onClick={() => setPackOpen(true)}><Sparkles size={15} />{packLabel(packId, lang)}</button></div>
+        <label className="visually-hidden" htmlFor="bring-material">{t('bring4.material')}</label>
+        <textarea id="bring-material" value={material} maxLength={50000} placeholder={t('bring4.materialHint')} onChange={(event) => setMaterial(event.target.value)} />
+        <div className="material-v5-foot"><span>{t('v5.bringPrivacy')}</span><span>{material.length.toLocaleString()}</span></div>
         <FileDrop
           accept={['.txt', '.md', '.py', '.js', '.ts', '.tsx', '.java', '.c', '.cpp', '.ipynb', 'text/*']}
           label={material ? (title || t('bring4.material')) : 'TXT · MD · CODE · IPYNB'}
-          hint={material ? `${material.length.toLocaleString()} characters` : undefined}
+          hint={material ? undefined : t('bring4.materialHint')}
           onFiles={(files) => { if (files[0]) void loadFile(files[0]); }}
         />
       </section>
 
-      <button className="subject-chip" type="button" onClick={() => setPackOpen(true)}>
-        <Sparkles size={15} aria-hidden />
-        <span>{t('bring4.subject', { pack: getPack(packId).name })}</span>
-        <span className="ink-accent">{t('bring4.change')}</span>
-      </button>
+      <section className="bring-details-v5">
+        <Input label={t('bring4.titleLabel')} placeholder={t('bring4.titlePlaceholder')} value={title} maxLength={72} onChange={(event) => setTitle(event.target.value)} />
+        <fieldset className="pace-v5"><legend>{t('v5.bringPace')}</legend><div>{paceOptions.map((option) => <button type="button" key={option.value} aria-pressed={pace === option.value} onClick={() => setPace(option.value)}>{option.label}</button>)}</div></fieldset>
+      </section>
 
       {error && <p className="form-kind-error" role="alert">{error}</p>}
-      <Button size="lg" variant="primary" block onClick={submit} iconRight={<ArrowRight size={19} />}>
+      <Button className="bring-submit-v5" size="lg" variant="primary" block onClick={submit} iconRight={<ArrowRight size={19} />}>
         {t('bring4.start')}
       </Button>
 
-      <BottomSheet
-        open={packOpen}
-        onClose={() => setPackOpen(false)}
-        title={t('bring4.subject', { pack: getPack(packId).name })}
-      >
+      <BottomSheet open={packOpen} onClose={() => setPackOpen(false)} title={t('bring4.subject', { pack: packLabel(packId, lang) })}>
         <div className="pack-picker">
           {PACKS.map((pack) => (
-            <button
-              type="button"
-              key={pack.id}
-              aria-pressed={pack.id === packId}
-              onClick={() => { setOverridePack(pack.id); setPackOpen(false); }}
-            >
-              <strong>{pack.name}</strong>
-              <small>{pack.tagline}</small>
+            <button type="button" key={pack.id} aria-pressed={pack.id === packId} onClick={() => { setOverridePack(pack.id); setPackOpen(false); }}>
+              <strong>{packLabel(pack.id, lang)}</strong>{lang === 'en' && <small>{pack.tagline}</small>}
             </button>
           ))}
         </div>
       </BottomSheet>
 
-      <BottomSheet
-        open={connectOpen}
-        onClose={() => setConnectOpen(false)}
-        title={t('bring4.connectTitle')}
-        footer={<Button variant="ghost" onClick={useExample}>{t('bring4.useExample')}</Button>}
-      >
+      <BottomSheet open={connectOpen} onClose={() => setConnectOpen(false)} title={t('bring4.connectTitle')} footer={<Button variant="ghost" onClick={useExample}>{t('bring4.useExample')}</Button>}>
         <div className="stack">
           <span className="privacy-lock" aria-hidden><LockKeyhole size={22} /></span>
           <p className="t-body-lg measure">{t('bring4.connectBody')}</p>

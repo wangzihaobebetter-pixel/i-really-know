@@ -1,14 +1,13 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { ArrowRight, BookMarked, ChevronDown, RotateCcw } from 'lucide-react';
+import { ArrowRight, ChevronDown, RotateCcw, X } from 'lucide-react';
 import { selectSession, useStore } from '../../store';
 import { useNavigate, useRoute } from '../../router';
 import { useLang, useT } from '../../i18n';
-import { AnchoredText, Button, Mark, Sheet, Tag } from '../../ui';
+import { AnchoredText, Button, Mark, Sheet } from '../../ui';
 import type { TextAnchor } from '../../ui';
 import { countVerdicts, divergence, verdictOf } from '../../lib/analysis';
 import { formatDate, targetsFromSession } from '../../lib/session-ops';
 import type { Probe, ResultTicket, Verdict } from '../../types';
-import { getPack } from '../../packs';
 import { resultLink } from '../../lib/student-links';
 
 const GROUPS: { verdict: Verdict; key: 'more' | 'held' | 'half' | 'slipped' }[] = [
@@ -19,19 +18,26 @@ const GROUPS: { verdict: Verdict; key: 'more' | 'held' | 'half' | 'slipped' }[] 
 ];
 
 function occasionLabel(value: string | undefined, t: ReturnType<typeof useT>) {
-  const keys: Record<string, string> = {
-    lab: 'bring4.occasionLab', defense: 'bring4.occasionDefense', review: 'bring4.occasionReview',
-    exam: 'bring4.occasionExam', other: 'bring4.occasionOther',
-  };
-  return value ? (keys[value] ? t(keys[value]) : value) : t('bring4.occasionOther');
+  switch (value) {
+    case 'lab': return t('bring4.occasionLab');
+    case 'defense': return t('bring4.occasionDefense');
+    case 'review': return t('bring4.occasionReview');
+    case 'exam': return t('bring4.occasionExam');
+    case 'other': return t('bring4.occasionOther');
+    default: return value || t('bring4.occasionOther');
+  }
+}
+
+function leadQuote(value: string, max = 190) {
+  const clean = value.trim();
+  return clean.length > max ? `${clean.slice(0, max).replace(/\s+\S*$/, '')}…` : clean;
 }
 
 function ProbeRow({ probe }: { probe: Probe }) {
   const t = useT();
   const [open, setOpen] = useState(false);
   const verdict = verdictOf(probe);
-  const line = probe.ai?.verdictLine
-    ?? (probe.manualScore !== undefined ? t(`common.verdict.${verdict}`) : '');
+  const line = probe.ai?.verdictLine ?? (probe.manualScore !== undefined ? t(`common.verdict.${verdict}`) : '');
   return (
     <article className="result-probe" data-verdict={verdict}>
       <button type="button" className="result-probe-head" onClick={() => setOpen((value) => !value)} aria-expanded={open}>
@@ -64,41 +70,49 @@ export default function ResultScreen() {
   const nav = useNavigate();
   const sessionId = useRoute().params.sessionId;
   const session = useStore(selectSession(sessionId));
-  const queue = useStore((s) => s.queue);
-  const addTargets = useStore((s) => s.addTargets);
+  const queue = useStore((state) => state.queue);
+  const addTargets = useStore((state) => state.addTargets);
   const [activeId, setActiveId] = useState<string | undefined>();
   const [returnUrl, setReturnUrl] = useState('');
   const [returnError, setReturnError] = useState('');
 
   const anchors: TextAnchor[] = useMemo(() => session?.probes
     .filter((probe) => probe.anchor.placed && probe.anchor.start !== undefined && probe.anchor.end !== undefined)
-    .map((probe) => ({
-      id: probe.id,
-      start: probe.anchor.start!,
-      end: probe.anchor.end!,
-      verdict: verdictOf(probe),
-    })) ?? [], [session]);
+    .map((probe) => ({ id: probe.id, start: probe.anchor.start!, end: probe.anchor.end!, verdict: verdictOf(probe) })) ?? [], [session]);
 
   useEffect(() => {
     if (!session || session.status !== 'complete') return;
-    const already = queue.some((target) => target.sessionId === session.id);
-    if (!already) addTargets(targetsFromSession(session));
-  }, [session, queue, addTargets]);
+    addTargets(targetsFromSession(session));
+  }, [session, addTargets]);
 
   if (!session) {
     return <div className="col-read stack"><p>{t('common.state.notfound.title')}</p><Button onClick={() => nav('today')}>{t('common.state.notfound.action')}</Button></div>;
   }
 
   const counts = countVerdicts(session.probes);
+  const held = counts.defended + counts.underclaimed;
   const back = counts.partial + counts.undefended;
+  const answered = session.probes.filter((probe) => probe.committedAt).length;
   const scheduled = queue.filter((target) => target.sessionId === session.id).length || back;
   const read = divergence(session.probes);
-  const words = session.probes
-    .filter((probe) => ['defended', 'underclaimed'].includes(verdictOf(probe)) && probe.answer?.trim())
-    .map((probe) => probe.answer!.trim());
+  const heldWords = session.probes
+    .map((probe, index) => ({ probe, index }))
+    .filter(({ probe }) => ['defended', 'underclaimed'].includes(verdictOf(probe)) && probe.answer?.trim());
+  const attemptWord = session.probes
+    .map((probe, index) => ({ probe, index }))
+    .find(({ probe }) => probe.answer?.trim());
   const occasion = occasionLabel(session.occasion, t);
   const date = session.occasionAt ? formatDate(session.occasionAt, lang) : '—';
-  const answered = session.probes.filter((probe) => probe.committedAt).length;
+  const takeaway = answered > 0 && held === answered
+    ? t('v5.resultAllHeld')
+    : held === 0
+      ? t(back === 1 ? 'v5.resultNoneOne' : 'v5.resultNone', { back })
+      : t('v5.resultMixed', { held, back });
+  const readLine = !read ? '' : read.direction === 'under'
+    ? t('v5.readUnder')
+    : read.direction === 'over'
+      ? t('v5.readOver')
+      : t('v5.readClose');
 
   async function prepareReturn() {
     if (!session?.cohortId || !session.submissionId) return;
@@ -130,86 +144,98 @@ export default function ResultScreen() {
   }
 
   return (
-    <div className="col-doc stack result-page page-enter" data-testid="result-screen">
-      <header className="result-header stack-tight">
-        <span className="t-micro ink-accent">{t('result4.eyebrow')}</span>
-        <h1 className="t-sentence">{t('result4.title')}</h1>
-        <p className="t-small ink-3">{t('result4.frame', { occasion, date })}</p>
-        <p className="result-sentence">
-          {t('result4.summary', { held: counts.defended, more: counts.underclaimed, back })}
-        </p>
-        <div className="row wrap">
-          <Tag mono>{getPack(session.packId).shortName}</Tag>
-          {session.mode === 'sample' && <Tag>{lang === 'zh-CN' ? '真实来源示例' : 'Sourced example'}</Tag>}
-        </div>
+    <div className="col-doc result-v5 page-enter" data-testid="result-screen">
+      <header className="result-v5-top">
+        <span className="product-wordmark"><span className="living-mark" aria-hidden /><strong>{lang === 'zh-CN' ? '这一遍' : 'This run-through'}</strong></span>
+        <button type="button" onClick={() => nav('today')} aria-label={t('v5.doneAction')}><X size={20} /></button>
       </header>
 
-      {!session.probes.some((probe) => probe.ai) && (
-        <p className="honesty-line">{t('result4.keyless')}</p>
-      )}
-
-      <section className="result-groups stack">
-        {GROUPS.map(({ verdict, key }) => {
-          const probes = session.probes.filter((probe) => verdictOf(probe) === verdict);
-          if (!probes.length) return null;
-          return (
-            <div className="result-group stack-tight" data-verdict={verdict} key={verdict}>
-              <div className="row-between">
-                <h2 className="result-group-heading t-title">{t(`result4.${key}`)}</h2>
-                <span className="count-chip" aria-label={`${probes.length}`}>{probes.length}</span>
-              </div>
-              {probes.length ? probes.map((probe) => <ProbeRow key={probe.id} probe={probe} />) : <p className="t-small ink-3">{t('result4.none')}</p>}
-            </div>
-          );
-        })}
+      <section className="result-takeaway">
+        <span className="v5-eyebrow">{t('v5.resultEyebrow')}</span>
+        <h1>{takeaway}</h1>
+        <p>{t('v5.resultFrame', { title: session.title, occasion, date })}</p>
       </section>
 
-      <section className="stack-tight">
-        <div className="row" style={{ gap: 'var(--space-3)' }}>
-          <BookMarked size={19} aria-hidden />
-          <h2 className="t-title">{t('result4.page')}</h2>
-        </div>
-        <p className="t-small ink-3 measure">{t('result4.pageHint')}</p>
-        <Sheet elevation={0} className="marked-page" padding="var(--space-6)">
-          <AnchoredText
-            text={session.material}
-            mode={session.materialKind === 'code' ? 'code' : 'prose'}
-            anchors={anchors}
-            activeId={activeId}
-            onAnchorClick={(id) => setActiveId(id === activeId ? undefined : id)}
-            staggered
-          />
-          {activeId && (() => {
-            const probe = session.probes.find((item) => item.id === activeId);
-            return probe ? <div className="marked-margin"><ProbeRow probe={probe} /></div> : null;
-          })()}
-        </Sheet>
-      </section>
-
-      {read && (
-        <section className="self-read-card stack-tight">
-          <h2 className="t-title">{t('result4.yourRead')}</h2>
-          <div className="self-read-pair">
-            <div><span>{lang === 'zh-CN' ? '你当时觉得' : 'You expected'}</span><strong>{read.claimed}</strong></div>
-            <ArrowRight size={20} aria-hidden />
-            <div><span>{lang === 'zh-CN' ? '实际站住' : 'Actually held'}</span><strong>{read.defended}</strong></div>
-          </div>
+      {heldWords[0] && (
+        <section className="held-voice-card">
+          <span>{t('v5.ownWords')}</span>
+          <blockquote>“{leadQuote(heldWords[0].probe.answer!)}”</blockquote>
+          <small>{t('v5.ownWordsFrom', { n: heldWords[0].index + 1 })}</small>
         </section>
       )}
 
-      {words.length > 0 && (
-        <section className="words-book stack-tight">
-          <h2 className="t-title">{t('result4.yourWords')}</h2>
-          {words.map((word, index) => <blockquote key={index}>“{word}”</blockquote>)}
+      {!heldWords[0] && attemptWord && (
+        <section className="attempt-voice-card" data-verdict={verdictOf(attemptWord.probe)}>
+          <span>{t('v5.attemptWords')}</span>
+          <blockquote>“{leadQuote(attemptWord.probe.answer!)}”</blockquote>
+          <small>{t('v5.attemptFrom', { n: attemptWord.index + 1 })}</small>
+        </section>
+      )}
+
+      <section className="result-marked-v5">
+        <div className="result-marked-head">
+          <h2>{t('v5.markedPage')}</h2>
+          <span>{t('v5.markedHint')}</span>
+        </div>
+        <AnchoredText
+          text={session.material}
+          mode={session.materialKind === 'code' ? 'code' : 'prose'}
+          anchors={anchors}
+          activeId={activeId}
+          onAnchorClick={(id) => setActiveId(id === activeId ? undefined : id)}
+          staggered
+        />
+        {activeId && (() => {
+          const probe = session.probes.find((item) => item.id === activeId);
+          return probe ? <div className="marked-margin"><ProbeRow probe={probe} /></div> : null;
+        })()}
+      </section>
+
+      {read && (
+        <section className="self-read-v5">
+          <h2>{t('v5.readTitle')}</h2>
+          <p>{readLine}</p>
+          <details>
+            <summary>{lang === 'zh-CN' ? '看刚才的两边' : 'See both sides'}</summary>
+            <div className="self-read-pair">
+              <div><span>{lang === 'zh-CN' ? '你当时觉得' : 'You expected'}</span><strong>{read.claimed}</strong></div>
+              <ArrowRight size={18} aria-hidden />
+              <div><span>{lang === 'zh-CN' ? '实际站住' : 'Actually held'}</span><strong>{read.defended}</strong></div>
+            </div>
+          </details>
         </section>
       )}
 
       {scheduled > 0 && (
-        <div className="followup-promise row">
-          <RotateCcw size={18} aria-hidden />
-          <p className="t-small">{t('result4.followups', { n: scheduled })}</p>
-        </div>
+        <section className="return-promise-v5">
+          <span aria-hidden><RotateCcw size={21} /></span>
+          <div>
+            <h2>{t(scheduled === 1 ? 'v5.comingBack' : 'v5.comingBackMany', { n: scheduled })}</h2>
+            <p>{t('v5.comingBackBody')}</p>
+          </div>
+        </section>
       )}
+
+      {!session.probes.some((probe) => probe.ai) && (
+        <details className="keyless-honesty-v5"><summary>{lang === 'zh-CN' ? '这一遍由谁做的判断？' : 'Who made the marks?'}</summary><p>{t('result4.keyless')}</p></details>
+      )}
+
+      <details className="result-all-v5">
+        <summary>{t('v5.detailsTitle')}<ChevronDown size={18} /></summary>
+        <div className="result-groups stack">
+          {GROUPS.map(({ verdict, key }) => {
+            const probes = session.probes.filter((probe) => verdictOf(probe) === verdict);
+            if (!probes.length) return null;
+            return (
+              <section className="result-group stack-tight" data-verdict={verdict} key={verdict}>
+                <div className="row-between"><h2 className="result-group-heading t-title">{t(`result4.${key}`)}</h2><span className="count-chip">{probes.length}</span></div>
+                {probes.map((probe) => <ProbeRow key={probe.id} probe={probe} />)}
+              </section>
+            );
+          })}
+          {heldWords.slice(1).map(({ probe, index }) => <blockquote className="more-held-word" key={probe.id}>“{probe.answer}”<small>{t('v5.ownWordsFrom', { n: index + 1 })}</small></blockquote>)}
+        </div>
+      </details>
 
       {session.mode === 'viva' && session.cohortId && session.submissionId && (
         <Sheet elevation={1} className="return-result-card" padding="var(--space-6)">
@@ -223,16 +249,11 @@ export default function ResultScreen() {
         </Sheet>
       )}
 
-      <Sheet elevation={1} className="ending-card" padding="var(--space-7)">
-        <div className="stack">
-          <h2 className="t-sentence-small">{t('result4.doneTitle')}</h2>
-          <p className="t-body ink-2 measure">{t('result4.doneBody', { answered })}</p>
-          <div className="row wrap">
-            <Button size="lg" variant="primary" iconRight={<ArrowRight size={18} />} onClick={() => nav('today')}>{t('result4.backToday')}</Button>
-            <Button variant="ghost" onClick={() => nav('bring')}>{t('result4.again')}</Button>
-          </div>
-        </div>
-      </Sheet>
+      <section className="ending-v5">
+        <h2>{t('v5.doneTitle')}</h2>
+        <p>{t('v5.doneBody')}</p>
+        <button type="button" onClick={() => nav('today')}>{t('v5.doneAction')}<ArrowRight size={18} /></button>
+      </section>
     </div>
   );
 }

@@ -30,14 +30,42 @@ const third = localFollowupVariant(probe, thirdTarget, 'en');
 const questions = [first.question, second.question, third.question];
 if (new Set(questions).size !== 3) failures.push('1/3/7-day local follow-ups repeated an angle');
 if (questions.includes(probe.question)) failures.push('a local follow-up reused the original question');
+const chinese = localFollowupVariant(probe, baseTarget, 'zh-CN');
+if (!/[\u3400-\u9fff]/.test(chinese.question) || chinese.question === probe.variant.question) failures.push('Chinese UI reused an English canned variant');
+const chineseSecondTarget = { ...baseTarget, history: [{ at: 1, probeId: chinese.id, question: chinese.question, answer: '第一次' }] };
+const chineseSecond = localFollowupVariant(probe, chineseSecondTarget, 'zh-CN');
+const chineseThird = localFollowupVariant(probe, { ...chineseSecondTarget, history: [...chineseSecondTarget.history, { at: 2, probeId: chineseSecond.id, question: chineseSecond.question, answer: '第二次' }] }, 'zh-CN');
+if (new Set([chinese.question, chineseSecond.question, chineseThird.question]).size !== 3) failures.push('Chinese 1/3/7-day follow-ups repeated an angle');
+
+function firstThreeQuestions(sourceProbe) {
+  let target = { ...baseTarget, probeId: sourceProbe.id, history: [] };
+  const result = [];
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    const next = localFollowupVariant(sourceProbe, target, 'en');
+    result.push(next.question);
+    target = { ...target, history: [...target.history, { at: attempt + 1, probeId: next.id, question: next.question, answer: `Answer ${attempt + 1}` }] };
+  }
+  return result;
+}
+
+const cannedAngleZero = 'Take this part of your work from the other direction: what would have to change for its reasoning no longer to hold?';
+const originalCollision = firstThreeQuestions({ ...probe, question: cannedAngleZero, variant: undefined });
+if (originalCollision.includes(cannedAngleZero) || new Set(originalCollision).size !== 3) failures.push('a canned angle repeated an identical original question');
+const suppliedCollision = firstThreeQuestions({ ...probe, variant: { question: cannedAngleZero, whyThisProbe: 'Same as canned angle zero.' } });
+if (new Set(suppliedCollision).size !== 3) failures.push('a supplied variant repeated its matching canned angle');
 
 const graded = gradeTarget({ ...baseTarget, draft: { prompt: first, answer: 'Saved words', selfGrade: 'shaky' } }, false, first.id, 1, 'shaky', 'Saved words', first.question);
 if (graded.history?.[0]?.answer !== 'Saved words' || graded.history?.[0]?.question !== first.question) failures.push('graded attempt lost its answer or exact question');
 if (graded.draft !== undefined) failures.push('completed attempt did not clear its saved draft');
 if (graded.stage !== 1 || graded.passesInRow !== 0) failures.push('an unheld attempt did not restart the 1-day ladder');
 
+const firstHold = gradeTarget(baseTarget, true, first.id, 3, 'owned', 'Held once', first.question);
+const secondHold = gradeTarget({ ...baseTarget, ...firstHold }, true, second.id, 3, 'owned', 'Held twice', second.question);
+if (firstHold.retired) failures.push('one held return retired the target too early');
+if (!secondHold.retired) failures.push('two consecutive held returns did not settle the target');
+
 rmSync(bundle, { force: true });
-console.log('verify-followup-logic: checked three changed angles, saved words, and schedule reset');
+console.log('verify-followup-logic: checked three changed angles, language, saved words and two-hold settlement');
 if (failures.length) {
   failures.forEach((failure) => console.error(`  ✗ ${failure}`));
   process.exit(1);
