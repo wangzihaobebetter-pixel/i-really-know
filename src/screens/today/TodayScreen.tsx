@@ -41,7 +41,11 @@ export default function TodayScreen() {
   function trySample() {
     const session = buildFeaturedSampleSession(lang);
     upsertSession(session);
-    nav('run', { sessionId: session.id });
+    /* Through the reading pass, not straight to the questions. Being read is
+       the first thing this product does for you (brief §6.2 #10); a sample run
+       that skips it is a sample of a different product. The one-question
+       taster on Welcome still goes direct — one probe has nothing to read. */
+    nav('read', { sessionId: session.id });
   }
 
   return (

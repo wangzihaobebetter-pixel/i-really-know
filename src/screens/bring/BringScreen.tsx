@@ -71,7 +71,9 @@ export default function BringScreen() {
     const session = buildFeaturedSampleSession(lang);
     upsertSession(session);
     setConnectOpen(false);
-    nav('run', { sessionId: session.id });
+    /* Same reason as Today: the example is a sample of the whole loop, and the
+       loop starts with being read. */
+    nav('read', { sessionId: session.id });
   }
 
   function submit() {

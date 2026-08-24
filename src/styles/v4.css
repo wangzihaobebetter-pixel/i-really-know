@@ -63,10 +63,6 @@
 .reading-step { display: flex; gap: var(--space-3); align-items: center; color: var(--ink-3); transition: color 280ms var(--ease); }
 .reading-step[data-state="active"] { color: var(--action); font-weight: 600; }
 .reading-step[data-state="done"] { color: var(--held); }
-.scan-page { position: relative; overflow: hidden; border: 1px solid var(--hairline); border-radius: 18px; padding: var(--space-6); background: var(--sheet); box-shadow: var(--e1); }
-.scan-page p { margin: 0 0 .72em; font-size: .84rem; line-height: 1.55; color: var(--ink-3); transition: color 500ms var(--ease), opacity 500ms var(--ease); opacity: .44; }
-.scan-page p[data-found="true"] { color: var(--ink-2); opacity: 1; }
-.scan-beam { position: absolute; inset: 0 0 auto; height: 82px; background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--action) 11%, transparent), transparent); transform: translateY(calc(var(--scan-stage) * 130px)); transition: transform 900ms var(--ease); pointer-events: none; }
 .reading-finish { padding: var(--space-4) 0; }
 
 /* Welcome */
@@ -221,6 +217,5 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .scan-beam { display: none; }
   .hero-action:hover, .work-card:hover { transform: none; }
 }

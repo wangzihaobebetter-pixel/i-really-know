@@ -1,0 +1,216 @@
+/**
+ * v6 — depth, and the reading pass.
+ *
+ * Two problems this file exists for, both measured rather than felt:
+ *
+ * 1. NO DEPTH. `--app` is #F6F3EA and `--sheet` is #FFFEFA — about 3% apart in
+ *    value. Every card in the product therefore sits flat on the page instead
+ *    of floating above it. Every mature competitor screenshotted into
+ *    memory/ireallyknow-v6/refs/ does the opposite: Brilliant and Duolingo both
+ *    run a tinted page under white cards, and that single value step is most of
+ *    what reads as "finished". The page darkens slightly here; cards stay where
+ *    they are, so contrast against ink is unchanged and the gate still passes.
+ *
+ * 2. ONE COLOUR ON SCREEN. tokens.css already defines held / half-held /
+ *    slipped / held-more / over / under plus six pre-composited washes. They
+ *    appear on exactly one screen. The palette was never the problem; using it
+ *    was. The reading pass and the run loop draw on it from here on.
+ */
+
+:root {
+  /* A half-step down for the page only. Cards keep --sheet, so every surface
+     now has somewhere to sit. Ink tokens are untouched. */
+  --app: #F0EBDF;
+  --app-2: #E4DECE;
+  /* Depth vocabulary. Soft and warm — a shadow with blue in it reads as
+     software, and this product is trying not to. */
+  --lift-1: 0 1px 2px rgba(56, 48, 33, .06), 0 0 0 1px var(--hairline);
+  --lift-2: 0 2px 4px rgba(56, 48, 33, .05), 0 12px 28px -14px rgba(56, 48, 33, .30), 0 0 0 1px var(--hairline);
+  --lift-press: 0 4px 0 0 var(--ink);
+}
+
+/* ============================ the reading pass ============================ */
+
+.reading-v6 { min-height: calc(100dvh - var(--space-8)); }
+.reading-v6-layout {
+  min-height: calc(100dvh - 64px);
+  display: grid; grid-template-rows: auto auto auto 1fr; gap: 18px;
+  align-content: start;
+}
+.reading-v6-head { display: grid; gap: 8px; }
+.reading-v6-head .product-wordmark { margin-bottom: 10px; padding: 0; }
+.reading-v6-head h1 {
+  font-family: var(--font-display); font-size: clamp(1.9rem, 7.5vw, 2.35rem);
+  font-weight: 740; line-height: 1.08; letter-spacing: -.05em;
+}
+.reading-v6-head > p {
+  overflow: hidden; color: var(--ink-3); font-size: .75rem;
+  text-overflow: ellipsis; white-space: nowrap;
+}
+
+.reading-v6-status {
+  min-height: 46px; display: flex; align-items: center; gap: 10px;
+  border-block: 1px solid var(--hairline); color: var(--ink-2);
+}
+.reading-v6-status strong { flex: 1 1 auto; font-size: .8125rem; font-weight: 640; }
+.reading-v6-dot {
+  width: 10px; height: 10px; flex: none; border-radius: 50%;
+  background: var(--ink-3); box-shadow: 0 0 0 4px var(--app-2);
+  transition: background var(--dur-slow) var(--ease), box-shadow var(--dur-slow) var(--ease);
+}
+.reading-v6-dot[data-scanning="true"] { background: var(--accent); box-shadow: 0 0 0 4px var(--accent-wash); animation: v6-breathe 1.9s var(--ease) infinite; }
+.reading-v6-dot[data-ready="true"]    { background: var(--held);  box-shadow: 0 0 0 4px var(--held-wash); animation: none; }
+@keyframes v6-breathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.35); } }
+
+/* The count is the only number the student sees here, and it is a count of
+   places in their own work — never a score. It ticks rather than appears. */
+.reading-v6-count {
+  flex: none; padding: 4px 10px; border-radius: var(--r-pill);
+  color: var(--ink); background: var(--warm-signal);
+  font-size: .6875rem; font-weight: 760; font-variant-numeric: tabular-nums;
+  animation: v6-count-in 420ms var(--spring) both;
+}
+@keyframes v6-count-in {
+  0%   { transform: translateY(5px) scale(.86); opacity: 0; }
+  55%  { transform: translateY(0) scale(1.09); opacity: 1; }
+  100% { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+/* The page itself. It scrolls, it is a real surface, and nothing tinted is
+   ever painted on top of the student's characters — the light is a sibling
+   layer behind the text, not over it. */
+.reading-v6-page {
+  /* Fits the work, up to a bound. A fixed 1fr row made a six-line snippet sit
+     in a card three times its height — the emptiness the whole rebuild is
+     about. Long work scrolls; short work stops. */
+  position: relative; overflow: hidden auto;
+  min-height: 180px; max-height: min(58vh, 560px);
+  padding: 22px 22px 22px 30px;
+  border-radius: 14px 26px 14px 14px; background: var(--sheet);
+  box-shadow: var(--lift-2);
+  scrollbar-width: none;
+}
+.reading-v6-page::-webkit-scrollbar { display: none; }
+.reading-v6-page::before {
+  content: ''; position: absolute; left: 14px; top: 18px; bottom: 18px;
+  width: 4px; border-radius: 4px; background: var(--accent);
+}
+.reading-v6-page .anchored { position: relative; z-index: 1; }
+.reading-v6-page .md-p, .reading-v6-page .md-li { font-size: .9375rem; line-height: 1.72; color: var(--ink-2); }
+.reading-v6-page .md-code {
+  /* No card inside a card. The reading surface is the card; the code is the
+     page's own content and must share its paper. */
+  margin: 0; padding: 0; border: 0; background: transparent; box-shadow: none;
+  font-size: .8125rem; line-height: 1.6;
+}
+
+/* A found spot has to be visible as it lands, and must still not read as an
+   accusation: it is the accent underline the product already uses for "here",
+   never a red or a fill. `verdict: none` during the pass guarantees no state
+   colour leaks in before the student has answered anything. */
+.reading-v6-page .anchor-span {
+  animation: v6-mark-land 560ms var(--spring) both;
+}
+.reading-v6-page .anchor-none {
+  text-decoration-color: var(--accent);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+@keyframes v6-mark-land {
+  0%   { background: color-mix(in srgb, var(--warm-signal) 62%, transparent); text-decoration-color: transparent; }
+  60%  { background: color-mix(in srgb, var(--warm-signal) 34%, transparent); }
+  100% { background: transparent; text-decoration-color: var(--accent); }
+}
+
+.reading-v6-beam {
+  position: absolute; inset-inline: 0; top: 0; height: 46%;
+  background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--warm-signal) 26%, transparent) 52%, transparent);
+  opacity: 0; pointer-events: none; z-index: 0;
+}
+.reading-v6-page.is-scanning .reading-v6-beam { opacity: 1; animation: v6-sweep 3.1s var(--ease) infinite; }
+@keyframes v6-sweep { 0% { transform: translateY(-60%); } 100% { transform: translateY(230%); } }
+
+.reading-v6-patience { align-self: end; max-width: 44ch; color: var(--ink-3); font-size: .75rem; line-height: 1.5; }
+/* The last row is 1fr so the call to action sits at the bottom of the screen
+   on a tall viewport. Without align-self the SECTION stretches and the button
+   inside it grows to 300px tall — which is what a stretched grid child does
+   and what the previous build shipped. */
+.reading-v6-finish { align-self: end; display: grid; gap: 12px; }
+.reading-v6-finish.is-error { padding: 16px; border-radius: 18px; background: var(--danger-wash); }
+.reading-v6-finish.is-error h2 { font-size: 1rem; }
+.reading-v6-finish p { color: var(--ink-2); font-size: .8125rem; line-height: 1.45; }
+.reading-v6-finish.is-ready { animation: v6-rise 460ms var(--spring) both; }
+@keyframes v6-rise { from { transform: translateY(10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .reading-v6-page.is-scanning .reading-v6-beam { animation: none; opacity: .5; }
+  .reading-v6-dot[data-scanning="true"] { animation: none; }
+  .reading-v6-count, .reading-v6-finish.is-ready { animation: none; }
+  .reading-v6-page .anchor-span { animation: none; }
+}
+
+/* ===================== depth applied to what already exists ================ */
+
+/* Cards that were flat on flat now have a page to sit on. Values unchanged —
+   only the page moved — so every contrast pair the gate measures is intact. */
+.welcome-passage,
+.reading-v6-page,
+.next-room-card,
+.new-room-card { box-shadow: var(--lift-2); }
+
+.kept-question,
+.held-memory { box-shadow: var(--lift-1); }
+
+/* The chunky press. Every competitor in refs/ that targets students has one:
+   Finch ships `box-shadow: rgb(22,128,53) 0 4px 0 0` on its primary. Ours was
+   already half-built on .welcome-primary; it becomes the shared behaviour. */
+.next-room-card,
+.new-room-card {
+  transition: transform var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease);
+}
+.next-room-card:active,
+.new-room-card:active { transform: translateY(2px); }
+
+/* =============================== the run loop ============================= */
+
+/* 1. The source excerpt is clipped at 108px with `overflow: hidden` and the
+      "see more" control only appears past 260 characters. Anything between
+      those two numbers renders as a card cut through the middle of a line of
+      code with no affordance — indistinguishable, on a phone, from a broken
+      render. A mask makes the clip deliberate. */
+.v5-run-source > div:not([data-expanded="true"]) {
+  -webkit-mask-image: linear-gradient(180deg, #000 0, #000 68%, transparent 100%);
+          mask-image: linear-gradient(180deg, #000 0, #000 68%, transparent 100%);
+}
+
+/* 2. On a 390x844 screen the question ended around y=1030 and the input dock
+      sits at the bottom, leaving ~400px of nothing between the thing being
+      asked and the place you answer it. The exchange now takes the available
+      column and centres the question in whatever is left, so the two things
+      that matter sit together wherever the source ends. */
+/*
+   Where the slack goes. On a tall phone with a short excerpt something has to
+   absorb the leftover height. Stretching the exchange was wrong: the accent
+   thread that runs from the source card down to the question is a fixed 64px
+   (`.v5-run-source::before { bottom: -64px }`), so stretching left it hanging
+   in mid-air with a dot on the end — an artifact, not a connection.
+   The slack goes ABOVE the card instead. The pair stays welded together at the
+   designed distance and sits where the thumb already is, next to the dock.
+*/
+.run-v5 { display: grid; grid-template-rows: auto auto 1fr; }
+.v5-exchange { align-self: end; }
+.v5-question-block { padding-bottom: 10px; }
+
+/* 3. Depth, consistent with the reading pass it just came from. */
+.v5-run-source { box-shadow: var(--lift-1); }
+.v5-answer-dock { box-shadow: var(--lift-2); }
+
+/* 4. The question is the one thing that changed when you tapped next. Say so. */
+.v5-question-block .run-question { animation: v6-question-in 460ms var(--spring) both; }
+@keyframes v6-question-in {
+  from { transform: translateY(9px); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .v5-question-block .run-question { animation: none; }
+}
