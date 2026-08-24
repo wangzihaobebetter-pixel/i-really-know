@@ -44,6 +44,17 @@ export const graphSample: SampleDef = {
       ],
       ownedLooksLike: 'Computes both sizes, names the factor of 8, and explains why it does not crash immediately.',
       surfaceLooksLike: 'Says it "allocates memory for the nodes" or that it should use sizeof(char*), with no account of why it seems to work.',
+      zh: {
+        question: '这行代码按 count × sizeof(char) 给 char** 分配了内存。在 64 位机器上，它实际买到了什么？带我走一遍。',
+        keyPoints: [
+          'sizeof(char) 是 1，所以这里只分配了 count 个字节。',
+          '这个数组需要 count 个指针 —— 64 位目标上每个 8 字节 —— 所以少了 8 倍。',
+          '它编译无警告、而且经常看起来能跑，因为堆在分配之后往往还有空余。',
+          '正确的写法是 sizeof(char *)，更好的是 sizeof(**allNodes)。',
+        ],
+        ownedLooksLike: '把两个尺寸都算出来，说出差了 8 倍，并解释它为什么不会当场崩。',
+        surfaceLooksLike: '说它「给节点分配了内存」，或者说应该用 sizeof(char*)，但讲不出它看起来为什么能跑。',
+      },
       variant: {
         question: 'The grading criteria award 14 points for a clean Valgrind run and take all of them away for any invalid read or write. Which line in this excerpt loses those points, and what would Valgrind actually print?',
         whyThisProbe: 'Same defect, approached through the instructor’s own rubric rather than through the arithmetic.',
@@ -63,6 +74,16 @@ export const graphSample: SampleDef = {
       ],
       ownedLooksLike: 'Names strcpy on the following line as the crash site.',
       surfaceLooksLike: 'Says it "prints an error message so the user knows".',
+      zh: {
+        question: '这里检测到了分配失败，然后打印。执行会继续走到下一行。接下来会发生什么？你原本想让它发生什么？',
+        keyPoints: [
+          '紧接着的下一条语句就是往那个 NULL 指针里 strcpy —— 立刻段错误。',
+          '检测到却不处理，比根本不检测更糟，因为它看起来像做了防御。',
+          '本该有的处理是 return、exit，或者回滚已经分配的部分。',
+        ],
+        ownedLooksLike: '指出下一行的 strcpy 就是崩溃点。',
+        surfaceLooksLike: '说它「打印了一条错误信息让用户知道」。',
+      },
     },
     {
       dimensionId: 'design',
@@ -78,6 +99,16 @@ export const graphSample: SampleDef = {
       ],
       ownedLooksLike: 'Accounts for the terminator and identifies the off-by-one at the boundary.',
       surfaceLooksLike: 'Says 31 is "long enough for a course name".',
+      zh: {
+        question: '为什么是 31？说出这个数字编码了什么，以及一个需要 31 个字符的节点名会怎样。',
+        keyPoints: [
+          '31 大概是 30 个字符的名字加上 NUL 终止符。',
+          '对一个 31 字符的名字做 strcpy 会写 32 字节，正好溢出一个。',
+          '这个上限该放在一个具名常量里、在读入处校验，而不是在分配处重复一遍。',
+        ],
+        ownedLooksLike: '把终止符算进去，并指出边界上那个差一错误。',
+        surfaceLooksLike: '说 31「对课程名来说够长了」。',
+      },
     },
   ],
   fragilities: [
@@ -124,6 +155,16 @@ export const gamblingSample: SampleDef = {
       ],
       ownedLooksLike: 'Names a break-even near 52.4% and notices 51.5% is beneath it.',
       surfaceLooksLike: 'Says the model "beats the market" or that 51.5% is "above chance".',
+      zh: {
+        question: '51.5% 是在多少场比赛上跑出来的？扣掉抽水之后，保本胜率是多少？',
+        keyPoints: [
+          '标准 -110 赔率下，保本线大约在 52.4%。',
+          '所以 51.5% 在保本线之下：这个头条结果是亏钱的。',
+          '没有 n 就不知道标准误 —— 500 场的话，95% 区间大约是 ±2.2 个百分点。',
+        ],
+        ownedLooksLike: '说出保本线在 52.4% 附近，并注意到 51.5% 在它下面。',
+        surfaceLooksLike: '说模型「跑赢了市场」，或者说 51.5%「高于随机」。',
+      },
       variant: {
         question: 'Your model is right 51.5% of the time on a held-out season. Write down the bet sizing that turns that into a positive expected return, or explain why none exists.',
         whyThisProbe: 'Same target — what the number is worth — approached through the decision it is supposed to support.',
@@ -142,6 +183,16 @@ export const gamblingSample: SampleDef = {
       ],
       ownedLooksLike: 'Names an as-of computation and a chronological split.',
       surfaceLooksLike: 'Says they used a train/test split and shuffled the data.',
+      zh: {
+        question: '一个跑在 NBA 赛程上的循环模型，有一条很明显的路可以偷看未来。说出最可能泄漏的那个特征，以及你的划分方式得长成什么样才能堵住它。',
+        keyPoints: [
+          '用整个赛季算出来的赛季均值，会泄漏进这个赛季更早的比赛里。',
+          '休息天数、伤病状态、赔率变动，只要取错时间戳，全都是被未来污染过的。',
+          '划分必须严格按时间顺序，特征要按每场比赛当天为准来计算。',
+        ],
+        ownedLooksLike: '说得出「按当时为准」的特征计算方式，以及按时间顺序切分。',
+        surfaceLooksLike: '说他们做了训练/测试划分并且打乱了数据。',
+      },
     },
     {
       dimensionId: 'honesty',
@@ -156,6 +207,16 @@ export const gamblingSample: SampleDef = {
       ],
       ownedLooksLike: 'Names at least one competing explanation and the ablation that would separate them.',
       surfaceLooksLike: 'Restates that Gaussians are a poor fit for this data.',
+      zh: {
+        question: '这句话是在解释另一个队的结果。什么证据能把你这个解释，和同样能解释那 2% 差距的另外两三个解释区分开？',
+        keyPoints: [
+          '别的可能：数据更少、特征更差、评估窗口不同，或者盘口本来就有效。',
+          '要区分它们需要消融实验，而不是一个听起来合理的机制。',
+          '「可能是」这三个字承担了太多 —— 诚实的写法是把候选一条条列出来。',
+        ],
+        ownedLooksLike: '说出至少一个竞争性解释，以及能把它们分开的消融实验。',
+        surfaceLooksLike: '把「高斯分布不适合这份数据」再说一遍。',
+      },
     },
   ],
   fragilities: [
@@ -198,6 +259,16 @@ export const tuberculosisSample: SampleDef = {
       ],
       ownedLooksLike: 'Names a direction and ties it to which regions go missing and why.',
       surfaceLooksLike: 'Repeats that missing data may bias results.',
+      zh: {
+        question: '被剔掉的是哪些地区、多少个国家-年？这会把你的 ANOVA 往哪个方向推？',
+        keyPoints: [
+          '结核监测的缺失不是随机的 —— 它集中在卫生系统能力弱的地方。',
+          '而那些恰恰是高死亡、低检出的情形，所以剔掉它们会削弱你报告的那个关系本身。',
+          '所以方向是可预测的，不只是「可能引入偏倚」。',
+        ],
+        ownedLooksLike: '说出一个方向，并把它和「哪些地区会缺失、为什么缺」连起来。',
+        surfaceLooksLike: '重复一遍「缺失数据可能造成偏倚」。',
+      },
       variant: {
         question: 'Suppose the missing country-years were filled in with a regional median. Would your negative correlation get stronger or weaker, and why?',
         whyThisProbe: 'Same target — whether the caveat is load-bearing — made concrete by an imputation.',
@@ -217,6 +288,16 @@ export const tuberculosisSample: SampleDef = {
       ],
       ownedLooksLike: 'Computes the number of comparisons and names a correction, or defends omitting one.',
       surfaceLooksLike: 'Says the t-tests confirmed the ANOVA result.',
+      zh: {
+        question: '你跑了 ANOVA，然后又对各地区做了两两 t 检验。那一共是多少次比较？你对此做了什么处理？',
+        keyPoints: [
+          '六个 WHO 地区意味着 15 次两两比较。',
+          'α = 0.05 且不校正时，族系错误率超过 50%。',
+          'Tukey HSD 或 Bonferroni 是标准做法；说「我们没有校正」只要给出理由，也是站得住的答案。',
+        ],
+        ownedLooksLike: '把比较次数算出来，并说出一种校正方法，或者给出不做校正的理由。',
+        surfaceLooksLike: '说 t 检验「验证了 ANOVA 的结果」。',
+      },
     },
     {
       dimensionId: 'interpretation',
@@ -232,6 +313,16 @@ export const tuberculosisSample: SampleDef = {
       ],
       ownedLooksLike: 'Recognises spurious correlation from a shared denominator and proposes the absolute-count check.',
       surfaceLooksLike: 'Restates that correlation is not causation.',
+      zh: {
+        question: '检出率是一个分母为估计发病数的比值。死亡率也用同一个估计值做了标化。这个共用的分母，对两者之间的相关会造成什么？',
+        keyPoints: [
+          '两个共用分母的比值，即使分子彼此独立，也会出现伪相关。',
+          '这两个量都依赖 WHO 用模型估计出来的发病数。',
+          '该做的复核是：换成绝对计数之后，这个关系还在不在。',
+        ],
+        ownedLooksLike: '认出共用分母带来的伪相关，并提出用绝对计数去复核。',
+        surfaceLooksLike: '重复一句「相关不等于因果」。',
+      },
     },
   ],
   fragilities: [
@@ -278,6 +369,16 @@ export const planckSample: SampleDef = {
       ],
       ownedLooksLike: 'Frames agreement as discrepancy over uncertainty and names roughly where their result sat.',
       surfaceLooksLike: 'Says the value was "close to" the accepted one.',
+      zh: {
+        question: '把「吻合得很好」用数字定义出来。你的结果距离公认值有多少个标准误？',
+        keyPoints: [
+          '吻合说的是差值相对于合成不确定度有多大。',
+          '一个标准误以内不值一提；三个以内仍算吻合；超出就需要一个交代。',
+          '没有不确定度，这句话不携带任何信息。',
+        ],
+        ownedLooksLike: '把「吻合」表述成差值相对于不确定度的关系，并说出自己的结果大致落在哪。',
+        surfaceLooksLike: '说这个值「接近」公认值。',
+      },
     },
     {
       dimensionId: 'model',
@@ -292,6 +393,16 @@ export const planckSample: SampleDef = {
       ],
       ownedLooksLike: 'Names a systematic and gets its direction right, and distinguishes slope effects from intercept effects.',
       surfaceLooksLike: 'Lists "human error" and "equipment limitations".',
+      zh: {
+        question: '你的斜率给出的是 h/e。说出这条斜率里最大的两项系统误差，以及每一项把你的 h 往哪个方向推。',
+        keyPoints: [
+          '阳极反向光电流会让测到的截止电压偏小。',
+          '接触电位差影响的是截距，不是斜率。',
+          '非单色光和光阴极逸出功不均匀，会把截止点抹宽。',
+        ],
+        ownedLooksLike: '说出一项系统误差并把方向说对，并且能区分影响斜率的和影响截距的。',
+        surfaceLooksLike: '列出「人为误差」和「设备限制」。',
+      },
     },
   ],
   fragilities: [
@@ -344,6 +455,16 @@ export const vicarSample: SampleDef = {
       ],
       ownedLooksLike: 'Names a specific excluded case and either defends the exclusion or concedes the definition is too tight.',
       surfaceLooksLike: 'Restates the definition in different words.',
+      zh: {
+        question: '这个定义是你自己下的。举出一本被你的定义排除在外、但多数读者都会叫它基督教道德故事的书 —— 并说这个代价你认不认。',
+        keyPoints: [
+          '自定义的定义必须比日常用法更窄，才可能干活。',
+          '它排除掉的东西就是这个论证的代价，而代价应该被说出来。',
+          '如果什么都没被排除，这个定义就没在做论点声称它在做的事。',
+        ],
+        ownedLooksLike: '举出一个被排除的具体例子，然后要么为这个排除辩护，要么承认定义收得太紧。',
+        surfaceLooksLike: '换一批词把定义再说一遍。',
+      },
     },
     {
       dimensionId: 'counterfactual',
@@ -358,6 +479,16 @@ export const vicarSample: SampleDef = {
       ],
       ownedLooksLike: 'Separates the two criteria and traces which evidence belongs to which.',
       surfaceLooksLike: 'Repeats that the book fails because the characters are rewarded with money.',
+      zh: {
+        question: '假设我们改用「意图」而不是「效果」来定义这个体裁 —— 作者本来就想教基督教道德。你文章里哪些段落还站得住，哪些当场垮掉？',
+        keyPoints: [
+          '意图和效果是两条不同的标准，而这篇文章两边的证据都用了。',
+          '在意图这条标准下，叙述者不停地讲道德，反而是支持这个体裁的证据，不是反对的。',
+          '站得住的答案会选定一条标准，并接受它的代价。',
+        ],
+        ownedLooksLike: '把两条标准分开，并追出哪些证据属于哪一条。',
+        surfaceLooksLike: '重复一遍「这本书失败是因为人物最后得到了钱」。',
+      },
     },
     {
       dimensionId: 'evidence',
@@ -372,6 +503,16 @@ export const vicarSample: SampleDef = {
       ],
       ownedLooksLike: 'Offers a concrete alternative reading of the same endings and says why theirs is better.',
       surfaceLooksLike: 'Cites more examples of characters being rewarded.',
+      zh: {
+        question: '这是你对情节在教什么的读法，不是原文说过的话。小说里什么东西不一样，才会让这个读法是错的？',
+        keyPoints: [
+          '这个主张是从「谁最后得了好处」推出来的，不是从任何写明的道德推出来的。',
+          '有一个对手读法 —— 奖赏只是叙事惯例、不是道德教诲 —— 同样能解释这批事件。',
+          '说得出什么能证伪它，才是读法和复述之间的区别。',
+        ],
+        ownedLooksLike: '对同一批结局给出一个具体的替代读法，并说出为什么自己的更好。',
+        surfaceLooksLike: '再举几个人物得到奖赏的例子。',
+      },
     },
     {
       dimensionId: 'objection',
@@ -386,6 +527,16 @@ export const vicarSample: SampleDef = {
       ],
       ownedLooksLike: 'Sees that the concession forces the thesis to narrow, and states the narrower thesis.',
       surfaceLooksLike: 'Says the concession is only a small point.',
+      zh: {
+        question: '这句让步是对你自己论点最强的反对。它为什么没有把论证击沉 —— 你在文章的哪一处回答了它？',
+        keyPoints: [
+          '这句让步承认了这本书在教道德，而那正是论点否认的大部分内容。',
+          '文章手上能用的回应是：道德变了，而不是消失了。',
+          '这个回应会把论点从「失败」收窄成「不同」，而文章从没把这一步挑明。',
+        ],
+        ownedLooksLike: '看出这句让步逼着论点收窄，并把那个更窄的论点说出来。',
+        surfaceLooksLike: '说这句让步只是个小问题。',
+      },
     },
   ],
   fragilities: [
@@ -444,6 +595,16 @@ export const pubertySample: SampleDef = {
       ],
       ownedLooksLike: 'Names a confounder that moves both puberty timing and depression, and says what design would break the link.',
       surfaceLooksLike: 'Repeats that the studies found a significant relationship.',
+      zh: {
+        question: '这里真正干活的词是「本身」。你需要什么样的研究设计，才配保留这两个字 —— 你综述里有哪一项研究具备它吗？',
+        keyPoints: [
+          '时机与抑郁之间的关联，同样可以由一个同时作用于两者的共同原因解释。',
+          '要把时机单独隔离出来，需要与家庭、体成分、社会环境无关的时机变异。',
+          '一篇观察性研究的综述提供不了这种变异，所以「本身」这两个字没挣到。',
+        ],
+        ownedLooksLike: '说出一个同时推动青春期时机和抑郁的混杂因素，并说出什么设计能斩断这条链。',
+        surfaceLooksLike: '重复一遍这些研究发现了显著关系。',
+      },
     },
     {
       dimensionId: 'bias',
@@ -458,6 +619,16 @@ export const pubertySample: SampleDef = {
       ],
       ownedLooksLike: 'Distinguishes differential from non-differential misclassification and picks a direction with a reason.',
       surfaceLooksLike: 'Says self-report is "less reliable".',
+      zh: {
+        question: '如果一个当下正抑郁的女孩，对自己青春期时机的回忆和不抑郁的女孩不一样，这会把结果往哪边推 —— 为什么这比普通的噪声更糟？',
+        keyPoints: [
+          '非差异性误差通常把结果推向零；而依赖于结局的误差可以往任一方向偏。',
+          '一个已经抑郁的青少年所回忆的时机，很可能与结局本身相连。',
+          '身高体重记录是一个客观校验，这也正是那项研究用它的原因。',
+        ],
+        ownedLooksLike: '区分差异性与非差异性错分，并带着理由挑一个方向。',
+        surfaceLooksLike: '说自我报告「不太可靠」。',
+      },
     },
     {
       dimensionId: 'measure',
@@ -472,6 +643,16 @@ export const pubertySample: SampleDef = {
       ],
       ownedLooksLike: 'Separates prevalence from incidence and notices the temporal ordering problem.',
       surfaceLooksLike: 'Says lifetime rates show the effect is large.',
+      zh: {
+        question: '「终身患病率」—— 而测量对象是青少年。这个量包含了什么，是「青春期之后那一年的发病率」不会包含的？你的论证真正需要的是哪一个？',
+        keyPoints: [
+          '终身患病率把「曾经发生过的」全都算进去，包括暴露之前。',
+          '一个关于「早熟造成了什么后果」的主张，需要的是它之后的发病率。',
+          '用终身患病率，会把本来就存在的差异看成是后果。',
+        ],
+        ownedLooksLike: '把患病率和发病率分开，并注意到时间先后的问题。',
+        surfaceLooksLike: '说终身患病率显示效应很大。',
+      },
     },
     {
       dimensionId: 'design',
@@ -486,6 +667,16 @@ export const pubertySample: SampleDef = {
       ],
       ownedLooksLike: 'Names a concrete excluded group and reasons about the direction of the resulting bias.',
       surfaceLooksLike: 'Says the sample "may not be representative".',
+      zh: {
+        question: '九所高中，能被访到的在校学生。说出这个抽样框系统性漏掉的一类女孩，并说她的缺席会把结论往哪边掰。',
+        keyPoints: [
+          '这个抽样框是在册、且在校的学生。',
+          '已经离开学校的女孩 —— 其中包含结局最严重的一部分 —— 根本进不来。',
+          '丢掉严重的那条尾巴，会削弱这个关联，而不是凭空造出一个。',
+        ],
+        ownedLooksLike: '举出一个具体被排除的群体，并对由此产生的偏倚方向做出推理。',
+        surfaceLooksLike: '说样本「可能不具代表性」。',
+      },
     },
   ],
   fragilities: [

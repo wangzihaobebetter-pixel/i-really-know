@@ -85,6 +85,41 @@ if (samplesSeen < 4) failures.push(`only ${samplesSeen} samples parsed — the p
 /* The corpus found no genuine student chemistry report (research file 01 §7.1:
    the best candidate was an instructor template bylined "Joe Student"). The
    gap is stated on every build rather than filled with invention. */
+
+/*
+ * Bilingual parity for everything a STUDENT reads off a sample.
+ *
+ * Found by walking the keyless path in a Chinese session: the probe question
+ * and, worse, the marking rubric (`ownedLooksLike` + `keyPoints`) rendered
+ * verbatim in English on the screen where the student decides whether their
+ * own answer held. Only one string in the whole corpus had ever been
+ * translated. The material itself is deliberately NOT translated — brief §12
+ * keeps the marked page in its original language and the anchor has to stay a
+ * verbatim substring of it — so this gate checks the probe text only.
+ */
+const CJK = /[\u4e00-\u9fff]/;
+let zhChecked = 0;
+for (const defFile of DEFS) {
+  const src = readFileSync(defFile, 'utf8');
+  const probes = src.split(/\n      dimensionId: /).slice(1);
+  for (const probe of probes) {
+    const head = probe.slice(0, 80).replace(/\n[\s\S]*/, '');
+    if (!/\n      zh: \{/.test(probe)) {
+      failures.push(`${defFile}: probe ${head} has no zh block — a Chinese session would ask it in English`);
+      continue;
+    }
+    const zh = probe.slice(probe.indexOf('\n      zh: {'));
+    const q = zh.match(/question: '((?:[^'\\]|\\.)*)'/)?.[1] ?? '';
+    const owned = zh.match(/ownedLooksLike: '((?:[^'\\]|\\.)*)'/)?.[1] ?? '';
+    const points = (zh.match(/keyPoints: \[([\s\S]*?)\]/)?.[1] ?? '').match(/'(?:[^'\\]|\\.)*'/g) ?? [];
+    if (!CJK.test(q)) failures.push(`${defFile}: probe ${head} zh.question is not Chinese`);
+    if (!CJK.test(owned)) failures.push(`${defFile}: probe ${head} zh.ownedLooksLike is not Chinese`);
+    if (!points.length) failures.push(`${defFile}: probe ${head} zh.keyPoints is empty`);
+    zhChecked += 1;
+  }
+}
+console.log(`verify-samples: ${zhChecked} probes carry Simplified Chinese for everything the student reads`);
+
 console.log('verify-samples: NOTE — no chemistry and no mathematics sample ships. research/ireallyknow/01 §7.1 found');
 console.log('  no genuine student-submitted chemistry lab report, and MICUSP carries no');
 console.log('  mathematics papers. Both gaps are stated, not fabricated.');

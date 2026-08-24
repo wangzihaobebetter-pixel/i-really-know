@@ -46,15 +46,9 @@ export const SAMPLES: SampleDef[] = [
 export const FEATURED_SAMPLE = graphSample;
 
 export function buildFeaturedSampleSession(lang: 'en' | 'zh-CN'): Session {
-  const session = buildSampleSession(FEATURED_SAMPLE);
-  if (lang !== 'zh-CN') return session;
-  return {
-    ...session,
-    probes: session.probes.map((probe, index) => index === 0 ? {
-      ...probe,
-      question: '这行代码按 count × sizeof(char) 给 char** 分配了内存。在 64 位机器上，它实际买到了什么？',
-    } : probe),
-  };
+  /* The one-off Chinese override for probe 1 is gone: every sample probe now
+     carries its own `zh` block, so the builder localizes the whole set. */
+  return buildSampleSession(FEATURED_SAMPLE, lang);
 }
 
 /** Samples carrying an illustrative worked run, used for the home demo. */
@@ -68,19 +62,20 @@ export function getSample(sampleId: string | undefined): SampleDef | undefined {
 export const sampleSessionId = (sampleId: string) => `sample_${sampleId}`;
 
 /** Builds a fresh, unanswered Session from a sample definition. */
-export function buildSampleSession(def: SampleDef): Session {
+export function buildSampleSession(def: SampleDef, lang: 'en' | 'zh-CN' = 'en'): Session {
+  const zh = lang === 'zh-CN';
   const probes: Probe[] = def.probes.map((p, i) => ({
     id: `${def.id}_p${i + 1}`,
     dimensionId: p.dimensionId,
     concept: p.concept,
     kind: p.kind,
     anchor: { quote: p.quote, placed: false },
-    question: p.question,
+    question: zh ? p.zh.question : p.question,
     whyThisProbe: p.whyThisProbe,
     reference: {
-      keyPoints: p.keyPoints,
-      ownedLooksLike: p.ownedLooksLike,
-      surfaceLooksLike: p.surfaceLooksLike,
+      keyPoints: zh ? p.zh.keyPoints : p.keyPoints,
+      ownedLooksLike: zh ? p.zh.ownedLooksLike : p.ownedLooksLike,
+      surfaceLooksLike: zh ? p.zh.surfaceLooksLike : p.surfaceLooksLike,
     },
     timerSec: p.timerSec ?? 90,
     difficulty: def.difficulty,
@@ -118,8 +113,8 @@ export function buildSampleSession(def: SampleDef): Session {
  * sat this examination — so every surface that renders them says so. See
  * `WorkedOutcome` in kit.ts.
  */
-export function buildWorkedSession(def: SampleDef): Session {
-  const base = buildSampleSession(def);
+export function buildWorkedSession(def: SampleDef, lang: 'en' | 'zh-CN' = 'en'): Session {
+  const base = buildSampleSession(def, lang);
   if (!def.worked?.length) return base;
   const at = now();
   return withDivergenceApplied({
@@ -199,10 +194,10 @@ export function unplacedAnchors(): { sampleId: string; quote: string }[] {
  * · seminar discussion" over an otherwise Chinese page. §7 requires parity in
  * both directions, so the two strings come from the table like everything else.
  */
-export function buildDemoCohort(name: string, occasion: string): { cohort: Cohort; sessions: Session[] } {
+export function buildDemoCohort(name: string, occasion: string, lang: 'en' | 'zh-CN' = 'en'): { cohort: Cohort; sessions: Session[] } {
   const cohortId = 'cohort_demo';
   const built = DEMO_SAMPLES.map((def) => {
-    const session = { ...buildWorkedSession(def), id: `${cohortId}_${def.id}`, cohortId, mode: 'class' as const };
+    const session = { ...buildWorkedSession(def, lang), id: `${cohortId}_${def.id}`, cohortId, mode: 'class' as const };
     return { def, session };
   });
   return {

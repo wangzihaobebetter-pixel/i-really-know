@@ -55,6 +55,16 @@ export const antepartumSample: SampleDef = {
       ],
       ownedLooksLike: 'Separates dilutional change from true anaemia and names one test that would settle it.',
       surfaceLooksLike: 'Says the value is "low" and recommends iron, with no mechanism and no threshold.',
+      zh: {
+        question: '13 周的双胎，Hgb 10、Hct 32 —— 这是一个异常发现，还是正常的？什么会让你改口？',
+        keyPoints: [
+          '血浆容量的扩张快于红细胞量，双胎更明显 —— 稀释性下降是预期之内的。',
+          '妊娠期贫血的参考阈值按孕期分段，不是一条统一的线。',
+          '能让你改口的东西：MCV、铁蛋白、孕前基线、有没有症状。',
+        ],
+        ownedLooksLike: '把稀释性下降和真正的贫血分开，并说出一项能定性的检查。',
+        surfaceLooksLike: '只说这个值「偏低」、建议补铁，既没有机制也没有阈值。',
+      },
       variant: {
         question: 'You have the same patient at 28 weeks with Hgb 9.4. Has anything changed about how you read it, and what do you do differently?',
         whyThisProbe: 'Moves the same value into a trimester where the expected physiology is different.',
@@ -74,6 +84,16 @@ export const antepartumSample: SampleDef = {
       ],
       ownedLooksLike: 'Connects the comorbidity to a decision, not just to a risk list.',
       surfaceLooksLike: 'Repeats that scleroderma is an autoimmune connective tissue disease.',
+      zh: {
+        question: '硬皮病在你的病史里只出现了一句，后面再没提过。说出它改变这一次妊娠管理的一个具体点，以及它改变分娩方案的一个具体点。',
+        keyPoints: [
+          '硬皮病带来肾危象和高血压疾病的风险，这直接改变了这里的血压读数意味着什么。',
+          '手指和肘部挛缩会影响静脉通路、体位摆放和产程监护。',
+          '它同时提出一个问题：哪些药物必须在孕前就复核。',
+        ],
+        ownedLooksLike: '把这个合并症连到一个决定上，而不是连到一串风险词上。',
+        surfaceLooksLike: '重复一遍硬皮病是一种自身免疫性结缔组织病。',
+      },
     },
     {
       dimensionId: 'risk',
@@ -89,6 +109,16 @@ export const antepartumSample: SampleDef = {
       ],
       ownedLooksLike: 'Names BMI-stratified twin guidance and notices the underweight starting point.',
       surfaceLooksLike: 'Says the gain "seems fine" or "is within normal limits" with no comparator.',
+      zh: {
+        question: 'BMI 18.4 的双绒双羊双胎，到 13 周增重 5 磅。这够吗？告诉我你在跟哪个数字比，以及那个数字从哪来。',
+        keyPoints: [
+          '双胎的增重目标高于单胎，并且按孕前 BMI 分层。',
+          'BMI 18.4 属于偏瘦，这会把推荐区间再往上抬。',
+          '诚实的答案可以是「我不记得确切区间」—— 说得出你在跟什么比，推理就已经站住了。',
+        ],
+        ownedLooksLike: '说得出按 BMI 分层的双胎增重区间，并注意到她的起点是偏瘦。',
+        surfaceLooksLike: '说增重「看着还行」或「在正常范围内」，但拿不出参照。',
+      },
     },
     {
       dimensionId: 'provenance',
@@ -104,6 +134,16 @@ export const antepartumSample: SampleDef = {
       ],
       ownedLooksLike: 'Either defends it as audience-facing plain language, or concedes it and says what should have followed.',
       surfaceLooksLike: 'Repeats the sentence a third time.',
+      zh: {
+        question: '这句话把它前面那行记录又说了一遍。你原本想让它给读者建立什么，是那行记录没给到的？',
+        keyPoints: [
+          '当读者未必读得懂专业记录时，用白话复述是正当的写法。',
+          '但它不能替代「13 周对这个方案意味着什么」这句该说而没说的话。',
+          '13 周真正确立的是：筛查窗口、生存力讨论、随访间隔。',
+        ],
+        ownedLooksLike: '要么把它辩护成写给非专业读者看的白话，要么承认它多余并说出本该接上的是什么。',
+        surfaceLooksLike: '把同一句话第三次复述一遍。',
+      },
     },
     {
       dimensionId: 'investigation',
@@ -119,6 +159,16 @@ export const antepartumSample: SampleDef = {
       ],
       ownedLooksLike: 'Splits the answer by timeframe and names the contraindication as the reason.',
       surfaceLooksLike: 'Says she should be vaccinated, with no mention of timing.',
+      zh: {
+        question: '13 周查出风疹抗体结果可疑。这次妊娠期间你怎么处理，妊娠结束之后又怎么处理？',
+        keyPoints: [
+          '活疫苗在妊娠期属于禁忌，所以动作是产后接种。',
+          '妊娠期间的动作是就暴露规避做宣教。',
+          '结果可疑可能需要复查滴度，而不是直接当作没有免疫力。',
+        ],
+        ownedLooksLike: '按时间段把答案劈成两半，并说出禁忌症就是那条分界线的原因。',
+        surfaceLooksLike: '说她应该接种疫苗，但不提时机。',
+      },
     },
   ],
   fragilities: [
@@ -170,6 +220,16 @@ export const contraceptionSample: SampleDef = {
       ],
       ownedLooksLike: 'Distinguishes "88% of expected pregnancies prevented" from "88% of users do not conceive".',
       surfaceLooksLike: 'Repeats the 88% and points at the footnote.',
+      zh: {
+        question: '88% 是从哪来的？相对于什么基线的 88%？把分母告诉我。',
+        keyPoints: [
+          '这个数字是相对于「不干预时的预期妊娠数」的下降，不是每次性行为的绝对概率。',
+          '那个预期基线本身是模型算出来的、不是观察到的，所以不同来源给的数字才会不一样。',
+          '时机很重要：在 120 小时窗口里，有效性并不是一条平线。',
+        ],
+        ownedLooksLike: '能把「预期妊娠减少了 88%」和「88% 的使用者不会怀孕」分开。',
+        surfaceLooksLike: '把 88% 再念一遍，然后指向脚注。',
+      },
       variant: {
         question: 'Two sources give different efficacy figures for the same regimen. Name one methodological choice that would produce that gap.',
         whyThisProbe: 'Same target — where a number comes from — approached through disagreement rather than through a single citation.',
@@ -188,6 +248,16 @@ export const contraceptionSample: SampleDef = {
       ],
       ownedLooksLike: 'Notices the baselines are different objects and refuses the multiplication.',
       surfaceLooksLike: 'Does the arithmetic.',
+      zh: {
+        question: '你的第一个数字是受孕高峰期单次性行为的概率，第二个是有效率。这两个能相乘得到用药后的风险吗？说出能或不能的理由。',
+        keyPoints: [
+          '88% 本身已经是相对于「预期妊娠」基线定义的，再乘一次就是重复计算。',
+          '17% 是按周期日条件化的；而有效率是跨周期日平均出来的。',
+          '要把两个数合起来，前提是知道每一个各自是相对哪个基线算的。',
+        ],
+        ownedLooksLike: '看出这两个数的基线不是同一个东西，并拒绝做这个乘法。',
+        surfaceLooksLike: '直接把两个数乘起来。',
+      },
     },
     {
       dimensionId: 'management',
@@ -202,6 +272,16 @@ export const contraceptionSample: SampleDef = {
       ],
       ownedLooksLike: 'Names a specific patient factor — BMI, time since intercourse, desire for ongoing contraception.',
       surfaceLooksLike: 'Says the IUD is "more effective" without saying for whom or why.',
+      zh: {
+        question: '你把两个方案并列得像是可以互换。说出一个含铜宫内节育器明显更优的具体病人，以及对她而言更优在哪。',
+        keyPoints: [
+          '含铜宫内节育器的有效性受 BMI 影响远小于口服左炔诺孕酮。',
+          '它同时提供长期避孕，这对一个本来就想要长期避孕的人会改变整个决定。',
+          '但它需要受过训练的置入者，在时间窗内未必找得到。',
+        ],
+        ownedLooksLike: '说得出一个具体的病人因素 —— BMI、距性行为的时间、是否还想要长期避孕。',
+        surfaceLooksLike: '只说宫内节育器「更有效」，不说对谁、也不说为什么。',
+      },
     },
   ],
   fragilities: [
@@ -243,6 +323,16 @@ export const motorOilSample: SampleDef = {
       ],
       ownedLooksLike: 'Gives a magnitude with a spread, or says plainly that the design could not distinguish it from noise.',
       surfaceLooksLike: 'Says the treatment group "showed reduced predation" and stops.',
+      zh: {
+        question: '你报告了机油对捕食行为的影响。这个影响有多大？你凭什么说它不是噪声？',
+        keyPoints: [
+          '一个效应需要量级和离散度，光有方向不算。',
+          '样本量小的时候，只报均值差几乎说明不了什么。',
+          '说出用了什么检验、它假设了什么，是最低限度站得住的答案。',
+        ],
+        ownedLooksLike: '给出一个带离散度的量级，或者干脆说清楚这个设计分不出它和噪声。',
+        surfaceLooksLike: '说处理组「捕食减少了」，然后就没了。',
+      },
     },
     {
       dimensionId: 'controls',
@@ -257,6 +347,16 @@ export const motorOilSample: SampleDef = {
       ],
       ownedLooksLike: 'Proposes an inert-film control and says what result would implicate which mechanism.',
       surfaceLooksLike: 'Says the study "controlled for other variables".',
+      zh: {
+        question: '机油会在水面形成油膜，它本身也有化学毒性。你测到的是这两者中的哪一个？什么对照能把它们分开？',
+        keyPoints: [
+          '表面油膜会改变氧交换，也会挡住昆虫接触水面。',
+          '一层惰性膜 —— 矿物油，或者一个漂浮隔层 —— 才能把物理效应和化学效应分开。',
+          '没有这个对照，数据里这两种机制是分不开的。',
+        ],
+        ownedLooksLike: '提出一个惰性油膜对照，并说明什么结果指向哪一种机制。',
+        surfaceLooksLike: '说这项研究「控制了其他变量」。',
+      },
     },
     {
       dimensionId: 'limits',
@@ -271,6 +371,16 @@ export const motorOilSample: SampleDef = {
       ],
       ownedLooksLike: 'Concedes it is scaffolding, or defends it as journal-specific convention with a reason.',
       surfaceLooksLike: 'Defends it as "providing context" without saying context for what.',
+      zh: {
+        question: '把开头这句话删掉。这段摘要少了什么？',
+        keyPoints: [
+          '社会意义的开场能立起利害关系，但它不承载这项研究自己的任何主张。',
+          '摘要的第一句是全文最贵的位置。',
+          '这项研究自己的问题放在那个位置会更好。',
+        ],
+        ownedLooksLike: '承认它是铺垫，或者拿出理由把它辩护成该期刊的惯例。',
+        surfaceLooksLike: '说它「提供了背景」，但说不出是什么的背景。',
+      },
     },
   ],
   fragilities: [
@@ -312,6 +422,16 @@ export const plantCompetitionSample: SampleDef = {
       ],
       ownedLooksLike: 'Instantiates the claim with a pair and a gradient, ideally from their own data.',
       surfaceLooksLike: 'Rephrases the sentence with different words.',
+      zh: {
+        question: '举出一对物种，它们的竞争优劣会随某个环境条件反转，并说出那个条件。',
+        keyPoints: [
+          '沿资源梯度出现竞争反转，是这件事的标准演示。',
+          '养分水平、水分供应和光照是常见的反转条件。',
+          '他自己的实验里大概就设了某个条件；把它说出来就够了。',
+        ],
+        ownedLooksLike: '用一对物种和一条梯度把这个说法坐实，最好是来自他自己的数据。',
+        surfaceLooksLike: '换一批词把原句再说一遍。',
+      },
     },
     {
       dimensionId: 'methodchoice',
@@ -326,6 +446,16 @@ export const plantCompetitionSample: SampleDef = {
       ],
       ownedLooksLike: 'Names the resource and the design feature that isolates it.',
       surfaceLooksLike: 'Says the plants "competed for nutrients and light".',
+      zh: {
+        question: '你的实验里限制性资源是哪一个？设计里的什么让你确定是它、而不是别的？',
+        keyPoints: [
+          '要谈竞争，先得证明某个资源确实是限制性的。',
+          '密度梯度或者加资源处理，才是把这件事确立下来的手段。',
+          '没有这一步，观察到的差异也可能是干扰或化感作用。',
+        ],
+        ownedLooksLike: '说出那个资源，以及设计里把它单独隔离出来的那一处。',
+        surfaceLooksLike: '说植物「在争养分和光照」。',
+      },
     },
   ],
   fragilities: [

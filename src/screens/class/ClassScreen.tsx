@@ -51,7 +51,7 @@ export default function ClassScreen() {
   }
 
   function loadDemo() {
-    const { cohort, sessions } = buildDemoCohort(t('class.demoName'), t('class.demoOccasion'));
+    const { cohort, sessions } = buildDemoCohort(t('class.demoName'), t('class.demoOccasion'), lang);
     sessions.forEach(upsertSession);
     upsertCohort(cohort);
     nav('cohort', { cohortId: cohort.id });

@@ -58,7 +58,7 @@ export default function TodayScreen() {
   function openSample(sampleId: string) {
     const def = SAMPLES.find((item) => item.id === sampleId) ?? SAMPLES[0];
     const existing = sessions.find((item) => item.id === sampleSessionId(def.id));
-    const session = existing ?? buildSampleSession(def);
+    const session = existing ?? buildSampleSession(def, lang);
     if (!existing) upsertSession(session);
     setPickerOpen(false);
     /* Through the reading pass, not straight to the questions. Being read is

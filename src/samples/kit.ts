@@ -14,6 +14,28 @@ export interface SampleProbeDef {
   timerSec?: number;
   /** Pre-baked second angle, used by keyless retraining (spec §7.1). */
   variant?: { question: string; whyThisProbe: string };
+  /**
+   * Simplified Chinese for everything the STUDENT sees. Required, and enforced
+   * by verify-samples.
+   *
+   * Why it exists: the probe question, `ownedLooksLike` and `keyPoints` render
+   * verbatim — the question on the answering screen, the other two on the
+   * keyless marking screen, which is the exact moment a student decides
+   * whether their own answer held. All three were English-only, so a Chinese
+   * session asked its hardest question and then showed its marking rubric in
+   * a language the rest of the interface never uses. §7 requires parity in
+   * both directions.
+   *
+   * The MATERIAL is deliberately not translated: brief §12 keeps the marked
+   * page in the student's original language, and the anchor quote must stay a
+   * verbatim substring of it.
+   */
+  zh: {
+    question: string;
+    keyPoints: string[];
+    ownedLooksLike: string;
+    surfaceLooksLike: string;
+  };
 }
 
 /**
