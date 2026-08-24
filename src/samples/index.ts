@@ -13,7 +13,8 @@ import {
   antepartumSample, contraceptionSample, motorOilSample, plantCompetitionSample,
 } from './defs-a';
 import {
-  gamblingSample, graphSample, planckSample, tuberculosisSample, vicarSample,
+  gamblingSample, graphSample, planckSample, pubertySample, tuberculosisSample,
+  vicarSample,
 } from './defs-b';
 
 export type { SampleDef } from './kit';
@@ -21,17 +22,24 @@ export type { SampleDef } from './kit';
 /**
  * Ordered so the first entry is the one the home screen demonstrates.
  *
- * There is NO CHEMISTRY SAMPLE, on purpose. `research/ireallyknow/01` §7.1
- * searched for a genuine student-submitted chemistry lab report and found
- * none: the best candidate turned out to be an instructor-authored template
- * bylined "Joe Student", dated 2010, instructor "Dr. Know It All". Shipping it
- * would have been exactly the v2 error. The gap is stated rather than filled
- * with invention, and `verify-samples` prints it on every build.
+ * There is NO CHEMISTRY AND NO MATHEMATICS SAMPLE, on purpose.
+ * `research/ireallyknow/01` §7.1 searched for a genuine student-submitted
+ * chemistry lab report and found none: the best candidate turned out to be an
+ * instructor-authored template bylined "Joe Student", dated 2010, instructor
+ * "Dr. Know It All". Mathematics has the same problem from the other side —
+ * MICUSP, the corpus every other sample here draws on, carries no mathematics
+ * papers at all, and the write-ups that surface elsewhere sit behind
+ * study-note resellers with no usable licence.
+ *
+ * Shipping an invented sample would have been exactly the v2 error. The gaps
+ * are stated rather than filled, and `verify-samples` prints them on every
+ * build. Both packs still work the moment a student brings their own work —
+ * what is missing is the no-key demonstration, not the capability.
  */
 export const SAMPLES: SampleDef[] = [
   antepartumSample, graphSample, tuberculosisSample, gamblingSample,
   contraceptionSample, motorOilSample, planckSample, plantCompetitionSample,
-  vicarSample,
+  vicarSample, pubertySample,
 ];
 
 /** The one cold-start sample is deliberately Marcus-shaped and localized. */

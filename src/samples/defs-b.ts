@@ -9,6 +9,7 @@ import sportsGambling from './material/ml-sports-gambling.md?raw';
 import tuberculosis from './material/stats-tuberculosis.md?raw';
 import planck from './material/phys-planck.md?raw';
 import vicar from './material/essay-vicar.md?raw';
+import puberty from './material/epi-puberty.md?raw';
 
 export const graphSample: SampleDef = {
   id: 'cs-graph-c',
@@ -395,6 +396,106 @@ export const vicarSample: SampleDef = {
     {
       quote: 'It is clear that',
       note: 'Used to open the conclusion. "It is clear that" is where a writer asserts what the argument was supposed to have shown.',
+    },
+  ],
+};
+
+/**
+ * Epidemiology. The pack probes design, bias, measure, power, analysis,
+ * counterfactual and causal language — and had nothing to probe.
+ *
+ * This literature review is the right artifact because its whole argument is
+ * carried by one word. "The timing of pubertal development ITSELF is a
+ * significant indicator of an increased risk" turns a set of associations into
+ * a claim about a cause, and every study it reviews measured exposure by
+ * asking adolescents to recall it. A student can write this paragraph, cite it
+ * correctly, be graded well, and still not be able to say what design would
+ * license the word "itself" — which is exactly the gap this product exists to
+ * find, and exactly what no amount of re-reading the paper reveals.
+ */
+export const pubertySample: SampleDef = {
+  id: 'epi-puberty',
+  title: 'Negative effects of early-onset puberty in girls',
+  packId: 'epi',
+  material: puberty,
+  level: 'undergraduate',
+  blurb: 'Careful, well-cited, and it says "itself" about a cause it never had the design to isolate. The most examinable sentence in the paper is one word long.',
+  preset: 'standard',
+  difficulty: 'defense',
+  source: {
+    url: 'https://micusp.elicorpora.info/view?pid=PSY.G0.03.1',
+    corpus: 'MICUSP — Michigan Corpus of Upper-level Student Papers',
+    who: 'Psychology · Final Year Undergraduate · Report (literature review)',
+    markers: 'Exposure is self-reported pubertal timing; the outcome is lifetime rates of major depression; the framing sentence upgrades both into "the timing itself". Association, measurement and causation are three separate problems here and the paper treats them as one.',
+    terms: 'Copyright the Regents of the University of Michigan; Fair Use statement on the site. Excerpt for analysis only.',
+    originalLength: '3,871 words',
+  },
+  probes: [
+    {
+      dimensionId: 'causal',
+      kind: 'concept',
+      quote: 'It is thought that the timing of pubertal development itself is a significant indicator of an increased risk of these negative effects on adolescent girls.',
+      question: 'The word doing the work here is "itself". What study design would you need before you could keep that word — and does any study in your review have it?',
+      whyThisProbe: 'Every source in the review reports an association. "Itself" claims the exposure, and not what travels with it, produces the outcome. The paper never states which it is arguing.',
+      keyPoints: [
+        'Association between timing and depression is compatible with a common cause acting on both.',
+        'Isolating timing needs variation in timing that is unrelated to family, body composition and social environment.',
+        'A literature review of observational studies cannot supply that, so "itself" is unearned.',
+      ],
+      ownedLooksLike: 'Names a confounder that moves both puberty timing and depression, and says what design would break the link.',
+      surfaceLooksLike: 'Repeats that the studies found a significant relationship.',
+    },
+    {
+      dimensionId: 'bias',
+      kind: 'method',
+      quote: "A self-report method was then used to assess the timing of each student's pubertal development.",
+      question: 'If a currently depressed girl recalls her own pubertal timing differently from a girl who is not, which direction does that push the result — and why is that worse than ordinary noise?',
+      whyThisProbe: 'Differential misclassification of exposure by outcome status is the specific failure this measurement invites, and it does not average out with a larger sample.',
+      keyPoints: [
+        'Non-differential error usually biases toward the null; error that depends on the outcome can bias either way.',
+        'Recalled timing in an already-depressed adolescent is plausibly linked to the outcome.',
+        'Height and weight records are an objective check, which is why the study used them.',
+      ],
+      ownedLooksLike: 'Distinguishes differential from non-differential misclassification and picks a direction with a reason.',
+      surfaceLooksLike: 'Says self-report is "less reliable".',
+    },
+    {
+      dimensionId: 'measure',
+      kind: 'concept',
+      quote: 'Compared with on-time girls, early-maturing girls had significantly elevated lifetime rates of major depression',
+      question: '"Lifetime rates" — measured on adolescents. What does that quantity include that a rate measured over the year after puberty would not, and which one does your argument actually need?',
+      whyThisProbe: 'A lifetime prevalence in a young sample mixes episodes that preceded puberty with episodes that followed it. The argument is about what puberty caused afterwards.',
+      keyPoints: [
+        'Lifetime prevalence counts anything ever, including before the exposure.',
+        'A claim about consequences of early puberty needs incidence after it.',
+        'Using lifetime rates can make a pre-existing difference look like a consequence.',
+      ],
+      ownedLooksLike: 'Separates prevalence from incidence and notices the temporal ordering problem.',
+      surfaceLooksLike: 'Says lifetime rates show the effect is large.',
+    },
+    {
+      dimensionId: 'design',
+      kind: 'alternative',
+      quote: 'Three different cohorts of adolescent students from nine high schools were interviewed and given questionnaires tapping into all psychological variables thought to be associated with depression.',
+      question: 'Nine high schools, students who are present to be interviewed. Name one girl this sampling frame systematically misses, and say which way her absence bends the finding.',
+      whyThisProbe: 'Selection into the frame is invisible in the write-up and is the one bias a reader cannot detect from the reported numbers.',
+      keyPoints: [
+        'The frame is enrolled, attending students.',
+        'Girls out of school — including some with the most severe outcomes — cannot enter it.',
+        'Losing the severe tail attenuates the association rather than inventing one.',
+      ],
+      ownedLooksLike: 'Names a concrete excluded group and reasons about the direction of the resulting bias.',
+      surfaceLooksLike: 'Says the sample "may not be representative".',
+    },
+  ],
+  fragilities: [
+    {
+      quote: 'It is thought that',
+      note: 'Agentless. Thought by whom, on what evidence — the sentence carries the paper\'s thesis and attributes it to nobody.',
+    },
+    {
+      quote: 'all psychological variables thought to be associated with depression',
+      note: '"All" is doing a great deal of work. Adjusting for everything measured is not the same as adjusting for everything that matters.',
     },
   ],
 };

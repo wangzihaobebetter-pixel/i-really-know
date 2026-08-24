@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { ArrowRight, Plus, RotateCcw } from 'lucide-react';
 import { selectDueTargets, selectRealSessions, useStore } from '../../store';
 import { useNavigate } from '../../router';
 import { useLang, useT } from '../../i18n';
-import { buildFeaturedSampleSession } from '../../samples';
+import { SAMPLES, buildSampleSession, sampleSessionId } from '../../samples';
+import { getPack } from '../../packs';
+import { BottomSheet } from '../../ui';
 import { formatDate, studentDestination } from '../../lib/session-ops';
 
 function occasionText(value: string | undefined, lang: 'en' | 'zh-CN') {
@@ -26,6 +28,7 @@ export default function TodayScreen() {
   const due = useStore(selectDueTargets());
   const upsertSession = useStore((state) => state.upsertSession);
   const lastId = useStore((state) => state.ui.lastSessionId);
+  const [pickerOpen, setPickerOpen] = useState(false);
 
   const real = sessions.filter((session) => !session.sampleId);
   const recent = [...real].sort((a, b) => (b.completedAt ?? b.createdAt) - (a.completedAt ?? a.createdAt));
@@ -38,9 +41,26 @@ export default function TodayScreen() {
   const left = unfinished ? Math.max(0, unfinished.probes.length - unfinished.probes.filter((probe) => probe.committedAt).length) : 0;
   const leadMinutes = Math.max(2, Math.ceil(left * 1.6));
 
-  function trySample() {
-    const session = buildFeaturedSampleSession(lang);
-    upsertSession(session);
+  /*
+   * Ten real samples ship — nursing, computer science, statistics, machine
+   * learning, biology, physics, argument writing, epidemiology — each a real
+   * student artifact with a source URL and hand-written probes. Until now the
+   * UI could reach exactly one of them: every entry point called
+   * buildFeaturedSampleSession(), so nine were dead data. A biology student
+   * opening the app with no key was shown a C program.
+   *
+   * This is a chooser, not the discipline-catalogue screen the brief cut
+   * (§6.4). It costs no screen — it is a bottom sheet over Today — and it
+   * offers work to try, never a taxonomy to browse. Packs stay invisible; the
+   * subject name is a label on a piece of work, which is how a person would
+   * actually pick one.
+   */
+  function openSample(sampleId: string) {
+    const def = SAMPLES.find((item) => item.id === sampleId) ?? SAMPLES[0];
+    const existing = sessions.find((item) => item.id === sampleSessionId(def.id));
+    const session = existing ?? buildSampleSession(def);
+    if (!existing) upsertSession(session);
+    setPickerOpen(false);
     /* Through the reading pass, not straight to the questions. Being read is
        the first thing this product does for you (brief §6.2 #10); a sample run
        that skips it is a sample of a different product. The one-question
@@ -126,11 +146,35 @@ export default function TodayScreen() {
       )}
 
       {first && !completedExample && (
-        <button className="sample-invitation" type="button" onClick={trySample}>
+        <button className="sample-invitation" type="button" onClick={() => setPickerOpen(true)}>
           <span>{lang === 'zh-CN' ? '还不想交自己的？先过一份真实作业' : 'Not ready to bring yours? Try a real piece first'}</span>
           <ArrowRight size={17} aria-hidden />
         </button>
       )}
+
+      <BottomSheet
+        open={pickerOpen}
+        onClose={() => setPickerOpen(false)}
+        title={lang === 'zh-CN' ? '挑一份真实作业' : 'Pick a real piece of work'}
+      >
+        <p className="sample-picker-lead">
+          {lang === 'zh-CN'
+            ? '都是真实学生交上去的东西，带原始出处。挑一份离你近的。'
+            : 'Every one is real student work with its source. Pick whichever sits closest to yours.'}
+        </p>
+        <div className="sample-picker">
+          {SAMPLES.map((def) => (
+            <button className="sample-option" type="button" key={def.id} onClick={() => openSample(def.id)}>
+              <span className="sample-option-top">
+                <em>{getPack(def.packId).shortName}</em>
+                <small>{def.probes.length} {lang === 'zh-CN' ? '问' : def.probes.length === 1 ? 'question' : 'questions'}</small>
+              </span>
+              <strong>{def.title}</strong>
+              <small>{def.blurb}</small>
+            </button>
+          ))}
+        </div>
+      </BottomSheet>
 
       {recent.length > 0 && (
         <section className="today-recent">

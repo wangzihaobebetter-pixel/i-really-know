@@ -102,7 +102,10 @@ export default function ResultScreen() {
     .map((probe, index) => ({ probe, index }))
     .find(({ probe }) => probe.answer?.trim());
   const occasion = occasionLabel(session.occasion, t);
-  const date = session.occasionAt ? formatDate(session.occasionAt, lang) : '—';
+  /* A sample run has no occasion date, and the old line rendered
+     "《…》· 其他场合 · —" — a dangling em dash on the first screen a new user
+     reaches. When there is no date, the date is simply not part of the frame. */
+  const date = session.occasionAt ? formatDate(session.occasionAt, lang) : '';
   const takeaway = answered > 0 && held === answered
     ? t('v5.resultAllHeld')
     : held === 0
@@ -153,7 +156,7 @@ export default function ResultScreen() {
       <section className="result-takeaway">
         <span className="v5-eyebrow">{t('v5.resultEyebrow')}</span>
         <h1>{takeaway}</h1>
-        <p>{t('v5.resultFrame', { title: session.title, occasion, date })}</p>
+        <p>{date ? t('v5.resultFrame', { title: session.title, occasion, date }) : t('v5.resultFrameNoDate', { title: session.title, occasion })}</p>
       </section>
 
       {heldWords[0] && (

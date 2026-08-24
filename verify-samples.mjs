@@ -85,8 +85,9 @@ if (samplesSeen < 4) failures.push(`only ${samplesSeen} samples parsed — the p
 /* The corpus found no genuine student chemistry report (research file 01 §7.1:
    the best candidate was an instructor template bylined "Joe Student"). The
    gap is stated on every build rather than filled with invention. */
-console.log('verify-samples: NOTE — no chemistry sample ships. research/ireallyknow/01 §7.1 found');
-console.log('  no genuine student-submitted chemistry lab report; the gap is stated, not fabricated.');
+console.log('verify-samples: NOTE — no chemistry and no mathematics sample ships. research/ireallyknow/01 §7.1 found');
+console.log('  no genuine student-submitted chemistry lab report, and MICUSP carries no');
+console.log('  mathematics papers. Both gaps are stated, not fabricated.');
 
 if (!checked) {
   console.error('verify-samples: parsed 0 anchors — the parser is out of date.');

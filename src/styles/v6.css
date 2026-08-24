@@ -214,3 +214,87 @@
 @media (prefers-reduced-motion: reduce) {
   .v5-question-block .run-question { animation: none; }
 }
+
+/* ============================== the result page =========================== */
+
+/*
+ * The payoff screen. Everything on it was already correct in substance —
+ * "held, more than you thought" is first in GROUPS and carries the same
+ * `t-title` weight as every other group, which is brief §6.2 #4 — but it
+ * arrived all at once, as a document that was simply there. A page that
+ * assembles in front of you is the difference between reading a report and
+ * being told something.
+ *
+ * The stagger is short on purpose (60ms steps, 8 items, ~480ms total). This
+ * is not a celebration: brief §5.9 and the never-accuse rule mean nothing the
+ * student did gets applauded or flinched at. It is the page arriving in the
+ * order a person would say it.
+ */
+.result-v5 > * { animation: v6-result-in 420ms var(--ease) both; }
+.result-v5 > *:nth-child(1) { animation-delay: 0ms; }
+.result-v5 > *:nth-child(2) { animation-delay: 60ms; }
+.result-v5 > *:nth-child(3) { animation-delay: 120ms; }
+.result-v5 > *:nth-child(4) { animation-delay: 180ms; }
+.result-v5 > *:nth-child(5) { animation-delay: 240ms; }
+.result-v5 > *:nth-child(6) { animation-delay: 300ms; }
+.result-v5 > *:nth-child(7) { animation-delay: 360ms; }
+.result-v5 > *:nth-child(n+8) { animation-delay: 420ms; }
+@keyframes v6-result-in {
+  from { transform: translateY(12px); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+
+/* Depth, same vocabulary as everywhere else. `.self-read-v5` sat on --paper-2
+   with a hairline and no lift, so between two saturated cards the middle of
+   the page read as a dead band. */
+.self-read-v5 { box-shadow: var(--lift-1); }
+.result-marked-v5 { box-shadow: var(--lift-2); }
+
+@media (prefers-reduced-motion: reduce) {
+  .result-v5 > * { animation: none; }
+}
+
+/* ------------------------------ desktop ---------------------------------- */
+@media (min-width: 1024px) {
+  /* The marked page is the evidence artifact — on a laptop it can hold a real
+     measure instead of a phone column, and the two folds that follow it read
+     as a pair rather than as two more stacked bars. */
+  .result-v5 { gap: 30px; }
+  .result-takeaway h1 { max-width: 20ch; font-size: clamp(2rem, 2.6vw, 2.6rem); }
+  .result-marked-v5 .anchored-prose { font-size: 1rem; line-height: 1.75; }
+  .held-voice-card blockquote { font-size: 1.35rem; }
+  .ending-v5 { padding: 26px 28px; }
+}
+
+/* ============================= the sample chooser ========================= */
+
+/*
+ * Ten real samples shipped and the UI could reach one. Every entry point
+ * called buildFeaturedSampleSession(), so a nursing or physics or argument-
+ * writing student with no key was handed a C program and nothing else. This
+ * is the chooser — a sheet over Today, not a screen, and not the discipline
+ * catalogue the brief cut in §6.4. What it lists is work, not a taxonomy.
+ */
+.sample-picker-lead { max-width: 40ch; color: var(--ink-3); font-size: .8125rem; line-height: 1.5; }
+.sample-picker { display: grid; gap: 10px; margin-top: 16px; }
+.sample-option {
+  display: grid; gap: 5px; padding: 15px 16px; text-align: left;
+  border: 1px solid var(--hairline); border-radius: 16px;
+  background: var(--sheet); box-shadow: var(--lift-1); cursor: pointer;
+  transition: transform var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease);
+}
+.sample-option:hover { box-shadow: var(--lift-2); }
+.sample-option:active { transform: translateY(2px); }
+.sample-option-top { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.sample-option-top em {
+  padding: 3px 9px; border-radius: var(--r-pill);
+  color: var(--ink); background: var(--accent-wash);
+  font-size: .6875rem; font-style: normal; font-weight: 740; letter-spacing: .01em;
+}
+.sample-option-top small { color: var(--ink-3); font-size: .6875rem; }
+.sample-option > strong { font-size: .9375rem; font-weight: 700; line-height: 1.3; }
+.sample-option > small { color: var(--ink-3); font-size: .75rem; line-height: 1.5; }
+
+@media (min-width: 1024px) {
+  .sample-picker { grid-template-columns: 1fr 1fr; }
+}

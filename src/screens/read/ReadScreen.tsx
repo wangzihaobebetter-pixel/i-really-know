@@ -171,9 +171,18 @@ export default function ReadScreen() {
           </section>
         ) : done ? (
           <section className="reading-v6-finish is-ready">
+            {/*
+              This line counts QUESTIONS, and the chip above counts the marks
+              that landed. They are different numbers on purpose and were
+              briefly contradictory: not every probe's quote can be placed in
+              the text (overlapping spans get dropped so the page does not
+              smear), so an essay with four probes can show three marks. The
+              copy now says what each number is, instead of calling both of
+              them "places".
+            */}
             <p>{lang === 'zh-CN'
-              ? `${found} 处值得你亲口讲清的地方。一次只问一个。`
-              : `${found} places worth explaining out loud. One at a time.`}</p>
+              ? `接下来问你 ${found} 个，一次一个。`
+              : `${found} question${found === 1 ? '' : 's'} next, one at a time.`}</p>
             <Button size="lg" variant="primary" block iconRight={<ArrowRight size={19} />} onClick={() => nav('run', { sessionId: session.id })}>
               {t('read4.start')}
             </Button>
