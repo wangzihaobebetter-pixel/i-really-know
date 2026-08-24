@@ -192,7 +192,14 @@ export function unplacedAnchors(): { sampleId: string; quote: string }[] {
  * are treated as one class. Both are labelled wherever they render, and the
  * cohort is flagged `isDemo` so no surface can present it as a recorded class.
  */
-export function buildDemoCohort(): { cohort: Cohort; sessions: Session[] } {
+/**
+ * The demo cohort is the instructor tier's shop window — brief §6.6 makes the
+ * teacher side the paying half — and its name and occasion were English string
+ * literals, so a Chinese instructor's first screen read "Worked example cohort
+ * · seminar discussion" over an otherwise Chinese page. §7 requires parity in
+ * both directions, so the two strings come from the table like everything else.
+ */
+export function buildDemoCohort(name: string, occasion: string): { cohort: Cohort; sessions: Session[] } {
   const cohortId = 'cohort_demo';
   const built = DEMO_SAMPLES.map((def) => {
     const session = { ...buildWorkedSession(def), id: `${cohortId}_${def.id}`, cohortId, mode: 'class' as const };
@@ -201,12 +208,12 @@ export function buildDemoCohort(): { cohort: Cohort; sessions: Session[] } {
   return {
     cohort: {
       id: cohortId,
-      name: 'Worked example cohort',
+      name,
       packId: built[0]?.def.packId ?? 'general',
       preset: 'standard',
       difficulty: 'standard',
       createdAt: now(),
-      occasion: 'seminar discussion',
+      occasion,
       occasionAt: now() + 7 * 86_400_000,
       isDemo: true,
       submissions: built.map(({ def, session }) => ({

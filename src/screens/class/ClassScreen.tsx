@@ -24,6 +24,12 @@ export default function ClassScreen() {
   const [occasion, setOccasion] = useState('');
   const [occasionDate, setOccasionDate] = useState('');
 
+  const missing = [
+    name.trim() ? '' : t('class.fieldName'),
+    occasion.trim() ? '' : t('class.fieldEvent'),
+    occasionDate ? '' : t('class.fieldDate'),
+  ].filter(Boolean);
+
   function create() {
     if (!name.trim() || !occasion.trim() || !occasionDate) return;
     const cohort: Cohort = {
@@ -45,7 +51,7 @@ export default function ClassScreen() {
   }
 
   function loadDemo() {
-    const { cohort, sessions } = buildDemoCohort();
+    const { cohort, sessions } = buildDemoCohort(t('class.demoName'), t('class.demoOccasion'));
     sessions.forEach(upsertSession);
     upsertCohort(cohort);
     nav('cohort', { cohortId: cohort.id });
@@ -96,8 +102,12 @@ export default function ClassScreen() {
             <span className="field-label">{t('teacher4.eventDate')}</span>
             <input className="control" type="date" value={occasionDate} onChange={(e) => setOccasionDate(e.target.value)} />
           </label>
-          <div className="row">
+          {/* A disabled primary with nothing next to it is a dead control:
+              the instructor is told no without being told what is missing.
+              §4 通畅 — no unexplained stops. */}
+          <div className="row wrap" style={{ gap: 'var(--space-4)' }}>
             <Button variant="primary" onClick={create} disabled={!name.trim() || !occasion.trim() || !occasionDate}>{t('class.newCohort')}</Button>
+            {missing.length > 0 && <span className="t-small ink-3">{t('class.missing', { fields: missing.join(lang === 'zh-CN' ? '、' : ', ') })}</span>}
           </div>
         </div>
       </Sheet>

@@ -351,3 +351,38 @@
 @media (prefers-reduced-motion: reduce) {
   .v5-self-options button { transition: none; }
 }
+
+/* ============================== instructor tier =========================== */
+
+/*
+ * Brief §6.6: the instructor half is the paying half and must not read as the
+ * student half's leftovers. It had none of the depth vocabulary — every
+ * surface was an outlined box flat on the page — because v6 had only been
+ * applied to the screens I happened to be walking through. The real class
+ * names are `teacher-home-v5` (cohort list), `teacher-workspace` (one cohort)
+ * and `teacher-row` (one submission); an earlier version of this block
+ * invented `cohort-v5` / `submission-row` and would have styled nothing.
+ *
+ * It is also the one place where a plain document IS the product: §6.6 asks
+ * for two printable documents, not a dashboard. So the lift goes on the chrome
+ * around the work, and the printed surfaces stay quiet.
+ */
+.teacher-home-v5 > .sheet,
+.teacher-workspace > .sheet { box-shadow: var(--lift-1); }
+
+.teacher-workspace .teacher-row {
+  border-radius: 14px;
+  background: var(--sheet);
+  box-shadow: var(--lift-1);
+  transition: box-shadow var(--dur-fast) var(--ease);
+}
+.teacher-workspace .teacher-row:hover { box-shadow: var(--lift-2); }
+.teacher-workspace .teacher-list { display: grid; gap: 10px; }
+
+@media (min-width: 1024px) {
+  .teacher-workspace .teacher-row { padding-block: 14px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .teacher-workspace .teacher-row { transition: none; }
+}

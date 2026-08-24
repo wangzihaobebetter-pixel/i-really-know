@@ -477,6 +477,12 @@ registerStrings('teacher4', {
 registerStrings('class', {
   en: {
     demoTitle: 'See the teacher documents before connecting a model',
+    demoName: 'Worked example cohort',
+    demoOccasion: 'seminar discussion',
+    missing: 'Still needed: {fields}',
+    fieldName: 'class name',
+    fieldEvent: 'the occasion',
+    fieldDate: 'the date',
     demoBody: 'The demo uses sourced public materials and clearly illustrative outcomes.',
     'status.pending': 'waiting for questions',
     'status.generating': 'questions are being prepared',
@@ -485,6 +491,12 @@ registerStrings('class', {
   },
   'zh-CN': {
     demoTitle: '接模型之前，先看完整教师文档',
+    demoName: '示例班级',
+    demoOccasion: '组会讨论',
+    missing: '还差：{fields}',
+    fieldName: '班级名称',
+    fieldEvent: '场合',
+    fieldDate: '日期',
     demoBody: '演示使用有来源的公开材料；其中结果会明确标为示意。',
     'status.pending': '等待出题',
     'status.generating': '正在准备问题',
