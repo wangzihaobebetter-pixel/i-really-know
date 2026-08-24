@@ -3,6 +3,9 @@ import { ArrowLeft, ArrowRight, Sparkles } from 'lucide-react';
 import { useNavigate } from '../../router';
 import { useLang, useT } from '../../i18n';
 import { FEATURED_SAMPLE, buildFeaturedSampleSession } from '../../samples';
+import { AnchoredText } from '../../ui';
+import type { TextAnchor } from '../../ui';
+import { detectMaterialKind } from '../../lib/analysis';
 import { useStore } from '../../store';
 
 export default function WelcomeScreen() {
@@ -18,10 +21,34 @@ export default function WelcomeScreen() {
     ? '这行代码按 count × sizeof(char) 给 char** 分配了内存。在 64 位机器上，它实际买到了什么？'
     : probe.question;
 
-  const quote = useMemo(() => {
-    const clean = probe.quote.replace(/\s+/g, ' ').trim();
-    return clean.length > 380 ? `${clean.slice(0, 380)}…` : clean;
-  }, [probe.quote]);
+  /*
+   * The first screen showed one line of the excerpt in a small card floating in
+   * the middle of a 437px container — about 128px of dead space above it and
+   * the same below. Held next to the four competitors captured in
+   * memory/ireallyknow-v6/refs/, that was the tile that lost: Duolingo puts
+   * characters above the fold, Brilliant puts a live product card, Quizlet
+   * puts illustrated cards. We put a paragraph and a gap.
+   *
+   * What goes there instead is not a mascot — this product is not going to be
+   * cute at a frightened person. It is the artifact itself: a real window of
+   * the student's page with the probed span already underlined. Same move as
+   * Brilliant's, made of our own material, and it is the one thing on the
+   * screen that proves the claim above it.
+   */
+  const window_ = useMemo(() => {
+    const material = sample.material;
+    const at = material.indexOf(probe.quote);
+    if (at < 0) return { text: probe.quote, start: 0, end: probe.quote.length };
+    const from = Math.max(0, material.lastIndexOf('\n', Math.max(0, at - 120)) + 1);
+    const to = Math.min(material.length, at + probe.quote.length + 260);
+    const text = material.slice(from, to);
+    return { text, start: at - from, end: at - from + probe.quote.length };
+  }, [sample.material, probe.quote]);
+
+  const anchors: TextAnchor[] = useMemo(
+    () => [{ id: 'welcome-hero', start: window_.start, end: window_.end, verdict: 'none' as const }],
+    [window_.start, window_.end],
+  );
 
   function ownWork() {
     setUi({ firstOpenSeen: true });
@@ -59,7 +86,13 @@ export default function WelcomeScreen() {
       <section className={`welcome-live-demo is-${phase}`}>
         <article className="welcome-passage">
           <span>{t('v5.welcomeSource')}</span>
-          <p>{quote}</p>
+          <div className="welcome-page-window">
+            <AnchoredText
+              text={window_.text}
+              mode={detectMaterialKind(sample.material) === 'code' ? 'code' : 'prose'}
+              anchors={anchors}
+            />
+          </div>
           <a href={sample.source.url} target="_blank" rel="noreferrer">{sample.source.corpus} ↗</a>
         </article>
         {phase === 'question' && (

@@ -78,9 +78,22 @@ export default function BringScreen() {
 
   function submit() {
     setError('');
-    if (material.trim().length < 80) { setError(t('bring4.tooShort')); return; }
+    if (material.trim().length < 80) {
+      setError(t('bring4.tooShort'));
+      window.requestAnimationFrame(() => {
+        document.querySelector('.form-kind-error')?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      });
+      return;
+    }
     if (!date || (occasion === 'other' && !customOccasion.trim())) {
-      setError(occasion === 'other' && !customOccasion.trim() ? t('bring4.occasionCustom') : t('bring4.date'));
+      /* Was `t('bring4.date')` — the LABEL of the date field, so a student who
+         forgot it saw the words 「什么时候」 in red. A field name is not a
+         message. It also rendered ~300px below the fold with no scroll, so on
+         a phone the button simply appeared not to work. */
+      setError(occasion === 'other' && !customOccasion.trim() ? t('bring4.needOccasion') : t('bring4.needDate'));
+      window.requestAnimationFrame(() => {
+        document.querySelector('.form-kind-error')?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      });
       return;
     }
     if (!hasKey) { setConnectOpen(true); return; }

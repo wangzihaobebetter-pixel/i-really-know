@@ -9,11 +9,21 @@ export const bioPack = definePack({
   tagline: 'The band is on the gel. What does it actually rule out?',
   materialKinds: ['lab reports', 'research summaries', 'genetics / molecular / cell / ecology essays', 'figure legends', 'protocols'],
   detect: detect(
+    /* Wet-lab and ecology vocabulary, plus the sequencing/differential-expression
+       terms the brief's own primary persona uses. §3 names her fear verbatim —
+       "这里为什么用 DESeq2 不用 edgeR" — and before these tokens existed, pasting
+       exactly that paragraph was scored as General and got generic probes. */
     [['PCR', 3], ['Western', 3], ['qPCR', 3], ['knockout', 3], ['allele', 3], ['phenotype', 3],
      ['assay', 2], ['primer', 3], ['negative control', 3], ['expression', 2], ['ecology', 2],
-     ['species', 2], ['ANOVA', 1], ['in vitro', 2], ['transfect', 3], ['incubat', 2], ['buffer', 1]],
+     ['species', 2], ['ANOVA', 1], ['in vitro', 2], ['transfect', 3], ['incubat', 2], ['buffer', 1],
+     ['DESeq', 4], ['edgeR', 4], ['limma', 4], ['RNA-seq', 4], ['RNAseq', 4], ['scRNA', 4],
+     ['transcriptom', 3], ['count matrix', 4], ['differential expression', 4],
+     ['differentially expressed', 4], ['normalis', 1], ['normaliz', 1], ['dispersion', 3],
+     ['read count', 3], ['genome', 2], ['sequencing', 3], ['alignment', 2], ['GO enrichment', 4],
+     ['pathway', 2], ['batch effect', 3], ['covariate', 2], ['CRISPR', 4], ['plasmid', 3]],
     [['\\bfold[- ]change\\b', 3], ['\\bp\\s*[<=]\\s*0\\.', 1], ['\\bn\\s*=\\s*\\d+', 1],
-     ['^\\s*(Methods|Results|Discussion)\\b', 2]],
+     ['^\\s*(Methods|Results|Discussion)\\b', 2], ['\\blog2\\b', 3], ['\\bpadj\\b', 4],
+     ['\\bFDR\\b', 3], ['\\bnegative binomial\\b', 3], ['\\bTPM\\b|\\bFPKM\\b|\\bCPM\\b', 4]],
   ),
   dimensions: [
     dim('mechanism', 'Mechanism at the right scale', 'Molecular → cellular → organism causal chain without conflating levels.',

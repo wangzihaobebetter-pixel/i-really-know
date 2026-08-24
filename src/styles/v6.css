@@ -412,3 +412,46 @@
 @media (prefers-reduced-motion: reduce) {
   .tried-piece-v5 { transition: none; }
 }
+
+/* ========================== the first screen's hero ======================= */
+
+/*
+ * Held next to the four apps in memory/ireallyknow-v6/refs/ at 390x844, the
+ * welcome screen was the tile that lost. Every one of them puts something
+ * visual above the fold — Duolingo characters, a live Brilliant exercise,
+ * Quizlet's illustrated cards — and ours put one line of text in a small card
+ * with ~128px of dead space above and below it inside its own container.
+ *
+ * The answer is not a mascot. This product does not get to be cute at someone
+ * who is frightened. It is the artifact: a real window of the page with the
+ * probed span already underlined, which is the same move Brilliant makes and
+ * is the only thing on the screen that evidences the sentence above it.
+ */
+.welcome-page-window {
+  margin-top: 15px;
+  max-height: 40vh;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(180deg, #000 0, #000 76%, transparent 100%);
+          mask-image: linear-gradient(180deg, #000 0, #000 76%, transparent 100%);
+}
+.welcome-page-window .md-p,
+.welcome-page-window .md-li { margin: 0 0 .6em; font-size: .875rem; line-height: 1.62; color: var(--ink-2); }
+.welcome-page-window .md-code {
+  margin: 0; padding: 0; border: 0; background: transparent; box-shadow: none;
+  font-size: .8125rem; line-height: 1.62;
+}
+.welcome-page-window .anchor-none {
+  text-decoration-color: var(--accent);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+/* Phase two: the question has been found, so the marked line takes the warm
+   signal the reading pass uses for the same event. */
+.welcome-live-demo.is-question .welcome-page-window .anchor-none {
+  background: color-mix(in srgb, var(--warm-signal) 55%, transparent);
+}
+/* Let the page fill the row it owns instead of leaving ~230px under it: the
+   window shows more of the student's work, which is the point of it. */
+.welcome-live-demo { align-content: stretch; }
+.welcome-live-demo .welcome-passage { display: flex; flex-direction: column; min-height: 0; }
+.welcome-page-window { flex: 1 1 auto; min-height: 0; max-height: none; }
