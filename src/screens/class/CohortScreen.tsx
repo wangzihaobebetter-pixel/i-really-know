@@ -1,7 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { UserRound } from 'lucide-react';
 import { selectCohort, selectHasKey, useStore } from '../../store';
-import { getPack } from '../../packs';
+import { getPack, packLabel } from '../../packs';
 import { useNavigate, useRoute } from '../../router';
 import { useLang, useT } from '../../i18n';
 import { Button, Callout, Input, Sheet, Spinner, Textarea, useToast } from '../../ui';
@@ -165,7 +165,7 @@ export default function CohortScreen() {
   return (
     <div className="col-wide stack teacher-workspace page-enter">
       <header className="row-between wrap" style={{ gap: 'var(--space-4)' }}>
-        <div className="stack-nano"><span className="t-micro ink-3">{pack.name}</span><h1 className="t-display-2">{currentCohort.name}</h1><p className="t-small ink-2">{currentCohort.occasion} · {currentCohort.occasionAt ? new Date(currentCohort.occasionAt).toLocaleDateString(lang) : ''}</p></div>
+        <div className="stack-nano"><span className="t-micro ink-3">{packLabel(currentCohort.packId, lang)}</span><h1 className="t-display-2">{currentCohort.name}</h1><p className="t-small ink-2">{currentCohort.occasion} · {currentCohort.occasionAt ? new Date(currentCohort.occasionAt).toLocaleDateString(lang) : ''}</p></div>
         <Button variant="ghost" onClick={() => nav('class')}>{t('common.action.back')}</Button>
       </header>
 

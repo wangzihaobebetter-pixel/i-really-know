@@ -32,6 +32,8 @@ export interface SampleProbeDef {
    */
   zh: {
     question: string;
+    /** Rendered inside the post-verdict fold on the run screen. */
+    whyThisProbe: string;
     keyPoints: string[];
     ownedLooksLike: string;
     surfaceLooksLike: string;
@@ -92,6 +94,12 @@ export interface SampleDef {
   material: string;
   level: 'undergraduate' | 'masters' | 'professional' | 'graduate';
   blurb: string;
+  /** Chinese blurb. This is the line that helps a person choose which piece to
+      try, so it is editorial copy, not an artifact title — and it rendered in
+      English on the chooser inside a Chinese interface. Sample TITLES stay in
+      their original language on purpose: they are the real names of real
+      papers, and renaming someone's work is not translation. */
+  zhBlurb: string;
   preset: RunPreset;
   difficulty: Difficulty;
   source: SampleSource;

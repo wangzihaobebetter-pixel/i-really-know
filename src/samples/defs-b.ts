@@ -18,6 +18,7 @@ export const graphSample: SampleDef = {
   material: graphC,
   level: 'undergraduate',
   blurb: 'A real submitted assignment with a real silent bug, and the instructor’s own grading criteria sitting in the same repository.',
+  zhBlurb: '一份真实提交的作业，里面有一个真实的、不出声的 bug，而助教自己的评分标准就躺在同一个仓库里。',
   preset: 'standard',
   difficulty: 'defense',
   source: {
@@ -46,6 +47,7 @@ export const graphSample: SampleDef = {
       surfaceLooksLike: 'Says it "allocates memory for the nodes" or that it should use sizeof(char*), with no account of why it seems to work.',
       zh: {
         question: '这行代码按 count × sizeof(char) 给 char** 分配了内存。在 64 位机器上，它实际买到了什么？带我走一遍。',
+        whyThisProbe: '语料为这一行自带的问题。写下它的人能说出自己想干什么；粘贴它的人说不出。而这恰恰是评分标准里那 14 分 Valgrind 项存在的意义。',
         keyPoints: [
           'sizeof(char) 是 1，所以这里只分配了 count 个字节。',
           '这个数组需要 count 个指针 —— 64 位目标上每个 8 字节 —— 所以少了 8 倍。',
@@ -76,6 +78,7 @@ export const graphSample: SampleDef = {
       surfaceLooksLike: 'Says it "prints an error message so the user knows".',
       zh: {
         question: '这里检测到了分配失败，然后打印。执行会继续走到下一行。接下来会发生什么？你原本想让它发生什么？',
+        whyThisProbe: '检测了结果却不据此行动，是「错误处理是照模板写的」的典型特征。而具体后果就在下一行。',
         keyPoints: [
           '紧接着的下一条语句就是往那个 NULL 指针里 strcpy —— 立刻段错误。',
           '检测到却不处理，比根本不检测更糟，因为它看起来像做了防御。',
@@ -101,6 +104,7 @@ export const graphSample: SampleDef = {
       surfaceLooksLike: 'Says 31 is "long enough for a course name".',
       zh: {
         question: '为什么是 31？说出这个数字编码了什么，以及一个需要 31 个字符的节点名会怎样。',
+        whyThisProbe: '一个魔法数字要么是一个决定，要么是一次复制。如果是决定，学生说得出它来自哪条约束。',
         keyPoints: [
           '31 大概是 30 个字符的名字加上 NUL 终止符。',
           '对一个 31 字符的名字做 strcpy 会写 32 字节，正好溢出一个。',
@@ -131,6 +135,7 @@ export const gamblingSample: SampleDef = {
   material: sportsGambling,
   level: 'undergraduate',
   blurb: 'A CS229 final project whose entire claim is one number — 51.5% — reported with no confidence interval and no break-even threshold.',
+  zhBlurb: '一份 CS229 期末项目，全部主张压在一个数字上 —— 51.5% —— 既没有置信区间，也没有保本线。',
   preset: 'standard',
   difficulty: 'defense',
   source: {
@@ -157,6 +162,7 @@ export const gamblingSample: SampleDef = {
       surfaceLooksLike: 'Says the model "beats the market" or that 51.5% is "above chance".',
       zh: {
         question: '51.5% 是在多少场比赛上跑出来的？扣掉抽水之后，保本胜率是多少？',
+        whyThisProbe: '语料自带的问题。这就是这篇论文的全部主张，而问题的两半都是作者要提出这个主张就必然知道的东西。',
         keyPoints: [
           '标准 -110 赔率下，保本线大约在 52.4%。',
           '所以 51.5% 在保本线之下：这个头条结果是亏钱的。',
@@ -185,6 +191,7 @@ export const gamblingSample: SampleDef = {
       surfaceLooksLike: 'Says they used a train/test split and shuffled the data.',
       zh: {
         question: '一个跑在 NBA 赛程上的循环模型，有一条很明显的路可以偷看未来。说出最可能泄漏的那个特征，以及你的划分方式得长成什么样才能堵住它。',
+        whyThisProbe: '跑在体育数据上的序列模型，几乎默认会通过赛季聚合特征泄漏。这一问没有指认任何过错，它要的是机制。',
         keyPoints: [
           '用整个赛季算出来的赛季均值，会泄漏进这个赛季更早的比赛里。',
           '休息天数、伤病状态、赔率变动，只要取错时间戳，全都是被未来污染过的。',
@@ -209,6 +216,7 @@ export const gamblingSample: SampleDef = {
       surfaceLooksLike: 'Restates that Gaussians are a poor fit for this data.',
       zh: {
         question: '这句话是在解释另一个队的结果。什么证据能把你这个解释，和同样能解释那 2% 差距的另外两三个解释区分开？',
+        whyThisProbe: '对着这句话，不是对着作者。给别人的结果安一个因果故事，那是一个主张，而主张就有检验方式。',
         keyPoints: [
           '别的可能：数据更少、特征更差、评估窗口不同，或者盘口本来就有效。',
           '要区分它们需要消融实验，而不是一个听起来合理的机制。',
@@ -234,6 +242,7 @@ export const tuberculosisSample: SampleDef = {
   material: tuberculosis,
   level: 'undergraduate',
   blurb: 'A USCLAP award-winning intro-statistics project with a well-written Limitations section that is not load-bearing anywhere.',
+  zhBlurb: '一份拿过 USCLAP 奖的入门统计项目，「局限性」那一节写得很好，但全文没有一处真的依赖它。',
   preset: 'standard',
   difficulty: 'standard',
   source: {
@@ -261,6 +270,7 @@ export const tuberculosisSample: SampleDef = {
       surfaceLooksLike: 'Repeats that missing data may bias results.',
       zh: {
         question: '被剔掉的是哪些地区、多少个国家-年？这会把你的 ANOVA 往哪个方向推？',
+        whyThisProbe: '语料自带的问题。这句话是对的，也是通用的。这一问的每一部分都能从作者真正跑过的分析里答出来 —— 这正是把套话式的免责声明和真正想过的局限区分开的办法。',
         keyPoints: [
           '结核监测的缺失不是随机的 —— 它集中在卫生系统能力弱的地方。',
           '而那些恰恰是高死亡、低检出的情形，所以剔掉它们会削弱你报告的那个关系本身。',
@@ -290,6 +300,7 @@ export const tuberculosisSample: SampleDef = {
       surfaceLooksLike: 'Says the t-tests confirmed the ANOVA result.',
       zh: {
         question: '你跑了 ANOVA，然后又对各地区做了两两 t 检验。那一共是多少次比较？你对此做了什么处理？',
+        whyThisProbe: '一个得过奖的项目里真实存在、且可核查的技术缺口：全文没提多重比较校正。这一问要一个计数和一个决定，两者都有确切答案。',
         keyPoints: [
           '六个 WHO 地区意味着 15 次两两比较。',
           'α = 0.05 且不校正时，族系错误率超过 50%。',
@@ -315,6 +326,7 @@ export const tuberculosisSample: SampleDef = {
       surfaceLooksLike: 'Restates that correlation is not causation.',
       zh: {
         question: '检出率是一个分母为估计发病数的比值。死亡率也用同一个估计值做了标化。这个共用的分母，对两者之间的相关会造成什么？',
+        whyThisProbe: '这篇论文的头条关系，可能有一部分是共用分母造成的假象 —— 一个真实的统计问题，而那节套话式的「局限性」够不到它。',
         keyPoints: [
           '两个共用分母的比值，即使分子彼此独立，也会出现伪相关。',
           '这两个量都依赖 WHO 用模型估计出来的发病数。',
@@ -345,6 +357,7 @@ export const planckSample: SampleDef = {
   material: planck,
   level: 'undergraduate',
   blurb: '"In good agreement with the accepted value" — with no uncertainty stated anywhere in the abstract. The canonical undergraduate lab move.',
+  zhBlurb: '「与公认值吻合得很好」—— 而整段摘要里一个不确定度都没有。本科实验报告最经典的那一手。',
   preset: 'quick',
   difficulty: 'standard',
   source: {
@@ -371,6 +384,7 @@ export const planckSample: SampleDef = {
       surfaceLooksLike: 'Says the value was "close to" the accepted one.',
       zh: {
         question: '把「吻合得很好」用数字定义出来。你的结果距离公认值有多少个标准误？',
+        whyThisProbe: '这个说法就是全文的结论，而整段摘要一个不确定度都没给，所以这句话要么是某个算出来的量的简写，要么是它的替代品。',
         keyPoints: [
           '吻合说的是差值相对于合成不确定度有多大。',
           '一个标准误以内不值一提；三个以内仍算吻合；超出就需要一个交代。',
@@ -395,6 +409,7 @@ export const planckSample: SampleDef = {
       surfaceLooksLike: 'Lists "human error" and "equipment limitations".',
       zh: {
         question: '你的斜率给出的是 h/e。说出这条斜率里最大的两项系统误差，以及每一项把你的 h 往哪个方向推。',
+        whyThisProbe: '能说出方向的系统误差，是「做过这个实验」和「懂这个实验」之间的分界。两个候选对这套装置来说都是标准答案。',
         keyPoints: [
           '阳极反向光电流会让测到的截止电压偏小。',
           '接触电位差影响的是截距，不是斜率。',
@@ -431,6 +446,7 @@ export const vicarSample: SampleDef = {
   material: vicar,
   level: 'undergraduate',
   blurb: 'The whole argument rests on a definition the writer wrote herself, one paragraph in. Every probe here walks back to that sentence.',
+  zhBlurb: '整篇论证压在作者自己在第二段下的一个定义上。这里每一个问题最后都走回那一句话。',
   preset: 'standard',
   difficulty: 'standard',
   source: {
@@ -457,6 +473,7 @@ export const vicarSample: SampleDef = {
       surfaceLooksLike: 'Restates the definition in different words.',
       zh: {
         question: '这个定义是你自己下的。举出一本被你的定义排除在外、但多数读者都会叫它基督教道德故事的书 —— 并说这个代价你认不认。',
+        whyThisProbe: '整篇文章的判决由这一句决定，而自定义的定义只有在作者知道自己扔掉了什么时才算诚实的工作。答案不在文章里。',
         keyPoints: [
           '自定义的定义必须比日常用法更窄，才可能干活。',
           '它排除掉的东西就是这个论证的代价，而代价应该被说出来。',
@@ -481,6 +498,7 @@ export const vicarSample: SampleDef = {
       surfaceLooksLike: 'Repeats that the book fails because the characters are rewarded with money.',
       zh: {
         question: '假设我们改用「意图」而不是「效果」来定义这个体裁 —— 作者本来就想教基督教道德。你文章里哪些段落还站得住，哪些当场垮掉？',
+        whyThisProbe: '这篇文章从没说清它拿哪一条标准在打分 —— 是这本书想教什么，还是它的情节奖赏了什么 —— 而整个论证就悬在这个选择上。',
         keyPoints: [
           '意图和效果是两条不同的标准，而这篇文章两边的证据都用了。',
           '在意图这条标准下，叙述者不停地讲道德，反而是支持这个体裁的证据，不是反对的。',
@@ -505,6 +523,7 @@ export const vicarSample: SampleDef = {
       surfaceLooksLike: 'Cites more examples of characters being rewarded.',
       zh: {
         question: '这是你对情节在教什么的读法，不是原文说过的话。小说里什么东西不一样，才会让这个读法是错的？',
+        whyThisProbe: '这句话是全文的核心证据，而它是从情节结局推出来的。一个作者自己没法证伪的推断，只是他自己论点的另一种说法。',
         keyPoints: [
           '这个主张是从「谁最后得了好处」推出来的，不是从任何写明的道德推出来的。',
           '有一个对手读法 —— 奖赏只是叙事惯例、不是道德教诲 —— 同样能解释这批事件。',
@@ -529,6 +548,7 @@ export const vicarSample: SampleDef = {
       surfaceLooksLike: 'Says the concession is only a small point.',
       zh: {
         question: '这句让步是对你自己论点最强的反对。它为什么没有把论证击沉 —— 你在文章的哪一处回答了它？',
+        whyThisProbe: '作者提出了这个反对，然后就走开了。一句从没被回答的让步，是阅卷人会一脚踩进去的洞。',
         keyPoints: [
           '这句让步承认了这本书在教道德，而那正是论点否认的大部分内容。',
           '文章手上能用的回应是：道德变了，而不是消失了。',
@@ -571,6 +591,7 @@ export const pubertySample: SampleDef = {
   material: puberty,
   level: 'undergraduate',
   blurb: 'Careful, well-cited, and it says "itself" about a cause it never had the design to isolate. The most examinable sentence in the paper is one word long.',
+  zhBlurb: '谨慎、引用扎实，然后它对一个自己从没有设计去分离的原因用了「本身」两个字。全文最值得考的那句话，只有两个字。',
   preset: 'standard',
   difficulty: 'defense',
   source: {
@@ -597,6 +618,7 @@ export const pubertySample: SampleDef = {
       surfaceLooksLike: 'Repeats that the studies found a significant relationship.',
       zh: {
         question: '这里真正干活的词是「本身」。你需要什么样的研究设计，才配保留这两个字 —— 你综述里有哪一项研究具备它吗？',
+        whyThisProbe: '综述里的每一项来源报告的都是关联。「本身」声称的是这个暴露、而不是与它同行的东西，造成了这个结局。文章从没说清自己在论证哪一个。',
         keyPoints: [
           '时机与抑郁之间的关联，同样可以由一个同时作用于两者的共同原因解释。',
           '要把时机单独隔离出来，需要与家庭、体成分、社会环境无关的时机变异。',
@@ -621,6 +643,7 @@ export const pubertySample: SampleDef = {
       surfaceLooksLike: 'Says self-report is "less reliable".',
       zh: {
         question: '如果一个当下正抑郁的女孩，对自己青春期时机的回忆和不抑郁的女孩不一样，这会把结果往哪边推 —— 为什么这比普通的噪声更糟？',
+        whyThisProbe: '暴露的错分随结局状态而变，正是这种测量方式招来的那个具体失败，而且它不会随着样本变大而抵消掉。',
         keyPoints: [
           '非差异性误差通常把结果推向零；而依赖于结局的误差可以往任一方向偏。',
           '一个已经抑郁的青少年所回忆的时机，很可能与结局本身相连。',
@@ -645,6 +668,7 @@ export const pubertySample: SampleDef = {
       surfaceLooksLike: 'Says lifetime rates show the effect is large.',
       zh: {
         question: '「终身患病率」—— 而测量对象是青少年。这个量包含了什么，是「青春期之后那一年的发病率」不会包含的？你的论证真正需要的是哪一个？',
+        whyThisProbe: '在一个年轻样本里量终身患病率，会把青春期之前和之后的发作混在一起。而论证谈的是青春期之后造成了什么。',
         keyPoints: [
           '终身患病率把「曾经发生过的」全都算进去，包括暴露之前。',
           '一个关于「早熟造成了什么后果」的主张，需要的是它之后的发病率。',
@@ -669,6 +693,7 @@ export const pubertySample: SampleDef = {
       surfaceLooksLike: 'Says the sample "may not be representative".',
       zh: {
         question: '九所高中，能被访到的在校学生。说出这个抽样框系统性漏掉的一类女孩，并说她的缺席会把结论往哪边掰。',
+        whyThisProbe: '进入抽样框的选择过程在报告里是看不见的，而它是读者从已报告的数字里唯一察觉不到的偏倚。',
         keyPoints: [
           '这个抽样框是在册、且在校的学生。',
           '已经离开学校的女孩 —— 其中包含结局最严重的一部分 —— 根本进不来。',

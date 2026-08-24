@@ -112,10 +112,18 @@ for (const defFile of DEFS) {
     const q = zh.match(/question: '((?:[^'\\]|\\.)*)'/)?.[1] ?? '';
     const owned = zh.match(/ownedLooksLike: '((?:[^'\\]|\\.)*)'/)?.[1] ?? '';
     const points = (zh.match(/keyPoints: \[([\s\S]*?)\]/)?.[1] ?? '').match(/'(?:[^'\\]|\\.)*'/g) ?? [];
+    const why = zh.match(/whyThisProbe: '((?:[^'\\]|\\.)*)'/)?.[1] ?? '';
     if (!CJK.test(q)) failures.push(`${defFile}: probe ${head} zh.question is not Chinese`);
+    if (!CJK.test(why)) failures.push(`${defFile}: probe ${head} zh.whyThisProbe is not Chinese`);
     if (!CJK.test(owned)) failures.push(`${defFile}: probe ${head} zh.ownedLooksLike is not Chinese`);
     if (!points.length) failures.push(`${defFile}: probe ${head} zh.keyPoints is empty`);
     zhChecked += 1;
+  }
+}
+for (const defFile of DEFS) {
+  const src = readFileSync(defFile, 'utf8');
+  for (const m of src.matchAll(/\n  id: '([\w-]+)',[\s\S]*?\n  blurb: '(?:[^'\\\\]|\\\\.)*',\n(  zhBlurb: '((?:[^'\\\\]|\\\\.)*)',\n)?/g)) {
+    if (!m[2] || !CJK.test(m[3] ?? '')) failures.push(`${defFile}: sample ${m[1]} has no Chinese blurb — the chooser line is what a person picks by`);
   }
 }
 console.log(`verify-samples: ${zhChecked} probes carry Simplified Chinese for everything the student reads`);

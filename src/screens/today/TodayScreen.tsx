@@ -4,7 +4,7 @@ import { selectDueTargets, selectRealSessions, useStore } from '../../store';
 import { useNavigate, FOLLOWUPS_ID } from '../../router';
 import { useLang, useT } from '../../i18n';
 import { SAMPLES, buildSampleSession, sampleSessionId } from '../../samples';
-import { getPack } from '../../packs';
+import { packShort } from '../../packs';
 import { BottomSheet } from '../../ui';
 import { formatDate, studentDestination } from '../../lib/session-ops';
 
@@ -166,11 +166,11 @@ export default function TodayScreen() {
           {SAMPLES.map((def) => (
             <button className="sample-option" type="button" key={def.id} onClick={() => openSample(def.id)}>
               <span className="sample-option-top">
-                <em>{getPack(def.packId).shortName}</em>
+                <em>{packShort(def.packId, lang)}</em>
                 <small>{def.probes.length} {lang === 'zh-CN' ? '问' : def.probes.length === 1 ? 'question' : 'questions'}</small>
               </span>
               <strong>{def.title}</strong>
-              <small>{def.blurb}</small>
+              <small>{lang === 'zh-CN' ? def.zhBlurb : def.blurb}</small>
             </button>
           ))}
         </div>

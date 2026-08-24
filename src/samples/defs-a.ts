@@ -30,6 +30,7 @@ export const antepartumSample: SampleDef = {
   material: antepartum,
   level: 'undergraduate',
   blurb: 'A nursing case study that reads as competent and contains almost no inference. Every number in the data dump is an anchor the student never uses.',
+  zhBlurb: '一份读起来很称职、却几乎没有任何推断的护理个案。数据罗列里的每一个数字，都是学生自己从没用过的抓手。',
   preset: 'standard',
   difficulty: 'standard',
   source: {
@@ -57,6 +58,7 @@ export const antepartumSample: SampleDef = {
       surfaceLooksLike: 'Says the value is "low" and recommends iron, with no mechanism and no threshold.',
       zh: {
         question: '13 周的双胎，Hgb 10、Hct 32 —— 这是一个异常发现，还是正常的？什么会让你改口？',
+        whyThisProbe: '这个数字写在报告里，然后再没被用过。真懂双胎血浆容量扩张的人，能说出为什么这个值在这里要跟单胎不同地读；只是把病历抄下来的人说不出。',
         keyPoints: [
           '血浆容量的扩张快于红细胞量，双胎更明显 —— 稀释性下降是预期之内的。',
           '妊娠期贫血的参考阈值按孕期分段，不是一条统一的线。',
@@ -86,6 +88,7 @@ export const antepartumSample: SampleDef = {
       surfaceLooksLike: 'Repeats that scleroderma is an autoimmune connective tissue disease.',
       zh: {
         question: '硬皮病在你的病史里只出现了一句，后面再没提过。说出它改变这一次妊娠管理的一个具体点，以及它改变分娩方案的一个具体点。',
+        whyThisProbe: '一个合并症被提到、然后被丢下 —— 这是「这条事实是被抄下来的、不是被用来推理的」最清楚的信号。',
         keyPoints: [
           '硬皮病带来肾危象和高血压疾病的风险，这直接改变了这里的血压读数意味着什么。',
           '手指和肘部挛缩会影响静脉通路、体位摆放和产程监护。',
@@ -111,6 +114,7 @@ export const antepartumSample: SampleDef = {
       surfaceLooksLike: 'Says the gain "seems fine" or "is within normal limits" with no comparator.',
       zh: {
         question: 'BMI 18.4 的双绒双羊双胎，到 13 周增重 5 磅。这够吗？告诉我你在跟哪个数字比，以及那个数字从哪来。',
+        whyThisProbe: '报告写了增重，却从没评价过它。这一问要的是那个参照 —— 记录和评估之间就差这一步。',
         keyPoints: [
           '双胎的增重目标高于单胎，并且按孕前 BMI 分层。',
           'BMI 18.4 属于偏瘦，这会把推荐区间再往上抬。',
@@ -136,6 +140,7 @@ export const antepartumSample: SampleDef = {
       surfaceLooksLike: 'Repeats the sentence a third time.',
       zh: {
         question: '这句话把它前面那行记录又说了一遍。你原本想让它给读者建立什么，是那行记录没给到的？',
+        whyThisProbe: '对着这段文字，不是对着人。用定义性的复述去填本该由分析占据的位置，是最常见的一种写法；而「这句话在替你做什么」，任何真有所指的人都答得上来。',
         keyPoints: [
           '当读者未必读得懂专业记录时，用白话复述是正当的写法。',
           '但它不能替代「13 周对这个方案意味着什么」这句该说而没说的话。',
@@ -161,6 +166,7 @@ export const antepartumSample: SampleDef = {
       surfaceLooksLike: 'Says she should be vaccinated, with no mention of timing.',
       zh: {
         question: '13 周查出风疹抗体结果可疑。这次妊娠期间你怎么处理，妊娠结束之后又怎么处理？',
+        whyThisProbe: '「可疑」既不是阳性也不是阴性，而两个时间段的答案不一样。这考的是学生读的是那个词，还是那个结果。',
         keyPoints: [
           '活疫苗在妊娠期属于禁忌，所以动作是产后接种。',
           '妊娠期间的动作是就暴露规避做宣教。',
@@ -196,6 +202,7 @@ export const contraceptionSample: SampleDef = {
   material: emergencyContraception,
   level: 'undergraduate',
   blurb: 'Dense with borrowed numbers — 17%, 88%, 72 hours, 120 hours — each footnoted, none interrogated. The highest-value provenance surface in the corpus.',
+  zhBlurb: '密密麻麻的借来的数字 —— 17%、88%、72 小时、120 小时 —— 每个都有脚注，没有一个被追问过。整个语料里最值得考「出处」的一份。',
   preset: 'quick',
   difficulty: 'defense',
   source: {
@@ -222,6 +229,7 @@ export const contraceptionSample: SampleDef = {
       surfaceLooksLike: 'Repeats the 88% and points at the footnote.',
       zh: {
         question: '88% 是从哪来的？相对于什么基线的 88%？把分母告诉我。',
+        whyThisProbe: '这是语料自己给这段文字提的问题。引用了一个数字却没有分母，是学生写作里最常见的一种借来的权威；而读过原始出处的人答得上来。',
         keyPoints: [
           '这个数字是相对于「不干预时的预期妊娠数」的下降，不是每次性行为的绝对概率。',
           '那个预期基线本身是模型算出来的、不是观察到的，所以不同来源给的数字才会不一样。',
@@ -250,6 +258,7 @@ export const contraceptionSample: SampleDef = {
       surfaceLooksLike: 'Does the arithmetic.',
       zh: {
         question: '你的第一个数字是受孕高峰期单次性行为的概率，第二个是有效率。这两个能相乘得到用药后的风险吗？说出能或不能的理由。',
+        whyThisProbe: '相邻两句里两个借来的数字，它们合不到一起。原文并没有声称它们能合 —— 这一问考的是学生知不知道它们不能。',
         keyPoints: [
           '88% 本身已经是相对于「预期妊娠」基线定义的，再乘一次就是重复计算。',
           '17% 是按周期日条件化的；而有效率是跨周期日平均出来的。',
@@ -274,6 +283,7 @@ export const contraceptionSample: SampleDef = {
       surfaceLooksLike: 'Says the IUD is "more effective" without saying for whom or why.',
       zh: {
         question: '你把两个方案并列得像是可以互换。说出一个含铜宫内节育器明显更优的具体病人，以及对她而言更优在哪。',
+        whyThisProbe: '并列不等于比较。这一问要的是那个区分因素，而背下来的一对选项恰恰在这里散架。',
         keyPoints: [
           '含铜宫内节育器的有效性受 BMI 影响远小于口服左炔诺孕酮。',
           '它同时提供长期避孕，这对一个本来就想要长期避孕的人会改变整个决定。',
@@ -299,6 +309,7 @@ export const motorOilSample: SampleDef = {
   material: motorOil,
   level: 'undergraduate',
   blurb: 'An abstract that opens on societal framing rather than on the study’s own question. The metadata records no figures in a paper that discusses results.',
+  zhBlurb: '摘要的开头讲的是社会意义，不是这项研究自己的问题。元数据显示全文没有一张图，而它在讨论结果。',
   preset: 'quick',
   difficulty: 'standard',
   source: {
@@ -325,6 +336,7 @@ export const motorOilSample: SampleDef = {
       surfaceLooksLike: 'Says the treatment group "showed reduced predation" and stops.',
       zh: {
         question: '你报告了机油对捕食行为的影响。这个影响有多大？你凭什么说它不是噪声？',
+        whyThisProbe: '语料为这份材料自带的问题。这篇论文在讨论结果，而元数据显示全文没有一张图，所以效应量是最可能被叙述出来、而不是算出来的那个东西。',
         keyPoints: [
           '一个效应需要量级和离散度，光有方向不算。',
           '样本量小的时候，只报均值差几乎说明不了什么。',
@@ -349,6 +361,7 @@ export const motorOilSample: SampleDef = {
       surfaceLooksLike: 'Says the study "controlled for other variables".',
       zh: {
         question: '机油会在水面形成油膜，它本身也有化学毒性。你测到的是这两者中的哪一个？什么对照能把它们分开？',
+        whyThisProbe: '一个只有真的设计过这个实验、而不只是跑过它的人才看得见的混杂。它有具体答案，所以这一问是公平的。',
         keyPoints: [
           '表面油膜会改变氧交换，也会挡住昆虫接触水面。',
           '一层惰性膜 —— 矿物油，或者一个漂浮隔层 —— 才能把物理效应和化学效应分开。',
@@ -373,6 +386,7 @@ export const motorOilSample: SampleDef = {
       surfaceLooksLike: 'Defends it as "providing context" without saying context for what.',
       zh: {
         question: '把开头这句话删掉。这段摘要少了什么？',
+        whyThisProbe: '对着这段文字。如果一句话删掉什么也不损失，学生通常自己说得出来 —— 而说出来比硬为它辩护是更强的答案。',
         keyPoints: [
           '社会意义的开场能立起利害关系，但它不承载这项研究自己的任何主张。',
           '摘要的第一句是全文最贵的位置。',
@@ -398,6 +412,7 @@ export const plantCompetitionSample: SampleDef = {
   material: plantCompetition,
   level: 'undergraduate',
   blurb: 'Titled by its position in the course, not by its finding. Two textbook-general opening sentences carrying no citation.',
+  zhBlurb: '标题用的是它在课程里的编号，不是它的发现。开头两句教科书式的泛论，一条引用都没有。',
   preset: 'quick',
   difficulty: 'foundations',
   source: {
@@ -424,6 +439,7 @@ export const plantCompetitionSample: SampleDef = {
       surfaceLooksLike: 'Rephrases the sentence with different words.',
       zh: {
         question: '举出一对物种，它们的竞争优劣会随某个环境条件反转，并说出那个条件。',
+        whyThisProbe: '这句话断言竞争力取决于条件。这个断言要么是学生能举例坐实的，要么是抄来的 —— 而要求举一个例子，是公平且答得上来的。',
         keyPoints: [
           '沿资源梯度出现竞争反转，是这件事的标准演示。',
           '养分水平、水分供应和光照是常见的反转条件。',
@@ -448,6 +464,7 @@ export const plantCompetitionSample: SampleDef = {
       surfaceLooksLike: 'Says the plants "competed for nutrients and light".',
       zh: {
         question: '你的实验里限制性资源是哪一个？设计里的什么让你确定是它、而不是别的？',
+        whyThisProbe: '「资源有限」是这篇论文的前提。一个说不出自己限制性资源是什么的竞争实验，根本还没确立竞争发生过。',
         keyPoints: [
           '要谈竞争，先得证明某个资源确实是限制性的。',
           '密度梯度或者加资源处理，才是把这件事确立下来的手段。',

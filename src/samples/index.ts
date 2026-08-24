@@ -71,7 +71,7 @@ export function buildSampleSession(def: SampleDef, lang: 'en' | 'zh-CN' = 'en'):
     kind: p.kind,
     anchor: { quote: p.quote, placed: false },
     question: zh ? p.zh.question : p.question,
-    whyThisProbe: p.whyThisProbe,
+    whyThisProbe: zh ? p.zh.whyThisProbe : p.whyThisProbe,
     reference: {
       keyPoints: zh ? p.zh.keyPoints : p.keyPoints,
       ownedLooksLike: zh ? p.zh.ownedLooksLike : p.ownedLooksLike,

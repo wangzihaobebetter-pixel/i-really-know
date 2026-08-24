@@ -40,6 +40,19 @@ export function packLabel(id: PackId | undefined, lang: 'en' | 'zh-CN'): string 
   return lang === 'zh-CN' ? ZH_PACK_NAMES[resolved] : getPack(resolved).name;
 }
 
+/**
+ * Short discipline chip. `packLabel` gives the full name; several screens want
+ * the short form and were reaching past both of them into
+ * `getPack(id).shortName`, which is English-only — so the sample chooser, the
+ * tag on a piece of work and the cohort header all showed "Med" / "CS" / "Epi"
+ * inside an otherwise Chinese interface. The Chinese table already existed and
+ * was simply not being used.
+ */
+export function packShort(id: PackId | undefined, lang: 'en' | 'zh-CN'): string {
+  const resolved = id ?? 'general';
+  return lang === 'zh-CN' ? ZH_PACK_NAMES[resolved] : getPack(resolved).shortName;
+}
+
 export function dimensionsOf(packId: PackId): ProbeDimension[] {
   return getPack(packId).dimensions;
 }

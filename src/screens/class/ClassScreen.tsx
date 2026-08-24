@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useStore, selectHasKey } from '../../store';
-import { PACKS, getPack } from '../../packs';
+import { PACKS, packLabel, packShort } from '../../packs';
 import { useNavigate } from '../../router';
 import { useT, useLang } from '../../i18n';
 import { Button, Callout, EmptyState, Input, Select, Sheet, Tag } from '../../ui';
@@ -90,7 +90,7 @@ export default function ClassScreen() {
             label={t('import.detected')}
             value={packId}
             onChange={(e) => setPackId(e.target.value as PackId)}
-            options={PACKS.map((p) => ({ value: p.id, label: p.name }))}
+            options={PACKS.map((p) => ({ value: p.id, label: packLabel(p.id, lang) }))}
           />
           <Input
             label={t('teacher4.event')}
@@ -122,7 +122,7 @@ export default function ClassScreen() {
                 <div className="stack-tight">
                   <div className="row wrap" style={{ gap: 'var(--space-2)' }}>
                     <span className="t-body-strong">{c.name}</span>
-                    <Tag mono>{getPack(c.packId).shortName}</Tag>
+                    <Tag mono>{packShort(c.packId, lang)}</Tag>
                   </div>
                   <span className="t-small ink-3">
                     {formatDate(c.createdAt, lang)} · {c.submissions.length} {t('class.submissions').toLowerCase()}

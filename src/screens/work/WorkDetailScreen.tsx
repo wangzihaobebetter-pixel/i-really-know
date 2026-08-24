@@ -6,7 +6,7 @@ import { useLang, useT } from '../../i18n';
 import { AnchoredText, Button, Mark, Sheet, Tag } from '../../ui';
 import type { TextAnchor } from '../../ui';
 import { verdictOf } from '../../lib/analysis';
-import { getPack } from '../../packs';
+import { packShort } from '../../packs';
 import { formatDate, studentDestination } from '../../lib/session-ops';
 
 /**
@@ -61,7 +61,7 @@ export function PieceDetail({ sessionId }: { sessionId: string }) {
     <div className="col-doc stack page-enter work-detail-v5" data-testid="work-detail">
       <button type="button" className="text-action row" onClick={() => nav('work')}><ArrowLeft size={16} />{t('common.action.back')}</button>
       <header className="stack-tight">
-        <div className="row wrap"><Tag mono>{getPack(session.packId).shortName}</Tag><span className="t-small ink-3">{history.length} {lang === 'zh-CN' ? '次过一遍' : 'run-throughs'}</span></div>
+        <div className="row wrap"><Tag mono>{packShort(session.packId, lang)}</Tag><span className="t-small ink-3">{history.length} {lang === 'zh-CN' ? '次过一遍' : 'run-throughs'}</span></div>
         <h1 className="t-sentence">{session.title}</h1>
         {session.occasionAt && <p className="t-small ink-3">{formatDate(session.occasionAt, lang)}</p>}
       </header>
