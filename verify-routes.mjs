@@ -58,7 +58,7 @@ for (const p of new Set(patterns.map((x) => x.name))) {
 }
 
 /* Routes with no bare `#/<name>` form, and why. */
-const PARAMETERISED = new Set(['read', 'run', 'result', 'workDetail', 'cohort', 'studentSheet', 'reteach', 'join', 'return']);
+const PARAMETERISED = new Set(['read', 'run', 'result', 'cohort', 'studentSheet', 'reteach', 'join', 'return']);
 for (const p of new Set(patterns.map((x) => x.name))) {
   if (PARAMETERISED.has(p)) continue;
   const got = parse(`#/${p}`);

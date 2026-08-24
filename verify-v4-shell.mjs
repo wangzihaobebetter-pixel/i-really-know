@@ -40,9 +40,36 @@ const workDetail = read('src/screens/work/WorkDetailScreen.tsx');
 const you = read('src/screens/you/YouScreen.tsx');
 const sessionOps = read('src/lib/session-ops.ts');
 
-for (const route of ['today','bring','read','run','result','work','workDetail','you','followups','welcome','settings','class']) {
+/*
+ * v6 collapse. Brief §6.4 counts NINE student screens; the build carried
+ * eleven, the two extras being `workDetail` and `followups`. Neither was
+ * deleted — 作业 gained a detail state at `#/work/:sessionId`, and a returning
+ * question is answered on `run`, the one surface where questions are answered.
+ *
+ * So this gate is rewritten rather than relaxed: it still requires every
+ * screen to be routed AND reachable, and it now also holds the count, which
+ * is the thing that actually regressed twice.
+ */
+const STUDENT_ROUTES = ['today','bring','read','run','result','work','you','welcome','settings'];
+for (const route of [...STUDENT_ROUTES, 'class']) {
   if (!router.includes(`name: '${route}'`)) failures.push(`router is missing ${route}`);
   if (route !== 'class' && route !== 'settings' && !app.includes(`case '${route}'`)) failures.push(`App outlet is missing ${route}`);
+}
+
+const outletCases = [...app.matchAll(/case '(\w+)':/g)].map((m) => m[1]);
+const INSTRUCTOR = new Set(['class', 'cohort', 'studentSheet', 'reteach', 'join', 'return']);
+const studentCases = outletCases.filter((name) => !INSTRUCTOR.has(name));
+if (studentCases.length > 9) {
+  failures.push(`brief §6.4 allows nine student screens; the outlet has ${studentCases.length}: ${studentCases.join(', ')}`);
+}
+
+/* The two folded screens must still be REACHABLE, or this was a deletion
+   dressed up as a collapse. */
+if (!read('src/screens/work/WorkScreen.tsx').includes('PieceDetail')) {
+  failures.push('作业 no longer renders the piece detail — the merge dropped it');
+}
+if (!app.includes('FOLLOWUPS_ID')) {
+  failures.push('the returning questions are no longer reachable from the run route');
 }
 
 for (const legacy of ["'home'", "'map'", "'queue'", "'record'", "'transcript'", "'packs'", "'packDetail'", "'import'", "'devUi'"]) {

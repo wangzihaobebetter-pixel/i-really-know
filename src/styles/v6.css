@@ -298,3 +298,56 @@
 @media (min-width: 1024px) {
   .sample-picker { grid-template-columns: 1fr 1fr; }
 }
+
+/* ============================ the self-read moment ======================== */
+
+/*
+ * The highest-stakes screen in the product: brief §5.4 makes this the one
+ * signal the whole thing rests on, collected BEFORE any judgement exists. Its
+ * shape was already right — full bleed, one question, three options, and copy
+ * that says out loud that nothing has been judged yet.
+ *
+ * What was wrong: the three options were colour-coded ink / #3B63F3 / #4C4E7A,
+ * and in a 390x844 capture the middle one plainly wins the eye. #3B63F3 is far
+ * more saturated than the other two and appears nowhere else in the product,
+ * so it reads as a system colour — several times I looked at that screenshot
+ * and read it as "the middle option is selected". If it can be misread as
+ * selected, it can nudge, and the one thing this screen cannot do is nudge:
+ * the option it was pulling toward is the hedge, "不好说，我漏了点什么", and a
+ * self-grade given because the button was loudest destroys the measurement
+ * (research/ireallyknow/03 §A2 — this is the only signal the product has).
+ *
+ * All three are now identical. What distinguishes them is the sentence, which
+ * is the only thing that should. Nor do they borrow the verdict palette:
+ * colouring a belief with the colours of the demonstrated result would imply
+ * the app has already agreed with you, one screen before it is allowed to.
+ */
+.v5-self-options button:nth-child(2),
+.v5-self-options button:nth-child(3) {
+  border-color: var(--ink);
+  box-shadow: 0 5px 0 var(--ink);
+}
+
+/* Off-palette focus. The shared ring is #3B63F3, the same blue; on a screen of
+   equal choices a keyboard ring must not look like a selection either. */
+.v5-self-options button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+}
+
+/* ~360px of empty page sat above the question at 390x844. */
+.v5-self-read {
+  display: grid; align-content: center;
+  min-height: calc(100dvh - 190px);
+  padding-block: clamp(12px, 3vh, 28px);
+}
+
+/* Choosing is a commitment, so it gets a press with weight behind it and
+   nothing else: no colour change, no tick, no sound (§5.9). */
+.v5-self-options button {
+  transition: transform var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .v5-self-options button { transition: none; }
+}

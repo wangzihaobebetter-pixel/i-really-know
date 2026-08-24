@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { selectHasKey, selectSession, useStore } from '../../store';
-import { useNavigate, useRoute } from '../../router';
+import { useNavigate } from '../../router';
 import { useLang, useT } from '../../i18n';
 import { AnchoredText, Button, Mark, Sheet, Tag } from '../../ui';
 import type { TextAnchor } from '../../ui';
@@ -9,11 +9,16 @@ import { verdictOf } from '../../lib/analysis';
 import { getPack } from '../../packs';
 import { formatDate, studentDestination } from '../../lib/session-ops';
 
-export default function WorkDetailScreen() {
+/**
+ * One piece, opened. This was its own route (`workDetail`) and its own screen;
+ * brief §6.4 counts nine student screens and this was the tenth. It is the
+ * same content, rendered by 作业 when a piece is open, so the tab, the header
+ * and the way back are one thing instead of two.
+ */
+export function PieceDetail({ sessionId }: { sessionId: string }) {
   const t = useT();
   const lang = useLang();
   const nav = useNavigate();
-  const sessionId = useRoute().params.sessionId;
   const session = useStore(selectSession(sessionId));
   const sessions = useStore((state) => state.sessions);
   const createSession = useStore((state) => state.createSession);
@@ -53,7 +58,7 @@ export default function WorkDetailScreen() {
   }
 
   return (
-    <div className="col-doc stack page-enter work-detail-v5" data-testid="work-detail-screen">
+    <div className="col-doc stack page-enter work-detail-v5" data-testid="work-detail">
       <button type="button" className="text-action row" onClick={() => nav('work')}><ArrowLeft size={16} />{t('common.action.back')}</button>
       <header className="stack-tight">
         <div className="row wrap"><Tag mono>{getPack(session.packId).shortName}</Tag><span className="t-small ink-3">{history.length} {lang === 'zh-CN' ? '次过一遍' : 'run-throughs'}</span></div>
@@ -86,7 +91,7 @@ export default function WorkDetailScreen() {
         <h2 className="t-title">{lang === 'zh-CN' ? '历史' : 'History'}</h2>
         <div className="history-list">
           {history.map((item) => (
-            <button type="button" className="history-row" key={item.id} onClick={() => nav('workDetail', { sessionId: item.id })} aria-current={item.id === session.id}>
+            <button type="button" className="history-row" key={item.id} onClick={() => nav('work', { sessionId: item.id })} aria-current={item.id === session.id}>
               <span>{formatDate(item.completedAt ?? item.createdAt, lang)}</span>
               <span className="ink-3">{item.probes.filter((probe) => probe.committedAt).length} / {item.probes.length}</span>
               <ArrowRight size={16} aria-hidden />

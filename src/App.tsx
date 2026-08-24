@@ -11,7 +11,7 @@
  */
 import React, { lazy, useEffect, useState } from 'react';
 import { AppShell } from './app/AppShell';
-import { useRoute, navigate } from './router';
+import { useRoute, navigate, FOLLOWUPS_ID } from './router';
 import { Button, EmptyState } from './ui';
 import { useT } from './i18n';
 import { useStore } from './store';
@@ -24,9 +24,9 @@ import './i18n/v5';
 // --- Student tabs / surfaces ---------------------------------------------
 const TodayScreen       = lazy(() => import('./screens/today/TodayScreen'));
 const WorkScreen        = lazy(() => import('./screens/work/WorkScreen'));
-const WorkDetailScreen  = lazy(() => import('./screens/work/WorkDetailScreen'));
 const YouScreen         = lazy(() => import('./screens/you/YouScreen'));
 const FollowupsScreen   = lazy(() => import('./screens/followups/FollowupsScreen'));
+
 const SettingsScreen    = lazy(() => import('./screens/settings/SettingsScreen'));
 
 // --- Run-through + result + bring + read ----------------------------------
@@ -53,12 +53,14 @@ function Outlet() {
     case 'today':         return <TodayScreen />;
     case 'bring':         return <BringScreen />;
     case 'read':          return <ReadScreen key={p.sessionId} />;
-    case 'run':           return <VivaScreen key={p.sessionId} />;
+    /* One answering surface. `#/run/followups` is the returning-question
+       form of it; anything else is a run-through of a piece of work. */
+    case 'run':           return p.sessionId === FOLLOWUPS_ID
+      ? <FollowupsScreen />
+      : <VivaScreen key={p.sessionId} />;
     case 'result':        return <ResultScreen key={p.sessionId} />;
-    case 'work':          return <WorkScreen />;
-    case 'workDetail':    return <WorkDetailScreen key={p.sessionId} />;
+    case 'work':          return <WorkScreen key={p.sessionId ?? 'shelf'} />;
     case 'you':           return <YouScreen />;
-    case 'followups':     return <FollowupsScreen />;
     case 'welcome': return <WelcomeScreen />;
     case 'join': return <JoinScreen />;
     case 'return': return <ReturnScreen />;

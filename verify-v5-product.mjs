@@ -43,7 +43,11 @@ need(!/window\.confirm/.test(settings), 'data deletion regressed to a system con
 need(!/settings\.count|settings\.preset|settings\.difficulty/.test(settings), 'developer run controls returned to Settings');
 need(/const tabs: NavItem\[\] = ITEMS/.test(nav) && !/\.\.\.ITEMS, SETTINGS_ITEM/.test(nav), 'Settings returned as a fourth student tab');
 const immersive = shell.match(/IMMERSIVE[^\n]*/)?.[0] ?? '';
-for (const route of ['bring', 'run', 'read', 'result', 'followups', 'welcome']) need(immersive.includes(`'${route}'`), `${route} is not immersive`);
+/* `followups` is no longer a route: a returning question is answered on `run`,
+   which is in this list, so the immersive contract still covers it. Checking
+   the old name would be checking that a screen we folded still exists. */
+for (const route of ['bring', 'run', 'read', 'result', 'welcome']) need(immersive.includes(`'${route}'`), `${route} is not immersive`);
+need(/FOLLOWUPS_ID/.test(read('src/App.tsx')), 'the returning questions lost their immersive answering surface');
 need(/theme: 'paper'/.test(store) && /theme === 'system'\) setSettings\(\{ theme: 'paper' \}\)/.test(read('src/app/theme.tsx')), 'light is no longer the real default');
 need(/--counter-accent:\s*#3B63F3/i.test(tokens) && /--warm-signal:\s*#F5C84B/i.test(tokens), 'Living Margin palette tokens are missing');
 need(/\.living-mark/.test(css) && /\.room-orbit/.test(css) && /\.held-voice-card/.test(css), 'ownable Living Margin objects are missing from the shipped CSS');

@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { ArrowRight, ChevronDown, RotateCcw, X } from 'lucide-react';
 import { selectSession, useStore } from '../../store';
-import { useNavigate, useRoute } from '../../router';
+import { useNavigate, useRoute, FOLLOWUPS_ID } from '../../router';
 import { useLang, useT } from '../../i18n';
 import { AnchoredText, Button, Mark, Sheet } from '../../ui';
 import type { TextAnchor } from '../../ui';
@@ -267,7 +267,7 @@ export default function ResultScreen() {
         <div className="ending-next">
           <button type="button" onClick={() => nav('bring')}>{t('v5.doneBring')}<ArrowRight size={16} /></button>
           {scheduled > 0 && (
-            <button type="button" onClick={() => nav('followups')}>{t('v5.doneFollowups')}<ArrowRight size={16} /></button>
+            <button type="button" onClick={() => nav('run', { sessionId: FOLLOWUPS_ID })}>{t('v5.doneFollowups')}<ArrowRight size={16} /></button>
           )}
         </div>
       </section>

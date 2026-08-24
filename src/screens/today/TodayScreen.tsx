@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ArrowRight, Plus, RotateCcw } from 'lucide-react';
 import { selectDueTargets, selectRealSessions, useStore } from '../../store';
-import { useNavigate } from '../../router';
+import { useNavigate, FOLLOWUPS_ID } from '../../router';
 import { useLang, useT } from '../../i18n';
 import { SAMPLES, buildSampleSession, sampleSessionId } from '../../samples';
 import { getPack } from '../../packs';
@@ -120,7 +120,7 @@ export default function TodayScreen() {
       {due.length > 0 && (
         <section className="today-kept">
           <div className="v5-section-head"><h2>{t('v5.remembered')}</h2><span>{due.length}</span></div>
-          <button className="kept-question" type="button" onClick={() => nav('followups')}>
+          <button className="kept-question" type="button" onClick={() => nav('run', { sessionId: FOLLOWUPS_ID })}>
             <span className="return-tile" aria-hidden><RotateCcw size={21} /></span>
             <span className="kept-copy">
               <strong>{t('v5.dueDifferent')}</strong>

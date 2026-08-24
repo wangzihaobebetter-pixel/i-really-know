@@ -19,7 +19,7 @@ function useViewport() {
 }
 
 /** Routes that take over the screen: no rail, no tab bar (§2.2). */
-const IMMERSIVE = new Set(['bring', 'run', 'read', 'result', 'followups', 'welcome', 'join']);
+const IMMERSIVE = new Set(['bring', 'run', 'read', 'result', 'welcome', 'join']);
 const INSTRUCTOR = new Set(['class', 'cohort', 'studentSheet', 'reteach', 'return']);
 
 class RouteBoundary extends React.Component<{ children: React.ReactNode; onReset: () => void; errorTitle: string; errorAction: string }, { error: Error | null }> {

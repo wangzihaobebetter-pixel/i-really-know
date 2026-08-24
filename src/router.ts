@@ -11,11 +11,18 @@
 import { useSyncExternalStore, useCallback } from 'react';
 
 export type RouteName =
-  | 'today' | 'bring' | 'read' | 'run' | 'result' | 'work' | 'workDetail'
-  | 'you' | 'followups' | 'welcome'
+  | 'today' | 'bring' | 'read' | 'run' | 'result' | 'work'
+  | 'you' | 'welcome'
   | 'class' | 'cohort' | 'studentSheet' | 'reteach'
   | 'join' | 'return'
   | 'settings' | 'notfound';
+
+/**
+ * Reserved `run` session id meaning "the returning questions" rather than a
+ * stored session. Lives here so screens can reach it without importing App,
+ * which lazy-imports them back.
+ */
+export const FOLLOWUPS_ID = 'followups';
 
 export interface Route {
   name: RouteName;
@@ -29,12 +36,18 @@ const PATTERNS: Pattern[] = [
   { name: 'today',        segments: [] },
   { name: 'bring',        segments: ['bring'] },
   { name: 'read',         segments: ['read', ':sessionId'] },
+  /* `run` is the one place a question gets answered. A follow-up is a
+     run-through of a single returning question, so it lives here too, under
+     the reserved id `followups` — brief §6.4 puts the due list on 今天 and
+     gives the student one answering surface, not two that look alike. */
   { name: 'run',          segments: ['run', ':sessionId'] },
   { name: 'result',       segments: ['result', ':sessionId'] },
   { name: 'work',         segments: ['work'] },
-  { name: 'workDetail',   segments: ['work', ':sessionId'] },
+  /* Not a second screen: `作业` with one piece open. href('work') still emits
+     `#/work` because the bare pattern is declared first, so the tab link is
+     unchanged and the deep link to a single piece keeps working. */
+  { name: 'work',         segments: ['work', ':sessionId'] },
   { name: 'you',          segments: ['you'] },
-  { name: 'followups',    segments: ['followups'] },
   { name: 'join',         segments: ['join', ':ticket'] },
   { name: 'return',       segments: ['return', ':ticket'] },
   { name: 'welcome',      segments: ['welcome'] },
@@ -117,15 +130,13 @@ export function useNavigate() {
 }
 
 /** Which tab should read as active for a given route. */
-export const ROUTE_GROUP: Record<RouteName, 'today' | 'work' | 'you' | 'followups' | 'class' | 'settings' | 'none'> = {
+export const ROUTE_GROUP: Record<RouteName, 'today' | 'work' | 'you' | 'class' | 'settings' | 'none'> = {
   today: 'today',
   bring: 'today',
   read: 'today',
   run: 'today',
   result: 'today',
-  followups: 'today',
   work: 'work',
-  workDetail: 'work',
   you: 'you',
   welcome: 'none',
   join: 'none',

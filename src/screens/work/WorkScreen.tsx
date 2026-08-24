@@ -1,10 +1,11 @@
 import React from 'react';
 import { ArrowRight, Plus } from 'lucide-react';
 import { selectRealSessions, useStore } from '../../store';
-import { useNavigate } from '../../router';
+import { useNavigate, useRoute } from '../../router';
 import { useLang, useT } from '../../i18n';
 import { Button } from '../../ui';
 import { verdictOf } from '../../lib/analysis';
+import { PieceDetail } from './WorkDetailScreen';
 import { formatDate } from '../../lib/session-ops';
 
 interface PieceGroup { key: string; title: string; sessions: ReturnType<typeof useStore.getState>['sessions'] }
@@ -13,6 +14,7 @@ export default function WorkScreen() {
   const t = useT();
   const lang = useLang();
   const nav = useNavigate();
+  const openId = useRoute().params.sessionId;
   const sessions = useStore(selectRealSessions).filter((session) => !session.sampleId);
   const grouped = new Map<string, PieceGroup>();
   for (const session of [...sessions].sort((a, b) => b.createdAt - a.createdAt)) {
@@ -22,6 +24,9 @@ export default function WorkScreen() {
     grouped.set(key, group);
   }
   const pieces = [...grouped.values()];
+
+  /* 作业 has two states, not two screens. */
+  if (openId) return <PieceDetail sessionId={openId} />;
 
   return (
     <div className="col-read work-v5 page-enter" data-testid="work-screen">
@@ -48,7 +53,7 @@ export default function WorkScreen() {
             const held = latest.probes.filter((probe) => ['defended', 'underclaimed'].includes(verdictOf(probe))).length;
             const back = latest.probes.filter((probe) => ['partial', 'undefended'].includes(verdictOf(probe))).length;
             return (
-              <button className="work-piece-v5" data-tone={pieceIndex % 3} type="button" key={piece.key} onClick={() => nav('workDetail', { sessionId: latest.id })}>
+              <button className="work-piece-v5" data-tone={pieceIndex % 3} type="button" key={piece.key} onClick={() => nav('work', { sessionId: latest.id })}>
                 <span className="work-piece-top">
                   <span>{latest.occasionAt ? formatDate(latest.occasionAt, lang) : (lang === 'zh-CN' ? '没有日期' : 'No date')}</span>
                   <span>{completed} {lang === 'zh-CN' ? '遍' : completed === 1 ? 'run' : 'runs'}</span>
