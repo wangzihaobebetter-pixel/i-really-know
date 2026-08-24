@@ -12,8 +12,25 @@ export default function YouScreen() {
   const t = useT();
   const lang = useLang();
   const nav = useNavigate();
+  /*
+   * Sample run-throughs count here, and used not to.
+   *
+   * 你 is defined by brief §6.2 #11 as "给他攒一本『你自己说过、并且站住了的话』"
+   * — a book of things the person said out loud that held. The words in a
+   * sample run-through are typed by them, the self-read is theirs, the places
+   * they slipped are theirs. Only the *material* belonged to someone else.
+   *
+   * Excluding them meant that a person with no API key — which is the entire
+   * zero-setup first run the brief demands in §7 — could finish a whole
+   * run-through, see a real verdict, open 你, and be told "这里会长出你的原话",
+   * with their own sentences sitting one screen away. Two of the three tabs
+   * were permanently empty for exactly the user the cold start is built for.
+   *
+   * The attribution stays honest: every quote is cited with the title of the
+   * piece it came from, so nothing here claims they wrote the material.
+   */
   const sessions = useStore(selectRealSessions)
-    .filter((session) => session.status === 'complete' && !session.sampleId)
+    .filter((session) => session.status === 'complete')
     .sort((a, b) => (b.completedAt ?? b.createdAt) - (a.completedAt ?? a.createdAt));
   const queue = useStore((state) => state.queue);
 

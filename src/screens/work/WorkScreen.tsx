@@ -15,7 +15,15 @@ export default function WorkScreen() {
   const lang = useLang();
   const nav = useNavigate();
   const openId = useRoute().params.sessionId;
-  const sessions = useStore(selectRealSessions).filter((session) => !session.sampleId);
+  const all = useStore(selectRealSessions);
+  /* 作业 says "你带来过的每一件东西", so a sample cannot sit in that list — the
+     material was not theirs to bring. But hiding sample runs entirely left a
+     keyless student, who had just finished a whole run-through, looking at
+     "这里还没有你的东西". They get their own shelf, named for what they are. */
+  const sessions = all.filter((session) => !session.sampleId);
+  const tried = all
+    .filter((session) => session.sampleId && session.status === 'complete')
+    .sort((a, b) => (b.completedAt ?? b.createdAt) - (a.completedAt ?? a.createdAt));
   const grouped = new Map<string, PieceGroup>();
   for (const session of [...sessions].sort((a, b) => b.createdAt - a.createdAt)) {
     const key = session.parentSessionId ?? session.id;
@@ -66,6 +74,20 @@ export default function WorkScreen() {
           })}
           <button className="work-add-v5" type="button" onClick={() => nav('bring')}><Plus size={19} />{t('work4.bring')}</button>
         </div>
+      )}
+
+      {tried.length > 0 && (
+        <section className="work-tried-v5">
+          <div className="v5-section-head">
+            <h2>{lang === 'zh-CN' ? '你试过的样例' : 'Samples you tried'}</h2><span>{tried.length}</span>
+          </div>
+          {tried.map((session) => (
+            <button className="tried-piece-v5" type="button" key={session.id} onClick={() => nav('result', { sessionId: session.id })}>
+              <span><strong>{session.title}</strong><small>{lang === 'zh-CN' ? '打开标过的原文' : 'Open the marked page'}</small></span>
+              <ArrowRight size={17} aria-hidden />
+            </button>
+          ))}
+        </section>
       )}
     </div>
   );
