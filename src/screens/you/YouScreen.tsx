@@ -56,7 +56,7 @@ export default function YouScreen() {
       const verdict = verdictOf(probe);
       if (verdict !== 'undefended' && verdict !== 'partial') continue;
       const key = `${session.packId}:${probe.dimensionId}`;
-      const item = slips.get(key) ?? { label: dimensionLabel(session.packId, probe.dimensionId), count: 0 };
+      const item = slips.get(key) ?? { label: dimensionLabel(session.packId, probe.dimensionId, lang), count: 0 };
       item.count += 1;
       slips.set(key, item);
     }

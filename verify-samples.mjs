@@ -126,6 +126,22 @@ for (const defFile of DEFS) {
     if (!m[2] || !CJK.test(m[3] ?? '')) failures.push(`${defFile}: sample ${m[1]} has no Chinese blurb — the chooser line is what a person picks by`);
   }
 }
+/* Dimension labels render on the 你 tab and on the instructor's printed
+   evidence sheet, so every pack dimension needs a Chinese label. */
+const packsIndex = readFileSync('src/packs/index.ts', 'utf8');
+const zhDims = packsIndex.slice(packsIndex.indexOf('const ZH_DIM_LABELS'), packsIndex.indexOf('export function dimensionLabel'));
+for (const file of readdirSync('src/packs').filter((f) => f.endsWith('.ts') && !['index.ts', 'kit.ts'].includes(f))) {
+  const src = readFileSync(join('src/packs', file), 'utf8');
+  const pid = src.match(/\n  id: '(\w+)'/)?.[1];
+  if (!pid) continue;
+  const table = zhDims.match(new RegExp('\\n  ' + pid + ': \\{([^}]*)\\}'))?.[1] ?? '';
+  for (const [, dimId] of src.matchAll(/dim\('([\w-]+)'/g)) {
+    if (!new RegExp('(^|[,{\\s])' + dimId + ':').test(table)) {
+      failures.push(`packs/${file}: dimension '${dimId}' has no Chinese label — it renders on 你 and on the printed evidence sheet`);
+    }
+  }
+}
+
 console.log(`verify-samples: ${zhChecked} probes carry Simplified Chinese for everything the student reads`);
 
 console.log('verify-samples: NOTE — no chemistry and no mathematics sample ships. research/ireallyknow/01 §7.1 found');

@@ -122,9 +122,9 @@ export const graphSample: SampleDef = {
     },
   ],
   worked: [
-    { selfGrade: 'owned', score: 0, verdictLine: 'Said it allocates memory for the node array. Did not reach sizeof(char) being 1, and did not account for why the program still runs.' },
-    { selfGrade: 'owned', score: 1, verdictLine: 'Identified that the error is not handled; did not name strcpy on the following line as the crash site.' },
-    { selfGrade: 'notmine', score: 3, verdictLine: 'Accounted for the NUL terminator unprompted and located the off-by-one at a 31-character name.' },
+    { selfGrade: 'owned', score: 0, verdictLine: 'Said it allocates memory for the node array. Did not reach sizeof(char) being 1, and did not account for why the program still runs.', zhVerdictLine: '说它给节点数组分配了内存。没有走到 sizeof(char) 等于 1，也没有交代程序为什么还能跑。' },
+    { selfGrade: 'owned', score: 1, verdictLine: 'Identified that the error is not handled; did not name strcpy on the following line as the crash site.', zhVerdictLine: '看出这个错误没有被处理；但没有指出下一行的 strcpy 就是崩溃点。' },
+    { selfGrade: 'notmine', score: 3, verdictLine: 'Accounted for the NUL terminator unprompted and located the off-by-one at a 31-character name.', zhVerdictLine: '没被追问就把 NUL 终止符算了进去，并定位到 31 字符名字上的那个差一错误。' },
   ],
 };
 
@@ -344,9 +344,9 @@ export const tuberculosisSample: SampleDef = {
     },
   ],
   worked: [
-    { selfGrade: 'owned', score: 0, verdictLine: 'Repeated that missingness may bias results. No direction, no regions named.' },
-    { selfGrade: 'shaky', score: 2, verdictLine: 'Reached 15 comparisons and named Bonferroni; did not compute the family-wise error rate.' },
-    { selfGrade: 'notmine', score: 3, verdictLine: 'Identified the shared denominator unprompted and proposed re-running on absolute counts.' },
+    { selfGrade: 'owned', score: 0, verdictLine: 'Repeated that missingness may bias results. No direction, no regions named.', zhVerdictLine: '重复了一句「缺失可能造成偏倚」。没有方向，也没点出是哪些地区。' },
+    { selfGrade: 'shaky', score: 2, verdictLine: 'Reached 15 comparisons and named Bonferroni; did not compute the family-wise error rate.', zhVerdictLine: '算到了 15 次比较并说出了 Bonferroni；没有算族系错误率。' },
+    { selfGrade: 'notmine', score: 3, verdictLine: 'Identified the shared denominator unprompted and proposed re-running on absolute counts.', zhVerdictLine: '没被追问就认出了共用分母，并提出改用绝对计数重跑一遍。' },
   ],
 };
 

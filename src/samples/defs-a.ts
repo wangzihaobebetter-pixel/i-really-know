@@ -187,11 +187,11 @@ export const antepartumSample: SampleDef = {
      everywhere they render. The artifact and the probes are real; no student
      sat this examination. */
   worked: [
-    { selfGrade: 'owned', score: 1, verdictLine: 'Named iron deficiency, but read the value against a non-pregnant threshold and did not reach plasma volume expansion.' },
-    { selfGrade: 'owned', score: 0, verdictLine: 'Restated the definition of scleroderma. No management consequence was reached.' },
-    { selfGrade: 'notmine', score: 3, verdictLine: 'Named BMI-stratified twin guidance unprompted and flagged the underweight starting point as raising the target.' },
-    { selfGrade: 'owned', score: 1, verdictLine: 'Defended the sentence as plain language for the reader, but did not say what should have followed it.' },
-    { selfGrade: 'owned', score: 1, verdictLine: 'Correct on postpartum vaccination; did not address what happens during the pregnancy.' },
+    { selfGrade: 'owned', score: 1, verdictLine: 'Named iron deficiency, but read the value against a non-pregnant threshold and did not reach plasma volume expansion.', zhVerdictLine: '说到了缺铁，但拿的是非妊娠期的阈值来读这个值，没有走到血浆容量扩张。' },
+    { selfGrade: 'owned', score: 0, verdictLine: 'Restated the definition of scleroderma. No management consequence was reached.', zhVerdictLine: '把硬皮病的定义复述了一遍。没有落到任何一个管理上的后果。' },
+    { selfGrade: 'notmine', score: 3, verdictLine: 'Named BMI-stratified twin guidance unprompted and flagged the underweight starting point as raising the target.', zhVerdictLine: '没被追问就说出了按 BMI 分层的双胎增重区间，并指出偏瘦这个起点会把目标往上抬。' },
+    { selfGrade: 'owned', score: 1, verdictLine: 'Defended the sentence as plain language for the reader, but did not say what should have followed it.', zhVerdictLine: '把这句话辩护成写给读者看的白话，但没说出它后面本该接什么。' },
+    { selfGrade: 'owned', score: 1, verdictLine: 'Correct on postpartum vaccination; did not address what happens during the pregnancy.', zhVerdictLine: '产后接种这一点答对了；没有回答妊娠期间该怎么办。' },
   ],
 };
 

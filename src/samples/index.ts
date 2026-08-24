@@ -132,7 +132,7 @@ export function buildWorkedSession(def: SampleDef, lang: 'en' | 'zh-CN' = 'en'):
         selfGrade: w.selfGrade,
         ai: {
           score: w.score,
-          verdictLine: w.verdictLine,
+          verdictLine: lang === 'zh-CN' ? w.zhVerdictLine : w.verdictLine,
           evidence: { present: [], missing: [] },
           parroting: false,
           confidence: 'med' as const,

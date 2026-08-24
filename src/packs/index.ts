@@ -57,7 +57,37 @@ export function dimensionsOf(packId: PackId): ProbeDimension[] {
   return getPack(packId).dimensions;
 }
 
-export function dimensionLabel(packId: PackId, dimensionId: string): string {
+const ZH_DIM_LABELS: Record<string, Record<string, string>> = {
+  bio: { mechanism: '对得上尺度的机制', controls: '实验逻辑', data2claim: '从数据到结论', methodchoice: '方法选择', precision: '术语准确度', perturbation: '扰动后的预测', provenance: '具体数字的出处', limits: '认下来的局限' },
+  chem: { mechanism: '反应机理', conditions: '试剂与条件选择', quant: '定量数据的出处', characterization: '从表征到结论', practical: '操作与安全考量', perturbation: '扰动', error: '误差分析' },
+  cs: { design: '设计理由', alternatives: '被否掉的方案', invariants: '正确性与不变式', edges: '边界与失败行为', complexity: '复杂度与资源', provenance: '具体数字的出处', testing: '测试与验证', change: '需求变更时的应对' },
+  epi: { design: '设计选择', bias: '这个设计特有的偏倚', measure: '指标的解读', power: '样本量与检验效能的来源', analysis: '分析方法选择', counterfactual: '反事实', causal: '因果措辞的分寸' },
+  essay: { thesis: '用自己的话说论点', evidence: '证据的出处', objection: '最强的反对意见', definition: '概念定义与边界', structure: '结构安排的理由', counterfactual: '反事实', retractable: '可以收回的主张' },
+  general: { concept: '用自己的话说概念', method: '方法选择', provenance: '具体数字的出处', counterfactual: '反事实', blindspot: '盲区' },
+  math: { justification: '每一步的依据', hypotheses: '前提的必要性', strategy: '证明策略选择', definitions: '定义与边界例子', counterexample: '构造反例', generalize: '推广与特殊化', provenance: '各处取值的来由' },
+  med: { ddx: '鉴别诊断推理', findings: '从发现到诊断', patho: '这位病人的病理生理', investigation: '检查的理由', management: '处理方案的依据', risk: '风险与安全', counterfactual: '换一个病人', provenance: '具体数字的出处' },
+  ml: { baseline: '模型选择与基线对比', leakage: '流程与数据泄漏', metric: '指标是否合适', hyper: '超参数的来由', diagnosis: '过拟合与失败诊断', shift: '分布变化的反事实', honesty: '评估的诚实度' },
+  phys: { model: '模型与理想化选择', governing: '控制方程的来由', limits: '量纲与极限情形', failure: '假设失效', numeric: '数值的出处', perturbation: '扰动', uncertainty: '测量与不确定度' },
+  stats: { choice: '检验/模型选择与备选', assumptions: '假设检查', interpretation: '结果解读', handling: '数据处理决定', provenance: '数字的出处', counterfactual: '数据上的反事实', limits: '推断的边界' },
+};
+
+/**
+ * Dimension labels in the interface language.
+ *
+ * These render in two places a person actually reads: the 「你通常在哪儿滑倒」
+ * list on the 你 tab, and the per-probe heading on the instructor's printed
+ * evidence sheet — the document §6.6 expects a professor to forward to a
+ * colleague. Both showed "Findings-to-diagnosis" and "Pipeline & leakage"
+ * inside otherwise Chinese pages.
+ *
+ * The English `label` on the pack stays the source of truth for the prompt
+ * layer; this table is display only.
+ */
+export function dimensionLabel(packId: PackId, dimensionId: string, lang: 'en' | 'zh-CN' = 'en'): string {
+  if (lang === 'zh-CN') {
+    const zh = ZH_DIM_LABELS[packId]?.[dimensionId];
+    if (zh) return zh;
+  }
   return getPack(packId).dimensions.find((d) => d.id === dimensionId)?.label ?? dimensionId;
 }
 

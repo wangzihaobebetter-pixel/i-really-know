@@ -84,7 +84,14 @@ export interface SampleSource {
  * they appear, rather than being passed off as a recorded result. The artifact
  * and the probes remain real and cited.
  */
-export interface WorkedOutcome { selfGrade: SelfGrade; score: Score; verdictLine: string }
+export interface WorkedOutcome {
+  selfGrade: SelfGrade;
+  score: Score;
+  verdictLine: string;
+  /** Chinese verdict line. These render on the instructor's printed evidence
+      sheet, which §6.6 expects a professor to read and forward to a colleague. */
+  zhVerdictLine: string;
+}
 
 export interface SampleDef {
   id: string;

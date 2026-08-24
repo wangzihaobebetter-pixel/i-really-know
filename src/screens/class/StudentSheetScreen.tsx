@@ -169,7 +169,7 @@ export default function StudentSheetScreen() {
           {probed.map((p, i) => (
             <div className="doc-row" key={p.id}>
               <div className="row-between wrap" style={{ gap: 'var(--space-3)' }}>
-                <span className="t-micro">{i + 1} · {dimensionLabel(session.packId, p.dimensionId)}</span>
+                <span className="t-micro">{i + 1} · {dimensionLabel(session.packId, p.dimensionId, lang)}</span>
                 <Mark verdict={verdictOf(p)} />
               </div>
 
