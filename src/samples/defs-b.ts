@@ -8,6 +8,7 @@ import graphC from './material/cs-graph-c.md?raw';
 import sportsGambling from './material/ml-sports-gambling.md?raw';
 import tuberculosis from './material/stats-tuberculosis.md?raw';
 import planck from './material/phys-planck.md?raw';
+import vicar from './material/essay-vicar.md?raw';
 
 export const graphSample: SampleDef = {
   id: 'cs-graph-c',
@@ -296,6 +297,104 @@ export const planckSample: SampleDef = {
     {
       quote: 'We qualitatively determine',
       note: '"Qualitatively determine" in a paper whose purpose is to measure a constant. The word concedes the measurement is not the argument, and nothing later resolves it.',
+    },
+  ],
+};
+
+/**
+ * Argument writing. The essay pack had no sample at all, so a humanities
+ * student opening the app with no key had nothing in their own subject to try
+ * — the packs were written and then never given anything to bite on.
+ *
+ * This paper is a good target precisely because it is competent. Its argument
+ * turns on a definition the writer stipulates for herself ("in the sense that
+ * I will be using it"), and a stipulated definition is the single most common
+ * place where an essay can be fluent, well-evidenced, and still unable to
+ * survive one question from the person marking it.
+ */
+export const vicarSample: SampleDef = {
+  id: 'essay-vicar',
+  title: 'The Vicar of Wakefield as a failed Christian morality story',
+  packId: 'essay',
+  material: vicar,
+  level: 'undergraduate',
+  blurb: 'The whole argument rests on a definition the writer wrote herself, one paragraph in. Every probe here walks back to that sentence.',
+  preset: 'standard',
+  difficulty: 'standard',
+  source: {
+    url: 'https://micusp.elicorpora.info/view?pid=ENG.G0.02.1',
+    corpus: 'MICUSP — Michigan Corpus of Upper-level Student Papers',
+    who: 'English · Final Year Undergraduate · Argumentative Essay',
+    markers: 'The thesis is a negative claim ("a failed Christian morality story") resting on a definition the writer stipulates herself in paragraph two. Nothing in the paper tests whether a different, equally reasonable definition would reverse the verdict — which is the question a supervisor asks first and the one no amount of re-reading the essay can answer.',
+    terms: 'Copyright the Regents of the University of Michigan; Fair Use statement on the site. Excerpt for analysis only.',
+    originalLength: '1,900 words',
+  },
+  probes: [
+    {
+      dimensionId: 'definition',
+      kind: 'concept',
+      quote: 'A Christian morality story, in the sense that I will be using it, is defined as a story that seeks to teach the reader lessons about the importance of Christian morals.',
+      question: 'You defined this term for yourself. Name a book that your definition excludes but that most readers would call a Christian morality story — and say whether that is a cost you accept.',
+      whyThisProbe: 'The verdict of the whole essay is decided by this sentence, and a stipulated definition is only honest work if the writer knows what it throws away. The answer is not in the paper.',
+      keyPoints: [
+        'A stipulated definition has to be narrower than ordinary use to do any work.',
+        'What it excludes is the price of the argument, and the price should be named.',
+        'If nothing is excluded, the definition is not doing the work the thesis claims it does.',
+      ],
+      ownedLooksLike: 'Names a specific excluded case and either defends the exclusion or concedes the definition is too tight.',
+      surfaceLooksLike: 'Restates the definition in different words.',
+    },
+    {
+      dimensionId: 'counterfactual',
+      kind: 'counterfactual',
+      quote: 'the Vicar of Wakefield is ultimately a failed Christian morality story',
+      question: 'Suppose we define the genre by intent rather than by effect — the author meant to teach Christian morals. Which paragraphs of your essay survive that change, and which collapse?',
+      whyThisProbe: 'The essay never states which of its two possible criteria — what the book intends, or what its plot rewards — it is grading against, and the whole argument swings on that choice.',
+      keyPoints: [
+        'Intent and effect are separate criteria and the essay uses evidence for both.',
+        'Under an intent criterion the narrator’s constant moralising is evidence FOR the genre, not against it.',
+        'A defensible answer picks one criterion and accepts what it costs.',
+      ],
+      ownedLooksLike: 'Separates the two criteria and traces which evidence belongs to which.',
+      surfaceLooksLike: 'Repeats that the book fails because the characters are rewarded with money.',
+    },
+    {
+      dimensionId: 'evidence',
+      kind: 'method',
+      quote: 'The moral lesson that we see here is, endure poverty, be good to those around you, and God will reward you with vast material riches.',
+      question: 'This is your reading of what the plot teaches, not something the text states. What in the novel would have to be different for this reading to be wrong?',
+      whyThisProbe: 'The sentence is the essay’s central piece of evidence and it is an inference from plot outcomes. An inference the writer cannot falsify is a paraphrase of their own thesis.',
+      keyPoints: [
+        'The claim is inferred from who ends up rewarded, not from any stated moral.',
+        'A rival reading — reward as narrative convention rather than as moral teaching — fits the same events.',
+        'Naming what would falsify it is what separates a reading from a restatement.',
+      ],
+      ownedLooksLike: 'Offers a concrete alternative reading of the same endings and says why theirs is better.',
+      surfaceLooksLike: 'Cites more examples of characters being rewarded.',
+    },
+    {
+      dimensionId: 'objection',
+      kind: 'blindspot',
+      quote: 'This is not to say, however, that The Vicar of Wakefield is completely devoid of morals.',
+      question: 'This concession is the strongest objection to your own thesis. Why does it not sink the argument — and where in the essay do you answer it?',
+      whyThisProbe: 'The writer raises the objection and then moves on. A concession that is never answered is a hole the marker will walk straight into.',
+      keyPoints: [
+        'The concession admits the book teaches morals, which is most of what the thesis denies.',
+        'The essay’s available reply is that the morals changed rather than disappeared.',
+        'That reply narrows the thesis from "failed" to "different", and the essay never makes that move explicit.',
+      ],
+      ownedLooksLike: 'Sees that the concession forces the thesis to narrow, and states the narrower thesis.',
+      surfaceLooksLike: 'Says the concession is only a small point.',
+    },
+  ],
+  fragilities: [
+    {
+      quote: 'in the sense that I will be using it',
+      note: 'The hinge of the essay. Everything the paper proves is proved about the writer’s own definition, and nothing in the paper defends choosing it.',
+    },
+    {
+      quote: 'It is clear that',
+      note: 'Used to open the conclusion. "It is clear that" is where a writer asserts what the argument was supposed to have shown.',
     },
   ],
 };

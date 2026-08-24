@@ -13,7 +13,7 @@ import {
   antepartumSample, contraceptionSample, motorOilSample, plantCompetitionSample,
 } from './defs-a';
 import {
-  gamblingSample, graphSample, planckSample, tuberculosisSample,
+  gamblingSample, graphSample, planckSample, tuberculosisSample, vicarSample,
 } from './defs-b';
 
 export type { SampleDef } from './kit';
@@ -31,6 +31,7 @@ export type { SampleDef } from './kit';
 export const SAMPLES: SampleDef[] = [
   antepartumSample, graphSample, tuberculosisSample, gamblingSample,
   contraceptionSample, motorOilSample, planckSample, plantCompetitionSample,
+  vicarSample,
 ];
 
 /** The one cold-start sample is deliberately Marcus-shaped and localized. */
