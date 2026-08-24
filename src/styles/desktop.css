@@ -1,0 +1,93 @@
+/**
+ * Desktop tier.
+ *
+ * Why this file exists: before it, every media query in the product was
+ * `max-width`. There was not one `min-width` rule in tokens/base/type/v4/v5.
+ * That is not a styling detail — it means the desktop screen was never
+ * designed, only inherited: a phone column parked in the middle of a 1440px
+ * viewport, with the leftover height dumped into `minmax(260px, 1fr)` so the
+ * first screen showed two dead vertical gaps of ~280px and ~240px and roughly
+ * 18% of the viewport carrying any ink at all (measured with elementFromPoint
+ * sampling at 1440x900; the same page measures 40% at 390x844).
+ *
+ * Everything here is additive and scoped to >=1024px. Phone and tablet render
+ * exactly as before.
+ */
+
+@media (min-width: 1024px) {
+  :root {
+    /* The reading column was tuned for a phone. On a laptop it leaves the
+       measure right but the page starved. */
+    --col-read: 860px;
+  }
+
+  /* ---- Welcome: two columns, not one column with holes -------------------
+     The four children (top / copy / demo / actions) were stacked in a single
+     680px column. Side by side, the passage sits at eye level next to the
+     promise instead of floating alone below it. */
+  .welcome-v5 {
+    width: min(100%, 1200px);
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+    grid-template-rows: auto auto auto;
+    grid-template-areas:
+      "top  top"
+      "copy demo"
+      "acts demo";
+    align-content: center;
+    column-gap: clamp(44px, 5vw, 80px);
+    row-gap: 26px;
+  }
+  .welcome-v5-top { grid-area: top; }
+  .welcome-v5-copy { grid-area: copy; align-self: start; padding-top: 0; }
+  .welcome-live-demo { grid-area: demo; align-self: center; align-content: center; padding: 0; }
+  .welcome-v5-actions { grid-area: acts; align-self: start; max-width: 460px; }
+
+  /* Display type earns its name at this width. */
+  .welcome-v5-copy h1 { max-width: 15ch; font-size: clamp(2.5rem, 3.4vw, 3.3rem); }
+  .welcome-v5-copy[data-phase="question"] h1 { max-width: 20ch; font-size: clamp(1.9rem, 2.3vw, 2.25rem); }
+  :lang(zh-CN) .welcome-v5-copy[data-phase="question"] h1 { font-size: 2rem; }
+  .welcome-v5-copy p { max-width: 34ch; margin-top: 18px; font-size: 1rem; }
+
+  /* The excerpt is the proof the product works. Let it read like one. */
+  .welcome-passage { padding: 30px 30px 28px 46px; }
+  .welcome-passage p { font-size: 1.0625rem; line-height: 1.72; }
+  .welcome-question-note { right: -14px; bottom: -12px; }
+
+  /* ---- Tab screens: keep the measure, lose the starved feeling ---------- */
+  .today-opening h1 { max-width: 16ch; font-size: clamp(2.1rem, 2.7vw, 2.75rem); }
+  .today-opening p { max-width: 46ch; font-size: 1rem; }
+  .bring-v5-opening h1,
+  .return-surface-opening h1 { font-size: clamp(2.1rem, 2.7vw, 2.7rem); }
+
+  /* Today's secondary cards read as one row instead of a lonely stack. */
+  .today-v5 .today-kept .kept-question,
+  .today-v5 .held-memory { min-height: 84px; }
+
+  /* An empty state on a 900px-tall desktop page was 6% ink and looked broken.
+     Centre it in the space it actually owns so it reads as "nothing due",
+     not as "nothing loaded". */
+  .followups-v5 .empty,
+  .work-v5 .empty,
+  .you-v5 .empty,
+  .today-v5 .empty {
+    min-height: min(44vh, 400px);
+    display: grid;
+    align-content: center;
+  }
+}
+
+/* Very wide screens: stop the column drifting away from the eye. */
+@media (min-width: 1600px) {
+  .welcome-v5 { width: min(100%, 1320px); }
+}
+
+/* The two next steps under the closing card. Quiet on purpose: they must be
+   findable without competing with "put it down for now", which is still the
+   healthy default answer after a run-through. */
+.ending-next { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.ending-next button {
+  width: auto; min-height: 40px; margin-top: 0; padding: 0 14px; gap: 7px;
+  border: 1.5px solid var(--ink); border-radius: 14px;
+  color: var(--ink); background: transparent; font-size: .8125rem; font-weight: 720;
+}
+.ending-next button:hover { background: color-mix(in srgb, var(--ink) 8%, transparent); }

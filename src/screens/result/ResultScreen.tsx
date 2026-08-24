@@ -253,6 +253,20 @@ export default function ResultScreen() {
         <h2>{t('v5.doneTitle')}</h2>
         <p>{t('v5.doneBody')}</p>
         <button type="button" onClick={() => nav('today')}>{t('v5.doneAction')}<ArrowRight size={18} /></button>
+        {/*
+          The keyless first run lands here after exactly one question, and this
+          block used to end the product: one button, back to an almost empty
+          Today. The moment a person has just felt the thing work is the worst
+          possible moment to offer them nothing to do next, so the two real
+          next steps live here — bring your own piece, or keep the question
+          that did not hold and meet it again.
+        */}
+        <div className="ending-next">
+          <button type="button" onClick={() => nav('bring')}>{t('v5.doneBring')}<ArrowRight size={16} /></button>
+          {scheduled > 0 && (
+            <button type="button" onClick={() => nav('followups')}>{t('v5.doneFollowups')}<ArrowRight size={16} /></button>
+          )}
+        </div>
       </section>
     </div>
   );
