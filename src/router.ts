@@ -43,6 +43,14 @@ const PATTERNS: Pattern[] = [
   { name: 'reteach',      segments: ['class', ':cohortId', 'reteach'] },
   { name: 'studentSheet', segments: ['class', ':cohortId', 's', ':submissionId'] },
   { name: 'settings',     segments: ['settings'] },
+  /**
+   * Alias, deliberately last. `today` is canonically `#/` (href() returns the
+   * first pattern matching a name, so links stay `#/`), but `#/today` is the
+   * URL a human types, bookmarks and pastes — the tab is literally labelled
+   * 今天/Today. Before this line it fell through to `notfound`, so the app's
+   * own main tab was a dead 404 when reached by URL. parseHash accepts both.
+   */
+  { name: 'today',        segments: ['today'] },
 ];
 
 export function parseHash(hash: string): Route {

@@ -90,6 +90,8 @@ registerStrings('v5', {
     doneTitle: 'That is enough for this run-through.',
     doneBody: 'You do not need to organise a report or keep drilling. I will remember the next question.',
     doneAction: 'Put it down for now',
+    doneBring: 'Bring a piece of my own',
+    doneFollowups: 'Meet the kept question again',
     detailsTitle: 'Everything from this run-through',
   },
   'zh-CN': {
@@ -181,6 +183,8 @@ registerStrings('v5', {
     doneTitle: '这一遍到这里就够了。',
     doneBody: '不用整理报告，也不用继续刷。我会替你记着下一问。',
     doneAction: '好，先放下',
+    doneBring: '带一份我自己的来',
+    doneFollowups: '去见那句留下的问',
     detailsTitle: '这一遍的全部内容',
   },
 });
