@@ -95,9 +95,49 @@ function SpecimenBlock({ d, flat }: { d: HomeData; flat?: boolean }) {
   );
 }
 
-/* ── 01 · Duolingo — the path ─────────────────────────────────────────────
-   A vertical journey. Every piece of work is a stop on it; the next thing to
-   do is the widest stop and everything else is smaller. No cards, no sections. */
+/* ── 02 · GoodNotes — read it back before you ask ─────────────────────────
+   GoodNotes shows you what it recognised and hands you a pencil before it acts
+   on it (Confirm Math Recognition). Our anchor picking is a black box: when it
+   lands on the wrong line the student reads it as "this product is stupid" or
+   "I am stupid", never as "it misread me". So this home leads with the read-back:
+   here are the places I think do not hold, is that right? */
+function ConfirmHome({ d }: { d: HomeData }) {
+  const piece = d.lead ?? pieces(d)[0];
+  const spots = piece?.probes.slice(0, 6) ?? [];
+  return (
+    <div className="s-confirm">
+      <h1 className="s-confirm-title">
+        {piece
+          ? (zh(d) ? `我读到这份作业里有 ${piece.probes.length} 个地方站不住。` : `I read ${piece.probes.length} places in this that may not hold.`)
+          : (zh(d) ? '先交一份，我读一遍再问你。' : 'Bring something; I read it before I ask.')}
+      </h1>
+      {piece && <p className="s-confirm-sub">{zh(d) ? '不对的地方现在就改掉——问题是照着这些生成的。' : 'Fix anything wrong now — the questions are built from these.'}</p>}
+      {spots.map((probe, i) => (
+        <div className="s-confirm-row" key={probe.id}>
+          <span className="s-confirm-num">{i + 1}</span>
+          <div className="s-confirm-body">
+            <blockquote>“{probe.anchor.quote.slice(0, 110)}”</blockquote>
+            <small>{probe.whyThisProbe.slice(0, 80)}</small>
+            <div className="s-confirm-actions">
+              <button type="button" onClick={() => d.openPiece(piece)}>{zh(d) ? '✓ 是这句' : '✓ That is the line'}</button>
+              <button type="button" className="is-quiet" onClick={() => d.openPiece(piece)}>{zh(d) ? '✗ 不是，换一句' : '✗ Wrong line'}</button>
+            </div>
+          </div>
+        </div>
+      ))}
+      {piece && (
+        <button className="s-confirm-go" type="button" onClick={() => d.openPiece(piece)}>
+          {zh(d) ? `确认这 ${spots.length} 处，开始问` : `Confirm these ${spots.length} and begin`}<ArrowRight size={18} aria-hidden />
+        </button>
+      )}
+      {!piece && <BringLine d={d} />}
+      {d.first && <SpecimenBlock d={d} />}
+    </div>
+  );
+}
+
+/* Kept from round one and no longer used by any scheme; the path shape lost to
+   the gate shape, which carries a real occasion instead of an abstract journey. */
 function PathHome({ d }: { d: HomeData }) {
   const stops = [d.lead, ...pieces(d).filter((s) => s.id !== d.lead?.id)].filter(Boolean) as Session[];
   return (
@@ -236,6 +276,17 @@ function ReaderHome({ d }: { d: HomeData }) {
                 : []}
             />
           </div>
+          {/* GoodNotes puts topic chips above the suggested questions so you pick a
+              face before you meet a question (P3). Ours are the places in this
+              piece that did not hold — which doubles as showing the diagnosis. */}
+          <div className="s-reader-chips">
+            <span>{zh(d) ? '这份作业里被盯上的地方' : 'What this piece got probed on'}</span>
+            {piece.probes.slice(0, 4).map((probe) => (
+              <button key={probe.id} type="button" onClick={() => d.openPiece(piece)}>
+                {probe.anchor.quote.slice(0, 12) || (zh(d) ? '一处' : 'a spot')}
+              </button>
+            ))}
+          </div>
           <button className="s-reader-play" type="button" onClick={() => d.openPiece(piece)}>
             {d.unfinished ? (zh(d) ? '接着过' : 'Continue') : (zh(d) ? '过一遍' : 'Run it')}<ArrowRight size={18} aria-hidden />
           </button>
@@ -252,9 +303,73 @@ function ReaderHome({ d }: { d: HomeData }) {
   );
 }
 
-/* ── 06 · Structured — the spine ──────────────────────────────────────────
-   A date strip and a vertical timeline. This product already has real dates —
-   組會 8/31, 答辯 9/12, and 1/3/7-day returns — so the timeline is not decor. */
+/* ── 06 · Busuu + Structured — the gate ───────────────────────────────────
+   Busuu marks one node on the path as a Checkpoint: "test your skills to access
+   the next chapter". Ours does not need inventing — 組會 8/31 and 答辯 9/12 are
+   already in the store as occasion + occasionAt, and they are the only dates a
+   student actually fears. So the real occasion becomes the gate, and every run
+   above it knows which room it is preparing for. The gate is never locked; we
+   are suggesting an order, not withholding content. */
+function GatesHome({ d }: { d: HomeData }) {
+  const list = pieces(d);
+  const gates = list.filter((s) => s.occasionAt).sort((a, b) => (a.occasionAt! - b.occasionAt!));
+  const days = (at: number) => Math.max(0, Math.ceil((at - Date.now()) / 86_400_000));
+  return (
+    <div className="s-gates">
+      <h1 className="s-gates-title">{zh(d) ? '你在为哪一场准备' : 'What you are preparing for'}</h1>
+      {/* No date yet: still draw the path, and draw the gate as an empty door.
+          A path with no end is the honest picture of this state, and the empty
+          door is where the student writes the date that gives it one. */}
+      {gates.length === 0 && list.map((piece) => (
+        <div className="s-gate" key={piece.id}>
+          <div className="s-gate-runs">
+            {piece.probes.slice(0, 4).map((probe, i) => (
+              <button key={probe.id} type="button" className="s-gate-step" data-done={Boolean(probe.committedAt)} onClick={() => d.openPiece(piece)}>
+                <i aria-hidden />{zh(d) ? `第 ${i + 1} 问` : `Q${i + 1}`}
+              </button>
+            ))}
+          </div>
+          <button className="s-gate-door is-empty" type="button" onClick={d.openBring}>
+            <span className="s-gate-when">{piece.title}</span>
+            <strong>{zh(d) ? '还没有定下场次' : 'No occasion yet'}</strong>
+            <small>{zh(d) ? '写上「组会 8/31」这样的日期，这条路就有终点了。' : 'Give it a date and this path gets an end.'}</small>
+          </button>
+        </div>
+      ))}
+      {gates.length === 0 && list.length === 0 && (
+        <p className="s-gates-empty">
+          {zh(d) ? '还没有作业。交一份，写上它要面对的那一场。' : 'Nothing here yet. Bring a piece and name the room it is for.'}
+        </p>
+      )}
+      {gates.map((gate) => {
+        const shaky = gate.probes.filter((p) => p.selfGrade && p.selfGrade !== 'owned').length;
+        return (
+          <div className="s-gate" key={gate.id}>
+            <div className="s-gate-runs">
+              {gate.probes.slice(0, 4).map((probe, i) => (
+                <button key={probe.id} type="button" className="s-gate-step" data-done={Boolean(probe.committedAt)} onClick={() => d.openPiece(gate)}>
+                  <i aria-hidden />{zh(d) ? `第 ${i + 1} 问` : `Q${i + 1}`}
+                </button>
+              ))}
+            </div>
+            <button className="s-gate-door" type="button" onClick={() => d.openPiece(gate)}>
+              <span className="s-gate-when">{d.occasionText(gate.occasion)} · {d.formatDate(gate.occasionAt!)}</span>
+              <strong>{zh(d) ? `还有 ${days(gate.occasionAt!)} 天` : `${days(gate.occasionAt!)} days away`}</strong>
+              <small>{shaky > 0
+                ? (zh(d) ? `按现在的状态，你有 ${shaky} 句会被问穿` : `${shaky} of your lines would not survive today`)
+                : (zh(d) ? '还没过过一遍，先跑一次看看' : 'Nothing run yet — take one pass')}</small>
+            </button>
+          </div>
+        );
+      })}
+      <DueLine d={d} />
+      <BringLine d={d} />
+      {d.first && <SpecimenBlock d={d} />}
+    </div>
+  );
+}
+
+/* Kept from round one: the plain timeline, without gates. */
 function TimelineHome({ d }: { d: HomeData }) {
   const now = new Date();
   const days = Array.from({ length: 7 }, (_, i) => new Date(now.getFullYear(), now.getMonth(), now.getDate() + i - 2));
@@ -298,9 +413,54 @@ function TimelineHome({ d }: { d: HomeData }) {
   );
 }
 
-/* ── 07 · Blinkist — the daily ────────────────────────────────────────────
-   One hero for today plus a day grid. Blinkist's DAY 1…12 strip is a record of
-   showing up; here it records the days something actually held. */
+/* ── 07 · Elevate + Readwise — today's closed set ─────────────────────────
+   Elevate's home is a list of today's items with a tag and a tick; Readwise's
+   is one Daily Review card that names how many are in it. Both close: you can
+   finish them. Our Today is a set of entrances (bring / follow-ups / samples),
+   which never closes, so there is no moment of being done. This one closes —
+   and when it does, it deliberately offers nothing else to do. */
+function SetHome({ d }: { d: HomeData }) {
+  const list = pieces(d);
+  const items = list.flatMap((s) => s.probes.map((p) => ({ s, p }))).slice(0, 5);
+  const done = items.filter((it) => it.p.committedAt).length;
+  const heldSaid = items.filter((it) => it.p.selfGrade === 'owned').length;
+  const heldReal = items.filter((it) => (it.p.ai?.score ?? it.p.manualScore ?? -1) >= 2).length;
+  const finished = items.length > 0 && done === items.length;
+  return (
+    <div className="s-set">
+      {finished ? (
+        <div className="s-set-done">
+          <h1>{zh(d) ? '今天做完了。' : 'Done for today.'}</h1>
+          <div className="s-set-score">
+            <span><strong>{heldSaid}</strong><small>{zh(d) ? '你说站住了' : 'you said held'}</small></span>
+            <span><strong>{heldReal}</strong><small>{zh(d) ? '其中真的站住' : 'actually held'}</small></span>
+          </div>
+          <p>{zh(d) ? '这两个数之差，就是明天要谈的东西。明天见。' : 'The gap between those two is tomorrow’s conversation. See you then.'}</p>
+        </div>
+      ) : (
+        <>
+          <h1 className="s-set-title">{items.length ? (zh(d) ? `今天 ${items.length} 问` : `${items.length} questions today`) : (zh(d) ? '今天还没有题' : 'Nothing queued today')}</h1>
+          <p className="s-set-sub">{items.length ? (zh(d) ? `大约 ${Math.max(2, Math.ceil(items.length * 1.6))} 分钟 · 做完就结束` : `About ${Math.max(2, Math.ceil(items.length * 1.6))} min · then you are done`) : (zh(d) ? '带一份作业来，明天这里就有五问。' : 'Bring a piece and this fills up.')}</p>
+          {items.map((it, i) => (
+            <button className="s-set-row" key={it.p.id} data-done={Boolean(it.p.committedAt)} type="button" onClick={() => d.openPiece(it.s)}>
+              <span className="s-set-tick" aria-hidden>{it.p.committedAt ? <Check size={15} /> : i + 1}</span>
+              <span className="s-set-body">
+                <strong>{it.p.anchor.quote.slice(0, 34) || it.s.title}</strong>
+                <small>{it.s.title}</small>
+              </span>
+              <em>{packShort(it.s.packId as never, d.lang)}</em>
+            </button>
+          ))}
+          {items.length === 0 && <BringLine d={d} />}
+          <DueLine d={d} />
+        </>
+      )}
+      {d.first && <SpecimenBlock d={d} />}
+    </div>
+  );
+}
+
+/* Kept from round one: Blinkist's daily hero plus a DAY 1…12 grid. */
 function DailyHome({ d }: { d: HomeData }) {
   const s = d.specimen;
   const hero = d.lead ?? pieces(d)[0];
@@ -393,6 +553,46 @@ const TILES: Array<{ id: string; en: string; zh: string }> = [
   { id: 'review', en: 'Code review', zh: '代码 review' },
   { id: 'exam', en: 'Exam', zh: '考试' },
 ];
+/* ── 03 · Babbel — pick how you want to be examined ───────────────────────
+   Babbel asks "How would you like to review?" and offers Listening / Speaking /
+   Flashcards / Writing before it starts. Two things come out of that: the user
+   owns the difficulty, and speaking is presented as a first-class mode rather
+   than a microphone tucked into a text field. A student the night before a lab
+   meeting and a student a week before a defence want different intensities;
+   asking is cheaper than guessing. */
+function SpokenHome({ d }: { d: HomeData }) {
+  const hero = d.lead ?? pieces(d)[0];
+  const modes: Array<{ id: string; zh: string; en: string; subZh: string; subEn: string }> = [
+    { id: 'speak', zh: '说出来', en: 'Say it out loud', subZh: '像组会那样，不给你改口的机会', subEn: 'Like the room. No second take.' },
+    { id: 'type', zh: '打字', en: 'Type it', subZh: '慢慢想，想清楚再交', subEn: 'Take your time.' },
+    { id: 'look', zh: '只看不答', en: 'Just look', subZh: '先熟悉会被问什么', subEn: 'See what would be asked.' },
+  ];
+  return (
+    <div className="s-spoken">
+      <h1 className="s-spoken-title">{zh(d) ? '这次想怎么被考？' : 'How do you want to be examined?'}</h1>
+      <div className="s-spoken-modes">
+        {modes.map((m) => (
+          <button key={m.id} className="s-spoken-mode" data-mode={m.id} type="button" onClick={hero ? () => d.openPiece(hero) : d.openPicker}>
+            <span className="s-spoken-glyph" aria-hidden />
+            <strong>{zh(d) ? m.zh : m.en}</strong>
+            <small>{zh(d) ? m.subZh : m.subEn}</small>
+          </button>
+        ))}
+      </div>
+      {hero && (
+        <button className="s-spoken-piece" type="button" onClick={() => d.openPiece(hero)}>
+          <span><strong>{hero.title}</strong><small>{d.occasionText(hero.occasion)} · {hero.probes.length} {zh(d) ? '问' : 'questions'}</small></span>
+          <ArrowRight size={18} aria-hidden />
+        </button>
+      )}
+      <DueLine d={d} />
+      <BringLine d={d} />
+      {d.first && <SpecimenBlock d={d} />}
+    </div>
+  );
+}
+
+/* Kept from round one. */
 function TilesHome({ d }: { d: HomeData }) {
   const hero = d.lead ?? pieces(d)[0];
   return (
@@ -435,6 +635,45 @@ function TilesHome({ d }: { d: HomeData }) {
 /* ── 10 · Brilliant — the panel ───────────────────────────────────────────
    Rows that read like a course: a panel, then a tutor line underneath saying
    what it will ask you. The voice of the examiner is present on home. */
+/* ── 04 · Khan + Elevate — the honest bar ─────────────────────────────────
+   Measured: our "这题我会卡住" is 78×19px next to a 52×52 submit. Khan ships
+   [Skip 44×40] beside [Check 130×40]; Elevate ships [Skip][Submit] at equal
+   width. Two independent products, 650k ratings between them, both put the
+   escape beside the commit. Ours tells the student, in pixels, that inventing
+   an answer is easier than admitting they are stuck — and an invented answer
+   destroys the only thing this product sells. This home carries the same bar
+   so the muscle memory starts before the run does. */
+function HonestHome({ d }: { d: HomeData }) {
+  const list = pieces(d);
+  const open = list.reduce((n, s) => n + s.probes.filter((p) => !p.committedAt).length, 0);
+  const lead = d.lead ?? list[0];
+  return (
+    <div className="s-honest-home">
+      <h1 className="s-honest-h1">{zh(d) ? '你已经写好的东西，先被读一遍。' : 'Something you already wrote, read back to you.'}</h1>
+      <p className="s-honest-lead">
+        {zh(d)
+          ? '这里没有分数。唯一重要的是：你说站得住的那几句，是不是真的站得住。'
+          : 'No score here. The only thing that matters is whether the lines you claim actually hold.'}
+      </p>
+      {list.map((s) => (
+        <button className="s-honest-row" key={s.id} type="button" onClick={() => d.openPiece(s)}>
+          <span><strong>{s.title}</strong><small>{d.occasionText(s.occasion)} · {s.probes.filter((p) => !p.committedAt).length} {zh(d) ? '问没答' : 'unanswered'}</small></span>
+          <ArrowRight size={17} aria-hidden />
+        </button>
+      ))}
+      {list.length === 0 && <SpecimenBlock d={d} />}
+      <div className="s-honest-bar">
+        <button type="button" className="s-honest-stuck" onClick={d.openPicker}>{zh(d) ? '先看看别人的' : 'Show me one first'}</button>
+        <span className="s-honest-count">{open > 0 ? (zh(d) ? `还剩 ${open} 问` : `${open} left`) : (zh(d) ? '还没有题' : 'nothing queued')}</span>
+        <button type="button" className="s-honest-go" onClick={lead ? () => d.openPiece(lead) : d.openBring}>
+          {lead ? (zh(d) ? '接着答' : 'Continue') : (zh(d) ? '交一份' : 'Bring one')}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/* Kept from round one. */
 function PanelHome({ d }: { d: HomeData }) {
   return (
     <div className="s-panel">
@@ -467,11 +706,17 @@ function PanelHome({ d }: { d: HomeData }) {
 }
 
 const HOMES: Record<HomeShape, (props: { d: HomeData }) => JSX.Element> = {
-  path: PathHome, deck: DeckHome, table: TableHome, scan: ScanHome, reader: ReaderHome,
-  timeline: TimelineHome, daily: DailyHome, outline: OutlineHome, tiles: TilesHome, panel: PanelHome,
+  reader: ReaderHome, confirm: ConfirmHome, spoken: SpokenHome, honest: HonestHome,
+  table: TableHome, gates: GatesHome, set: SetHome, scan: ScanHome,
+  outline: OutlineHome, deck: DeckHome,
 };
 
+/* Round-one shapes that no scheme selects any more. Kept compiled rather than
+   deleted: they are the alternatives this round rejected, and the gallery links
+   to them from the design note so a decision can be re-examined. */
+export const RETIRED_HOMES = { path: PathHome, timeline: TimelineHome, daily: DailyHome, tiles: TilesHome, panel: PanelHome };
+
 export function HomeLayout({ shape, data }: { shape: HomeShape; data: HomeData }) {
-  const View = HOMES[shape] ?? PathHome;
+  const View = HOMES[shape] ?? ReaderHome;
   return <View d={data} />;
 }

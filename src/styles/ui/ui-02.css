@@ -1,19 +1,13 @@
-/* ── 02 · The Card — after Quizlet (1,104,312 ratings) ────────────────────
-   What was taken: indigo on a near-white page, one white card lifted off it,
-   and chrome reduced to close · count · title. The card is the product, so it
-   gets the shadow and everything else gets none. */
+/* ── 02 · 我读到的是这句 — GoodNotes 443,855 ──────────────────────────────
+   同一家，但取的是它「确认识别结果」那一屏的语言：白底、淡蓝确认卡 #E7FAFE、
+   紫色批注 #E3D4F5、深蓝 #284C7E。圆角 8px、动效 130/200ms：这是一屏要求
+   你逐条核对的界面，形式必须克制到不干扰阅读。 */
 html[data-ui="02"] {
-  --app: #F6F7FB; --app-2: #EDEFFF; --sheet: #FFFFFF; --hairline: #D9DDE8;
-  --ink: #282E3E; --ink-2: #4A5064; --ink-3: #5C6280;
-  --accent: #4255FF; --accent-text: #3244D8; --accent-wash: #E5E8FF;
-  --warm-signal: #4255FF; --on-warm: #FFFFFF;
-  --primary-button-bg: #4255FF; --primary-button-ink: #FFFFFF;
-  --s-radius: 12px;
+  --app: #FBFCFE; --app-2: #EDF5F8; --sheet: #FFFFFF; --hairline: #DAE3EA;
+  --ink: #16202C; --ink-2: #41505F; --ink-3: #566779;
+  --accent: #3562A3; --accent-text: #1F4B87; --accent-wash: #E7FAFE;
+  --warm-signal: #E3D4F5; --on-warm: #2A1B45;
+  --primary-button-bg: #1F4B87; --primary-button-ink: #FFFFFF;
 }
-html[data-ui="02"] h1, html[data-ui="02"] h2 { font-family: var(--font-display); font-weight: 700; letter-spacing: -.02em; }
-html[data-ui="02"] .s-topbar { border-bottom: 0; box-shadow: 0 1px 0 var(--hairline); }
-html[data-ui="02"] .s-card-face { box-shadow: 0 2px 0 var(--hairline), 0 12px 30px -18px rgba(40, 46, 62, .5); }
-html[data-ui="02"] .s-deck-tile { box-shadow: 0 2px 0 var(--hairline); }
-html[data-ui="02"] .s-deck-tile:hover { border-color: var(--accent); }
-html[data-ui="02"] .s-deck-count { background: var(--accent-wash); color: var(--accent-text); }
-html[data-ui="02"] .s-logo-word strong { color: var(--accent-text); }
+html[data-ui="02"] h1, html[data-ui="02"] h2 { font-family: var(--font-ui); font-weight: 650; letter-spacing: -.02em; }
+html[data-ui="02"] .s-confirm-body blockquote { background: var(--accent-wash); padding: 10px 12px; border-radius: 6px; }

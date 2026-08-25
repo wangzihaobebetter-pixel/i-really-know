@@ -66,7 +66,7 @@
 .reading-v6-count {
   flex: none; padding: 4px 10px; border-radius: var(--r-pill);
   color: var(--on-warm); background: var(--warm-signal);
-  font-size: .6875rem; font-weight: 760; font-variant-numeric: tabular-nums;
+  font-size: 0.75rem; font-weight: 600; font-variant-numeric: tabular-nums;
   animation: v6-count-in 420ms var(--spring) both;
 }
 @keyframes v6-count-in {
@@ -291,9 +291,9 @@
 .sample-option-top em {
   padding: 3px 9px; border-radius: var(--r-pill);
   color: var(--ink); background: var(--accent-wash);
-  font-size: .6875rem; font-style: normal; font-weight: 740; letter-spacing: .01em;
+  font-size: 0.75rem; font-style: normal; font-weight: 600; letter-spacing: .01em;
 }
-.sample-option-top small { color: var(--ink-3); font-size: .6875rem; }
+.sample-option-top small { color: var(--ink-3); font-size: 0.75rem; }
 .sample-option > strong { font-size: .9375rem; font-weight: 700; line-height: 1.3; }
 .sample-option > small { color: var(--ink-3); font-size: .75rem; line-height: 1.5; }
 
@@ -490,9 +490,9 @@
 .specimen-head em {
   padding: 3px 9px; border-radius: var(--r-pill);
   color: var(--ink); background: var(--accent-wash);
-  font-size: .6875rem; font-style: normal; font-weight: 740;
+  font-size: 0.75rem; font-style: normal; font-weight: 600;
 }
-.specimen-head small { color: var(--ink-3); font-size: .6875rem; }
+.specimen-head small { color: var(--ink-3); font-size: 0.75rem; }
 
 /* The page. Clipped with a fade so it reads as a window onto something longer
    rather than as a truncated paragraph. */
@@ -578,7 +578,7 @@
   border: 1px dashed var(--hairline); border-radius: 14px;
   background: var(--app-2);
 }
-.work-preview figcaption { color: var(--ink-3); font-size: .6875rem; letter-spacing: .01em; }
+.work-preview figcaption { color: var(--ink-3); font-size: 0.75rem; letter-spacing: .01em; }
 .work-preview-page {
   max-height: 132px; overflow: hidden;
   padding-left: 12px; border-left: 3px solid var(--hairline);
@@ -596,7 +596,7 @@
 /* --ink-3 on --app-2 is 4.08:1 — the dashed box is darker than the page, so
    the tertiary ink that passes on --app does not pass here. Caught by walking
    both themes on every screen this round changed. */
-.work-preview > small { color: var(--ink-2); font-size: .6875rem; }
+.work-preview > small { color: var(--ink-2); font-size: 0.75rem; }
 .work-preview figcaption { color: var(--ink-2); }
 
 /* The shelf card gets the same treatment as everything else that holds work. */
@@ -630,7 +630,7 @@
   box-shadow: var(--lift-2);
 }
 .voice-bank-scroll blockquote > span { font-size: 1rem; line-height: 1.5; }
-.voice-bank-scroll blockquote cite { font-size: .6875rem; opacity: .85; }
+.voice-bank-scroll blockquote cite { font-size: 0.75rem; opacity: .85; }
 
 /* The read on yourself: one line and a rule, under the words rather than
    beside them. Still present, still honest, no longer the hero. */
@@ -644,7 +644,7 @@
   font-size: .9375rem; font-weight: 640; line-height: 1.5; letter-spacing: 0;
   max-width: 34ch; color: var(--ink-2);
 }
-.read-yourself-v5 .v5-eyebrow { font-size: .625rem; }
+.read-yourself-v5 .v5-eyebrow { font-size: 0.75rem; }
 
 @media (min-width: 1024px) {
   .voice-bank-scroll blockquote { flex: 0 0 min(46%, 380px); }

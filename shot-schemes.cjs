@@ -14,8 +14,8 @@ const { writeFileSync, mkdirSync, existsSync } = require('node:fs');
 const { PNG } = require('pngjs');
 
 const CHROME = process.env.CHROME_PATH || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
-const BASE = process.env.APP_URL || 'http://127.0.0.1:4173';
-const OUT = process.env.SHOT_DIR || 'shots-v7';
+const BASE = process.env.APP_URL || 'http://127.0.0.1:4174';
+const OUT = process.env.SHOT_DIR || 'shots-v7r2';
 const IDS = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10'];
 
 const MEASURE = `(selector) => {

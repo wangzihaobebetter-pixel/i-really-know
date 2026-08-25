@@ -74,6 +74,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     el.setAttribute('data-home', scheme.home);
     el.setAttribute('data-run', scheme.run);
     el.setAttribute('data-logo', scheme.logo);
+    /* Motion and radius are per-scheme, not shared. Round one gave all ten the
+       same duration and the same 12–18px corner, so every scheme claimed a
+       character it could not demonstrate. Measured floors are in MEASURED.md. */
+    el.style.setProperty('--s-fast', `${scheme.motion.fast}ms`);
+    el.style.setProperty('--s-slow', `${scheme.motion.slow}ms`);
+    el.style.setProperty('--s-ease', scheme.motion.ease);
+    el.style.setProperty('--s-radius', `${scheme.radius}px`);
   }, [scheme]);
   const t = useT();
   const [hydrated, setHydrated] = useState(() => useStore.persist.hasHydrated());

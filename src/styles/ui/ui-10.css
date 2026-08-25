@@ -1,18 +1,13 @@
-/* ── 10 · The Tutor — after Brilliant (31,957 ratings) ────────────────────
-   What was taken: the warm-grey page with white panels, the green that only
-   ever means "correct", speech bubbles with a real tail, and the split where
-   the work sits above and the tutor talks below. */
+/* ── 10 · 卡片 — Quizlet 1,104,312 · Elevate 539,777 · Busuu 100,261 ─────
+   Quizlet 实测：hurme 16/24 600、圆角 4/8/200px、动效 .12s
+   cubic-bezier(.47,0,.745,.715)、sticky 顶栏 120px、靛蓝 #4255FF。
+   二值表态的两个按钮取 Elevate 的 ✗/✓ 语言：一个中性、一个肯定，谁也不比谁大。 */
 html[data-ui="10"] {
-  --app: #F5F3F1; --app-2: #EBE8E4; --sheet: #FFFFFF; --hairline: #DEDAD5;
-  --ink: #111111; --ink-2: #424242; --ink-3: #5B5B5B;
-  --accent: #17A24A; --accent-text: #0F7434; --accent-wash: #E1F4E7;
-  --warm-signal: #FFFFFF; --on-warm: #111111;
-  --primary-button-bg: #111111; --primary-button-ink: #FFFFFF;
-  --held: #0F7434; --held-wash: #E1F4E7;
-  --s-radius: 14px;
+  --app: #F6F7FB; --app-2: #EDEFFF; --sheet: #FFFFFF; --hairline: #D9DDE8;
+  --ink: #282E3E; --ink-2: #4A5064; --ink-3: #5C6280;
+  --accent: #4255FF; --accent-text: #3244D8; --accent-wash: #E5E8FF;
+  --warm-signal: #4255FF; --on-warm: #FFFFFF;
+  --primary-button-bg: #4255FF; --primary-button-ink: #FFFFFF;
 }
-html[data-ui="10"] h1, html[data-ui="10"] h2 { font-family: var(--font-ui); font-weight: 700; letter-spacing: -.025em; }
-html[data-ui="10"] .s-panel-row { box-shadow: 0 6px 20px -14px rgba(0, 0, 0, .35); }
-html[data-ui="10"] .s-bubble p { font-size: 1.0625rem; }
-html[data-ui="10"] .s-split-panel { box-shadow: 0 6px 20px -14px rgba(0, 0, 0, .35); }
-html[data-ui="10"] .s-logo-mark i { background: var(--accent); }
+html[data-ui="10"] h1, html[data-ui="10"] h2 { font-family: var(--font-display); font-weight: 700; letter-spacing: -.02em; }
+html[data-ui="10"] .s-card-face { box-shadow: 0 2px 0 var(--hairline), 0 12px 30px -18px rgba(40, 46, 62, .5); }

@@ -1,0 +1,387 @@
+[
+  {
+    "id": "ours-today",
+    "name": "我们 · 今天（无方案基线）",
+    "url": "http://127.0.0.1:4174/?ui=off#/",
+    "error": null,
+    "data": {
+      "title": "I Really Know · 我真会",
+      "viewport": {
+        "w": 390,
+        "h": 844
+      },
+      "docHeight": 876,
+      "type": [
+        {
+          "k": "JetBrains Mono | 13px | 400 | lh 21.06px",
+          "v": 74043
+        },
+        {
+          "k": "Nunito Variable | 32px | 750 | lh 34.56px",
+          "v": 23878
+        },
+        {
+          "k": "Inter Variable | 16px | 760 | lh 24.8px",
+          "v": 20764
+        },
+        {
+          "k": "Inter Variable | 15px | 400 | lh 23.25px",
+          "v": 16647
+        },
+        {
+          "k": "Inter Variable | 12px | 780 | lh 18.6px",
+          "v": 6657
+        },
+        {
+          "k": "Inter Variable | 11px | 760 | lh 17.05px",
+          "v": 5604
+        },
+        {
+          "k": "Inter Variable | 11px | 400 | lh 17.05px",
+          "v": 5604
+        },
+        {
+          "k": "Inter Variable | 12px | 400 | lh 18.6px",
+          "v": 2224
+        },
+        {
+          "k": "Inter Variable | 18px | 820 | lh 27.9px",
+          "v": 1454
+        }
+      ],
+      "radii": [
+        {
+          "k": "12px",
+          "v": 1
+        },
+        {
+          "k": "16px",
+          "v": 1
+        },
+        {
+          "k": "3px",
+          "v": 1
+        },
+        {
+          "k": "18px",
+          "v": 1
+        }
+      ],
+      "motion": [
+        {
+          "k": "transition 0.26s, 0.26s cubic-bezier(0.2, 0.7, 0.2, 1), cubic-bezier(0.2, 0.7, 0.2, 1)",
+          "v": 1
+        },
+        {
+          "k": "transition 0.18s cubic-bezier(0.2, 0.7, 0.2, 1)",
+          "v": 1
+        }
+      ],
+      "fixed": [],
+      "bg": [
+        {
+          "k": "rgb(255, 254, 250)",
+          "v": 149497
+        },
+        {
+          "k": "rgb(32, 32, 29)",
+          "v": 20764
+        }
+      ],
+      "targetCount": 2,
+      "targetHeight": {
+        "min": 21,
+        "median": 58,
+        "max": 58
+      },
+      "biggestTargets": [
+        {
+          "w": 358,
+          "h": 58,
+          "r": "18px",
+          "text": "找出藏在里面的难问"
+        },
+        {
+          "w": 108,
+          "h": 21,
+          "r": "0px",
+          "text": "直接带我自己的来"
+        }
+      ]
+    }
+  },
+  {
+    "id": "ours-welcome",
+    "name": "我们 · 欢迎",
+    "url": "http://127.0.0.1:4174/?ui=off#/welcome",
+    "error": null,
+    "data": {
+      "title": "I Really Know · 我真会",
+      "viewport": {
+        "w": 390,
+        "h": 844
+      },
+      "docHeight": 876,
+      "type": [
+        {
+          "k": "JetBrains Mono | 13px | 400 | lh 21.06px",
+          "v": 74043
+        },
+        {
+          "k": "Nunito Variable | 32px | 750 | lh 34.56px",
+          "v": 23878
+        },
+        {
+          "k": "Inter Variable | 16px | 760 | lh 24.8px",
+          "v": 20764
+        },
+        {
+          "k": "Inter Variable | 15px | 400 | lh 23.25px",
+          "v": 16647
+        },
+        {
+          "k": "Inter Variable | 12px | 780 | lh 18.6px",
+          "v": 6657
+        },
+        {
+          "k": "Inter Variable | 11px | 760 | lh 17.05px",
+          "v": 5604
+        },
+        {
+          "k": "Inter Variable | 11px | 400 | lh 17.05px",
+          "v": 5604
+        },
+        {
+          "k": "Inter Variable | 12px | 400 | lh 18.6px",
+          "v": 2224
+        },
+        {
+          "k": "Inter Variable | 18px | 820 | lh 27.9px",
+          "v": 1454
+        }
+      ],
+      "radii": [
+        {
+          "k": "12px",
+          "v": 1
+        },
+        {
+          "k": "16px",
+          "v": 1
+        },
+        {
+          "k": "3px",
+          "v": 1
+        },
+        {
+          "k": "18px",
+          "v": 1
+        }
+      ],
+      "motion": [
+        {
+          "k": "transition 0.26s, 0.26s cubic-bezier(0.2, 0.7, 0.2, 1), cubic-bezier(0.2, 0.7, 0.2, 1)",
+          "v": 1
+        },
+        {
+          "k": "transition 0.18s cubic-bezier(0.2, 0.7, 0.2, 1)",
+          "v": 1
+        }
+      ],
+      "fixed": [],
+      "bg": [
+        {
+          "k": "rgb(255, 254, 250)",
+          "v": 149497
+        },
+        {
+          "k": "rgb(32, 32, 29)",
+          "v": 20764
+        }
+      ],
+      "targetCount": 2,
+      "targetHeight": {
+        "min": 21,
+        "median": 58,
+        "max": 58
+      },
+      "biggestTargets": [
+        {
+          "w": 358,
+          "h": 58,
+          "r": "18px",
+          "text": "找出藏在里面的难问"
+        },
+        {
+          "w": 108,
+          "h": 21,
+          "r": "0px",
+          "text": "直接带我自己的来"
+        }
+      ]
+    }
+  },
+  {
+    "id": "ours-bring",
+    "name": "我们 · 交作业",
+    "url": "http://127.0.0.1:4174/?ui=off#/bring",
+    "error": null,
+    "data": {
+      "title": "I Really Know · 我真会",
+      "viewport": {
+        "w": 390,
+        "h": 844
+      },
+      "docHeight": 1202,
+      "type": [
+        {
+          "k": "Nunito Variable | 32px | 750 | lh 34.56px",
+          "v": 21225
+        },
+        {
+          "k": "Inter Variable | 17px | 550 | lh 17px",
+          "v": 19332
+        },
+        {
+          "k": "Inter Variable | 12px | 400 | lh 18.6px",
+          "v": 17355
+        },
+        {
+          "k": "Inter Variable | 16px | 400 | lh 24.8px",
+          "v": 17033
+        },
+        {
+          "k": "Inter Variable | 12px | 400 | lh 16.8px",
+          "v": 8029
+        },
+        {
+          "k": "Inter Variable | 15.5px | 400 | lh 25.575px",
+          "v": 7567
+        },
+        {
+          "k": "Inter Variable | 14px | 400 | lh 21px",
+          "v": 7048
+        },
+        {
+          "k": "Inter Variable | 18px | 700 | lh 27.9px",
+          "v": 6666
+        },
+        {
+          "k": "Inter Variable | 12px | 780 | lh 18.6px",
+          "v": 6657
+        },
+        {
+          "k": "Inter Variable | 12px | 720 | lh 18.6px",
+          "v": 6156
+        },
+        {
+          "k": "Inter Variable | 14px | 400 | lh 20.3px",
+          "v": 6008
+        },
+        {
+          "k": "Inter Variable | 11px | 400 | lh 17.05px",
+          "v": 5903
+        }
+      ],
+      "radii": [
+        {
+          "k": "16px",
+          "v": 9
+        },
+        {
+          "k": "15px",
+          "v": 3
+        },
+        {
+          "k": "12px",
+          "v": 1
+        },
+        {
+          "k": "999px",
+          "v": 1
+        }
+      ],
+      "motion": [
+        {
+          "k": "transition 0.12s cubic-bezier(0.2, 0.7, 0.2, 1)",
+          "v": 2
+        },
+        {
+          "k": "transition 0.12s, 0.12s cubic-bezier(0.2, 0.7, 0.2, 1), cubic-bezier(0.2, 0.7, 0.2, 1)",
+          "v": 1
+        },
+        {
+          "k": "transition 0.12s, 0.12s, 0.12s cubic-bezier(0.2, 0.7, 0.2, 1), cubic-bezier(0.2, 0.7, 0.2, 1), cubic-bezier(0.2, 0.7, 0.2, 1)",
+          "v": 1
+        }
+      ],
+      "fixed": [],
+      "bg": [
+        {
+          "k": "rgb(255, 254, 250)",
+          "v": 207090
+        },
+        {
+          "k": "rgb(240, 235, 223)",
+          "v": 38374
+        },
+        {
+          "k": "rgb(32, 32, 29)",
+          "v": 19332
+        },
+        {
+          "k": "rgb(245, 200, 75)",
+          "v": 6156
+        },
+        {
+          "k": "color(srgb 0.93851 0.947451 0.978196)",
+          "v": 2852
+        }
+      ],
+      "targetCount": 12,
+      "targetHeight": {
+        "min": 27,
+        "median": 46,
+        "max": 110
+      },
+      "biggestTargets": [
+        {
+          "w": 328,
+          "h": 110,
+          "r": "16px",
+          "text": "TXT · MD · CODE · IPYNB\n"
+        },
+        {
+          "w": 358,
+          "h": 54,
+          "r": "16px",
+          "text": "开始读"
+        },
+        {
+          "w": 114,
+          "h": 54,
+          "r": "15px",
+          "text": "5 分钟 · 4 问"
+        },
+        {
+          "w": 114,
+          "h": 54,
+          "r": "15px",
+          "text": "10 分钟 · 6 问"
+        },
+        {
+          "w": 114,
+          "h": 54,
+          "r": "15px",
+          "text": "15 分钟 · 7 问"
+        },
+        {
+          "w": 94,
+          "h": 46,
+          "r": "16px",
+          "text": "代码评审"
+        }
+      ]
+    }
+  }
+]

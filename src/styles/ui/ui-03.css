@@ -1,18 +1,18 @@
-/* ── 03 · The Interval — after Anki (2,319 ratings; the de-facto standard) ─
-   What was taken: nothing decorative. System grey chrome, a hairline under the
-   toolbar, tabular numerals, square-ish 5px corners, and the rating row whose
-   buttons name the interval. Anki's restraint is its identity, so this file is
-   deliberately the shortest of the ten. */
+/* ── 03 · 说出来 — Babbel 750,907 ─────────────────────────────────────────
+   采样自 full-babbel-*.jpg：#FE4D01（那个橙色就是它的全部）、#FFFBDB 奶油底、
+   #45C588 判定绿。Babbel 的排版是衬线大标题 + 无衬线正文。
+   动效 160/320ms 配 Headspace 式的过冲曲线——这是十个里最热情的一个。 */
 html[data-ui="03"] {
-  --app: #FFFFFF; --app-2: #F2F2F2; --sheet: #FFFFFF; --hairline: #D6D6D6;
-  --ink: #1D1D1D; --ink-2: #444444; --ink-3: #5D5D5D;
-  --accent: #2C6BED; --accent-text: #1C4FBB; --accent-wash: #E6EEFD;
-  --counter-accent: #1C4FBB;
-  --held: #14663F; --half-held: #7A4E05; --slipped: #444444;
-  --warm-signal: #F2F2F2; --on-warm: #1D1D1D;
-  --primary-button-bg: #2C6BED; --primary-button-ink: #FFFFFF;
-  --s-radius: 5px;
+  --app: #FFFBDB; --app-2: #FDEAC8; --sheet: #FFFFFF; --hairline: #EFDCBB;
+  --ink: #241206; --ink-2: #4E3524; --ink-3: #6A4B36;
+  --accent: #FE4D01; --accent-text: #C43A00; --accent-wash: #FFE3D5;
+  --accent-ink: #FFFFFF;
+  --warm-signal: #FE4D01; --on-warm: #FFFFFF;
+  --primary-button-bg: #FE4D01; --primary-button-ink: #FFFFFF;
+  --held: #1E7C4E; --held-wash: #DFF3E8;
 }
-html[data-ui="03"] body { font-family: var(--font-ui); font-size: .9375rem; }
-html[data-ui="03"] h1, html[data-ui="03"] h2 { font-family: var(--font-ui); font-weight: 600; letter-spacing: 0; }
-html[data-ui="03"] .s-specimen, html[data-ui="03"] .s-due-line, html[data-ui="03"] .s-bring-line { border-radius: 5px; }
+html[data-ui="03"] h1, html[data-ui="03"] .s-spoken-title, html[data-ui="03"] .s-bubble p {
+  font-family: Songti SC, Georgia, var(--font-display);
+}
+html[data-ui="03"] .s-spoken-title { font-weight: 500; font-size: 1.75rem; }
+html[data-ui="03"] .s-mic { box-shadow: 0 8px 24px -8px rgba(254, 77, 1, .55); }

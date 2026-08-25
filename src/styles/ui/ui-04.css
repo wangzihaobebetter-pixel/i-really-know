@@ -1,19 +1,16 @@
-/* ── 04 · The Worked Sheet — after Gauth (1,457,029) and Photomath (732,929) ─
-   What was taken: the cream page and crimson accent, the enormous dark primary
-   action that opens the app, the pill tool row under it, and the numbered
-   solution rows that expand one at a time. */
+/* ── 04 · 诚实条 — Khan Academy 110,169 · Elevate 539,777 ────────────────
+   Khan 实测：Lato 16/22、圆角 4px 为主（22 处）、动效 .125s ease、
+   导航深蓝 #0B2149、信息底 #EDF3FE。这一整套语言的关键词是克制——
+   因为这个方案的主张是「把最重要的动作做大」，其它一切都得让路。 */
 html[data-ui="04"] {
-  --app: #FFFAF0; --app-2: #F6EFE2; --sheet: #FFFFFF; --hairline: #E7DCC8;
-  --ink: #1A1A1A; --ink-2: #494037; --ink-3: #665A4B;
-  --accent: #BF0C34; --accent-text: #A00A2C; --accent-wash: #FBE3E8;
-  --accent-ink: #FFFAF0;
-  --warm-signal: #BF0C34; --on-warm: #FFFAF0;
-  --primary-button-bg: #1A1A1A; --primary-button-ink: #FFFAF0;
-  --s-radius: 14px;
+  --app: #FFFFFF; --app-2: #EDF3FE; --sheet: #FFFFFF; --hairline: #D5DEEC;
+  --ink: #191919; --ink-2: #3E4552; --ink-3: #545C6B;
+  --accent: #1865F2; --accent-text: #0B4FCC; --accent-wash: #E4EDFE;
+  --warm-signal: #EDF3FE; --on-warm: #0B2149;
+  --primary-button-bg: #0B2149; --primary-button-ink: #FFFFFF;
 }
-html[data-ui="04"] h1, html[data-ui="04"] h2 { font-family: var(--font-display); font-weight: 800; letter-spacing: -.025em; }
-html[data-ui="04"] .s-step-num { border-radius: 999px; }
-html[data-ui="04"] .s-step[data-state="current"] .s-step-num { background: var(--accent); color: var(--accent-ink); }
-html[data-ui="04"] .s-scan-primary { box-shadow: 0 10px 30px -14px rgba(26, 26, 26, .8); }
-html[data-ui="04"] .s-scan-tools button { border-color: var(--accent-wash); color: var(--accent-text); }
-html[data-ui="04"] .s-logo-mark i { background: var(--accent); }
+html[data-ui="04"] body { font-family: var(--font-ui); }
+html[data-ui="04"] h1, html[data-ui="04"] h2 { font-family: var(--font-ui); font-weight: 700; letter-spacing: -.01em; }
+/* The whole argument of this scheme, in one rule: the escape is a peer. */
+html[data-ui="04"] .s-stuck { min-height: 48px; border: 1px solid var(--ink-3); font-weight: 700; }
+html[data-ui="04"] .s-send { width: 56px; height: 56px; border-radius: 4px; }

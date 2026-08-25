@@ -1,20 +1,14 @@
-/* ── 07 · The Daily — after Blinkist (153,947 ratings) ────────────────────
-   What was taken: the mint page with a honey hero, a serif display face for
-   the one thing that matters today, the DAY 1…12 grid, and the horizontal
-   shelf of spines underneath. */
+/* ── 07 · 今日一组 — Elevate 539,777 · Readwise ──────────────────────────
+   采样自 full-elevate-*.jpg：#2BA0FF 亮蓝、#E0F6FC 浅底、#053944 深青、
+   #FD6847 珊瑚。Elevate 的今日清单是浅底 + 高饱和标签。
+   动效 150/400ms 双档、圆角 22px —— 十个里最柔软的一个，因为它讲的是「今天做完了」。 */
 html[data-ui="07"] {
-  --app: #EFF5F3; --app-2: #E1EBE7; --sheet: #FFFFFF; --hairline: #CBD9D3;
-  --ink: #033049; --ink-2: #2F5468; --ink-3: #48697A;
-  --accent: #0E9E5B; --accent-text: #0A7042; --accent-wash: #DCF0E5;
-  --warm-signal: #FDBE21; --on-warm: #033049;
-  --primary-button-bg: #033049; --primary-button-ink: #FFFFFF;
-  --held: #0A7042; --held-wash: #DCF0E5;
-  --s-radius: 12px;
+  --app: #F2FAFE; --app-2: #E0F6FC; --sheet: #FFFFFF; --hairline: #C8E4F0;
+  --ink: #05303B; --ink-2: #2A5563; --ink-3: #3D6A79;
+  --accent: #2BA0FF; --accent-text: #0A6BAF; --accent-wash: #DCF0FE;
+  --warm-signal: #FD6847; --on-warm: #FFFFFF;
+  --primary-button-bg: #053944; --primary-button-ink: #E0F6FC;
+  --held: #0B6C4B; --held-wash: #DCF2E8;
 }
-html[data-ui="07"] h1, html[data-ui="07"] h2,
-html[data-ui="07"] .s-chapter-q, html[data-ui="07"] .s-daily-hero strong {
-  font-family: Songti SC, Georgia, var(--font-display); font-weight: 500; letter-spacing: -.01em;
-}
-html[data-ui="07"] .s-daily-eyebrow, html[data-ui="07"] .s-chapter-eyebrow { color: var(--accent-text); font-weight: 700; }
-html[data-ui="07"] .s-tab[aria-current="page"] { color: var(--accent-text); }
-html[data-ui="07"] .s-daily-spine { border-left: 4px solid var(--accent); }
+html[data-ui="07"] h1, html[data-ui="07"] h2 { font-family: var(--font-display); font-weight: 750; letter-spacing: -.025em; }
+html[data-ui="07"] .s-set-score strong { color: var(--accent-text); }

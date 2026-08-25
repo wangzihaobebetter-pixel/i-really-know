@@ -1,17 +1,13 @@
-/* ── 06 · The Spine — after Structured (164,657 ratings) ──────────────────
-   What was taken: the day number set enormous over a two-letter month, the
-   hairline spine with hollow nodes, tabular times in the left gutter, and a
-   quiet indigo that never competes with the timeline itself. */
+/* ── 06 · 关卡 — Busuu 100,261 · Structured 164,657 ──────────────────────
+   采样自 full-busuu-*.jpg：#274EB3 / #2064ED / #3058ED 一族蓝，白卡，
+   #E3E7EF 分隔。Structured 贡献的是等宽数字与时间轴的比例。
+   门用 warm-signal 涂满——路上唯一一块实心色，因为它是唯一真实的截止日。 */
 html[data-ui="06"] {
-  --app: #FBFBFD; --app-2: #F0F1F6; --sheet: #FFFFFF; --hairline: #DEDFE8;
-  --ink: #1C1D26; --ink-2: #454756; --ink-3: #5D5F70;
-  --accent: #5B5BD6; --accent-text: #4442B8; --accent-wash: #E9E9FA;
-  --warm-signal: #E9E9FA; --on-warm: #26244F;
-  --primary-button-bg: #1C1D26; --primary-button-ink: #FFFFFF;
-  --s-radius: 10px;
+  --app: #FBFCFE; --app-2: #EDEFF6; --sheet: #FFFFFF; --hairline: #DCE0EA;
+  --ink: #141B2E; --ink-2: #3E4759; --ink-3: #545E73;
+  --accent: #2064ED; --accent-text: #1A4CB8; --accent-wash: #E4EBFC;
+  --warm-signal: #274EB3; --on-warm: #FFFFFF;
+  --primary-button-bg: #274EB3; --primary-button-ink: #FFFFFF;
 }
-html[data-ui="06"] body { font-family: var(--font-ui); font-variant-numeric: tabular-nums; }
-html[data-ui="06"] h1, html[data-ui="06"] h2 { font-family: var(--font-ui); font-weight: 650; letter-spacing: -.02em; }
-html[data-ui="06"] .s-time-item { border-bottom-style: dashed; }
-html[data-ui="06"] .s-time-day.is-today { background: var(--accent-text); }
-html[data-ui="06"] .s-agenda-q { font-weight: 550; }
+html[data-ui="06"] body { font-variant-numeric: tabular-nums; }
+html[data-ui="06"] h1, html[data-ui="06"] h2 { font-family: var(--font-ui); font-weight: 700; letter-spacing: -.02em; }

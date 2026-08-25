@@ -12,7 +12,7 @@ import type { Score, SelfGrade } from '../../types';
 import { activeScheme, DEFAULT_SCHEME } from '../../app/scheme';
 import { RunFrame, type RunSlots } from './presentations';
 
-type Phase = 'answering' | 'blankplan' | 'selfgrade' | 'scoring' | 'manualgrade' | 'revealed';
+type Phase = 'stance' | 'answering' | 'blankplan' | 'selfgrade' | 'scoring' | 'manualgrade' | 'revealed';
 
 export default function VivaScreen() {
   const t = useT();
@@ -62,7 +62,10 @@ export default function VivaScreen() {
     setSourceOpen(false);
     usedVoice.current = probe.answerMode === 'voice';
     startedAt.current = Date.now();
-    if (!probe.committedAt) setPhase('answering');
+    /* Scheme 10 asks for a stance before the answer opens; every other scheme
+       goes straight to answering. The stance is stored on the probe, so
+       resuming a run lands back in the right place either way. */
+    if (!probe.committedAt) setPhase(needsStance && !probe.preStance ? 'stance' : 'answering');
     else if (!probe.selfGrade) setPhase('selfgrade');
     else if (probe.ai || probe.manualScore !== undefined) setPhase('revealed');
     else setPhase('manualgrade');
@@ -127,6 +130,12 @@ export default function VivaScreen() {
     });
     setAnswer(value.trim());
     setPhase('selfgrade');
+  }
+
+  function takeStance(stance: 'holds' | 'unsure') {
+    if (!session || !probe) return;
+    updateProbe(session.id, probe.id, { preStance: stance });
+    setPhase('answering');
   }
 
   function commitAnswer() {
@@ -202,6 +211,7 @@ export default function VivaScreen() {
   const showExchange = phase === 'answering' || phase === 'blankplan' || phase === 'revealed';
 
   const scheme = React.useMemo(() => activeScheme(), []);
+  const needsStance = scheme.run === 'card';
 
   /*
    * v7. The phase bodies below are identical under every scheme — the model
@@ -227,8 +237,29 @@ export default function VivaScreen() {
         ['notmine', t('v5.selfSlipped')],
       ];
 
-  /** The six phase bodies, frame-agnostic. Every scheme renders these. */
+  /** The phase bodies, frame-agnostic. Every scheme renders these. */
   function PhaseBody() {
+    if (phase === 'stance') return (
+      <section className="s-stance">
+        <p className="s-stance-ask">
+          {lang === 'zh-CN' ? '先别打字。就这一句，你现在怎么看？' : 'Before you type. Right now, what do you think?'}
+        </p>
+        <div className="s-stance-options">
+          <button type="button" data-stance="holds" onClick={() => takeStance('holds')}>
+            {lang === 'zh-CN' ? '这句我站得住' : 'I can defend this'}
+          </button>
+          <button type="button" data-stance="unsure" onClick={() => takeStance('unsure')}>
+            {lang === 'zh-CN' ? '这句我说不清' : 'I cannot explain this'}
+          </button>
+        </div>
+        <p className="s-stance-hint">
+          {lang === 'zh-CN'
+            ? '按完再展开说。说完之后，两次表态会一起给你看。'
+            : 'You will explain after. Both of your answers get shown together at the end.'}
+        </p>
+      </section>
+    );
+
     if (phase === 'answering') return (
       <section className="s-dock">
         <div className="s-dock-row">
@@ -249,9 +280,28 @@ export default function VivaScreen() {
           <button type="button" className="s-send" onClick={commitAnswer} disabled={!answer.trim()} aria-label={t('run4.commit')}><ArrowUp size={21} /></button>
         </div>
         {voiceError && voiceError !== 'unsupported' && <p className="s-dock-error">{t('run4.voiceUnsupported')}</p>}
+        {/*
+          Measured on our own build: this escape was 78×19px next to a 52×52
+          submit — the smallest target on a screen whose entire purpose is to
+          make admitting "I can't defend this" cheaper than inventing an answer.
+          Khan ships [Skip 44×40] beside [Check 130×40]; Elevate ships
+          [Skip][Submit] at equal width. Two independent products, 650k ratings.
+          So it becomes a real button, at least 44px, sitting on the same row as
+          the count — and it is not a skip: it opens the blank-plan step, which
+          is scored, because knowing how you would find out is a real answer.
+        */}
         <div className="s-dock-meta">
-          <span>{t('v5.runSavedAfter')}</span>
-          <button type="button" onClick={() => { stopVoice(); setPhase('blankplan'); }}>{t('v5.runBlank')}</button>
+          <button type="button" className="s-stuck" onClick={() => { stopVoice(); setPhase('blankplan'); }}>
+            {t('v5.runBlank')}
+          </button>
+          <span className="s-left">{lang === 'zh-CN' ? `还剩 ${Math.max(0, total - index)} 问` : `${Math.max(0, total - index)} left`}</span>
+          {/* Scheme 04 spells the commit out in words on the same row, so the two
+              actions are literally the same size. Other schemes keep the arrow. */}
+          {scheme.run === 'honest' && (
+            <button type="button" className="s-honest-commit" onClick={commitAnswer} disabled={!answer.trim()}>
+              {lang === 'zh-CN' ? '提交' : 'Submit'}
+            </button>
+          )}
         </div>
       </section>
     );
@@ -280,11 +330,28 @@ export default function VivaScreen() {
       </section>
     );
 
+    /*
+      Chegg turns the wait into a screen with content: a three-stage line
+      (Sent → Working → Answered), one plain sentence, and two things to do
+      instead of waiting. Ours was a spinner — spent on the most anxious moment
+      in the product, the seconds right after a student has committed a claim
+      about their own work. The stages here are real: the answer is already
+      saved locally before the request leaves.
+    */
     if (phase === 'scoring') return (
       <section className="s-scoring">
+        <ol className="s-stages" aria-label={t('v5.scoring')}>
+          <li data-state="done">{lang === 'zh-CN' ? '你的原话已经存下' : 'Your words are saved'}</li>
+          <li data-state="active">{lang === 'zh-CN' ? '正在对着你的原文读一遍' : 'Reading it against your page'}</li>
+          <li data-state="later">{lang === 'zh-CN' ? '给一句判定' : 'One sentence back'}</li>
+        </ol>
         <span className="living-typing" aria-hidden><i /><i /><i /></span>
-        <Spinner label={t('v5.scoring')} />
         <blockquote className="answer-quote">“{answer}”</blockquote>
+        <p className="s-scoring-note">
+          {lang === 'zh-CN'
+            ? '不用等在这里。回到今天页，判定回来时它还在这一问。'
+            : 'You do not have to wait here. Leave and this question keeps your place.'}
+        </p>
       </section>
     );
 
@@ -311,6 +378,16 @@ export default function VivaScreen() {
           <Mark verdict={verdict} />
           <p>{oneLine}</p>
         </div>
+        {/* The whole point of asking for a stance first: name the change of mind. */}
+        {committed!.preStance && committed!.selfGrade && (
+          (committed!.preStance === 'holds') !== (committed!.selfGrade === 'owned') ? (
+            <p className="s-stance-shift">
+              {committed!.preStance === 'holds'
+                ? (lang === 'zh-CN' ? '你先说站得住，说完之后自己改了口。' : 'You said you could defend it, then changed your mind while writing.')
+                : (lang === 'zh-CN' ? '你先说说不清，说完之后发现其实站得住。' : 'You said you could not explain it, then found you could.')}
+            </p>
+          ) : null
+        )}
         {scoreError && !hasJudgment && (
           <Button variant="secondary" onClick={() => setPhase('manualgrade')}>{t('run4.markMyself')}</Button>
         )}
@@ -352,6 +429,8 @@ export default function VivaScreen() {
       guidance: t('v5.runGuidance'),
       answer: committed.answer,
       verdict,
+      flagged: Boolean(committed.flagged),
+      onFlag: () => updateProbe(session.id, probe.id, { flagged: !committed.flagged }),
       body: <PhaseBody />,
     };
     return <RunFrame shape={scheme.run} slots={slots} />;

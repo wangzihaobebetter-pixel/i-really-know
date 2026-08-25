@@ -1,25 +1,16 @@
-/* ── 01 · The Path — after Duolingo (5,398,782 ratings) ───────────────────
-   What was taken: the extruded solid-shadow button, the very heavy rounded
-   display face, the oversized circular node, and the rule that a practice
-   screen carries no navigation at all. Identity only; the structure that makes
-   this a path rather than a list is in shapes.css under [data-home="path"]. */
+/* ── 01 · 那页纸 — GoodNotes 443,855 · Speechify 517,576 ───────────────────
+   颜色不是猜的：从 appstore2/full-goodnotes-*.jpg 的应用内截图里采样得到
+   #284C7E（工具栏深蓝）、#3562A3、#F5E9B5（高亮黄）、#C8E0FA。
+   立场：页是纸白，唯一的深色是顶栏；被追问的那一句用 GoodNotes 的高亮黄。
+   动效 150/240ms（Speechify 实测 80–150ms 档），圆角 18px。 */
 html[data-ui="01"] {
-  --app: #FFFFFF; --app-2: #E5E5E5; --sheet: #FFFFFF; --hairline: #E5E5E5;
-  --ink: #3C3C3C; --ink-2: #4B4B4B; --ink-3: #626262;
-  --accent: #58CC02; --accent-text: #3C7A0F; --accent-wash: #E8F8DC;
-  --warm-signal: #58CC02; --on-warm: #0F2E00;
-  --primary-button-bg: #58CC02; --primary-button-ink: #16350B;
-  --s-radius: 16px;
+  --app: #FFFFFF; --app-2: #EEF3F9; --sheet: #FFFFFF; --hairline: #D8E1EC;
+  --ink: #1A2433; --ink-2: #46536A; --ink-3: #5D6B82;
+  --accent: #3562A3; --accent-text: #284C7E; --accent-wash: #E2EBF7;
+  --warm-signal: #F5E9B5; --on-warm: #3A3208;
+  --primary-button-bg: #284C7E; --primary-button-ink: #FFFFFF;
 }
-html[data-ui="01"] body { font-family: var(--font-display); }
-html[data-ui="01"] h1, html[data-ui="01"] h2 { font-family: var(--font-display); font-weight: 800; letter-spacing: -.03em; }
-html[data-ui="01"] .s-tabs { border-top: 2px solid var(--hairline); }
-html[data-ui="01"] .s-tab { font-weight: 800; text-transform: uppercase; letter-spacing: .04em; font-size: 10px; }
-html[data-ui="01"] .s-tab[aria-current="page"] { color: var(--accent-text); }
-html[data-ui="01"] .s-self-options button,
-html[data-ui="01"] .s-manual-opts button,
-html[data-ui="01"] .s-bring-line,
-html[data-ui="01"] .s-due-line { border: 2px solid var(--hairline); border-radius: 16px; font-weight: 700; }
-html[data-ui="01"] .s-self-options button { box-shadow: 0 4px 0 var(--hairline); border-left-width: 2px; }
-html[data-ui="01"] .s-send { box-shadow: 0 4px 0 #46A302; }
-html[data-ui="01"] .s-logo-mark i { background: var(--accent); }
+html[data-ui="01"] .s-reader-page, html[data-ui="01"] .s-reader-surface { font-size: 1.125rem; line-height: 1.9; }
+html[data-ui="01"] .s-dock, html[data-ui="01"] .s-reader-dock { background: #FFFFFF; }
+html[data-ui="01"] mark, html[data-ui="01"] .anchor { background: var(--warm-signal); }
+html[data-ui="01"] .s-logo-mark i { background: var(--accent-text); }

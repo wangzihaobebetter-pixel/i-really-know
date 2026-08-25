@@ -1,0 +1,576 @@
+[
+  {
+    "id": "ours-today",
+    "name": "ours-today",
+    "url": "#/",
+    "data": {
+      "title": "I Really Know · 我真会",
+      "viewport": {
+        "w": 390,
+        "h": 844
+      },
+      "docHeight": 861,
+      "type": [
+        {
+          "k": "Inter Variable | 13px | 400 | lh 20.8px",
+          "v": 67000
+        },
+        {
+          "k": "Inter Variable | 16px | 760 | lh 24.8px",
+          "v": 14904
+        },
+        {
+          "k": "Inter Variable | 12px | 400 | lh 18.6px",
+          "v": 14807
+        },
+        {
+          "k": "Inter Variable | 15px | 700 | lh 21.75px",
+          "v": 13442
+        },
+        {
+          "k": "Nunito Variable | 25px | 760 | lh 26.4576px",
+          "v": 11877
+        },
+        {
+          "k": "Inter Variable | 13px | 400 | lh 20.15px",
+          "v": 11232
+        },
+        {
+          "k": "Inter Variable | 13.3px | 400 | lh 18.6667px",
+          "v": 9589
+        },
+        {
+          "k": "Inter Variable | 12px | 780 | lh 18.6px",
+          "v": 6657
+        },
+        {
+          "k": "Inter Variable | 17px | 700 | lh 20.4px",
+          "v": 5240
+        },
+        {
+          "k": "Inter Variable | 11px | 400 | lh 17.05px",
+          "v": 1500
+        },
+        {
+          "k": "Inter Variable | 18px | 820 | lh 27.9px",
+          "v": 1454
+        },
+        {
+          "k": "Inter Variable | 11px | 740 | lh 17.05px",
+          "v": 922
+        }
+      ],
+      "radii": [
+        {
+          "k": "18px",
+          "v": 4
+        },
+        {
+          "k": "24px",
+          "v": 1
+        },
+        {
+          "k": "50%",
+          "v": 1
+        },
+        {
+          "k": "32px",
+          "v": 1
+        },
+        {
+          "k": "19px",
+          "v": 1
+        },
+        {
+          "k": "16px",
+          "v": 1
+        }
+      ],
+      "motion": [
+        {
+          "k": "transition 0.18s, 0.18s, 0.12s cubic-bezier(0.2, 0.7, 0.2, 1), cubic-bezier(0.2, 0.7, 0.2, 1), cubic-bezier(0.2, 0.7, 0.2, 1)",
+          "v": 3
+        },
+        {
+          "k": "transition 0.12s, 0.12s cubic-bezier(0.2, 0.7, 0.2, 1), cubic-bezier(0.2, 0.7, 0.2, 1)",
+          "v": 2
+        },
+        {
+          "k": "transition 0.18s cubic-bezier(0.2, 0.7, 0.2, 1)",
+          "v": 1
+        }
+      ],
+      "fixed": [
+        {
+          "tag": "nav",
+          "pos": "fixed",
+          "top": 766,
+          "bottom": 10,
+          "h": 68,
+          "w": 366,
+          "bg": "color(srgb 1 0.996078 0.980392 / 0.92)",
+          "z": "30"
+        }
+      ],
+      "bg": [
+        {
+          "k": "rgb(255, 254, 250)",
+          "v": 107006
+        },
+        {
+          "k": "rgb(245, 200, 75)",
+          "v": 80323
+        },
+        {
+          "k": "color(srgb 1 0.996078 0.980392 / 0.92)",
+          "v": 24888
+        },
+        {
+          "k": "rgb(32, 32, 29)",
+          "v": 21060
+        },
+        {
+          "k": "rgb(228, 222, 206)",
+          "v": 14807
+        },
+        {
+          "k": "color(srgb 1 0.996078 0.980392 / 0.84)",
+          "v": 1936
+        }
+      ],
+      "targetCount": 2,
+      "targetHeight": {
+        "min": 224,
+        "median": 290,
+        "max": 290
+      },
+      "biggestTargets": [
+        {
+          "w": 358,
+          "h": 290,
+          "r": "18px 30px 18px 18px",
+          "text": "数学\n一份真实学生作业\n\n…it holds f"
+        },
+        {
+          "w": 358,
+          "h": 224,
+          "r": "32px 32px 32px 10px",
+          "text": "带一份你做的东西来\n论文、一段代码、报告或笔记，"
+        }
+      ]
+    }
+  },
+  {
+    "id": "ours-run",
+    "name": "ours-run",
+    "url": "#/run/sample_nur-antepartum",
+    "data": {
+      "title": "I Really Know · 我真会",
+      "viewport": {
+        "w": 390,
+        "h": 844
+      },
+      "docHeight": 876,
+      "type": [
+        {
+          "k": "Inter Variable | 14px | 400 | lh 21.84px",
+          "v": 83786
+        },
+        {
+          "k": "Inter Variable | 26.4px | 730 | lh 31.68px",
+          "v": 41574
+        },
+        {
+          "k": "Inter Variable | 13px | 400 | lh 19.24px",
+          "v": 12618
+        },
+        {
+          "k": "Inter Variable | 14px | 400 | lh 21.7px",
+          "v": 3390
+        },
+        {
+          "k": "Inter Variable | 16px | 400 | lh 24.8px",
+          "v": 3201
+        },
+        {
+          "k": "Inter Variable | 11px | 400 | lh 17.05px",
+          "v": 2986
+        },
+        {
+          "k": "Inter Variable | 11px | 760 | lh 17.05px",
+          "v": 1144
+        }
+      ],
+      "radii": [
+        {
+          "k": "18px",
+          "v": 2
+        },
+        {
+          "k": "12px",
+          "v": 1
+        },
+        {
+          "k": "28px",
+          "v": 1
+        },
+        {
+          "k": "17px",
+          "v": 1
+        }
+      ],
+      "motion": [
+        {
+          "k": "transition 0.18s cubic-bezier(0.2, 0.7, 0.2, 1)",
+          "v": 1
+        },
+        {
+          "k": "animation 0.46s linear(0 0%, 0.128 3.1%, 0.478 7.9%, 0.827 13%, 1.036 16.9%, 1.096 19%, 1.117 21.1%, 1.101 23.6%, 1.031 29%, 0.994 34.2%, 0.99 38.3%, 1.002 47.4%, 1.004 60.5%, 1 100%)",
+          "v": 1
+        }
+      ],
+      "fixed": [
+        {
+          "tag": "section",
+          "pos": "fixed",
+          "top": 732,
+          "bottom": 10,
+          "h": 102,
+          "w": 366,
+          "bg": "color(srgb 1 0.996078 0.980392 / 0.95)",
+          "z": "28"
+        }
+      ],
+      "bg": [
+        {
+          "k": "rgb(255, 254, 250)",
+          "v": 86798
+        },
+        {
+          "k": "color(srgb 1 0.996078 0.980392 / 0.95)",
+          "v": 37246
+        },
+        {
+          "k": "rgb(245, 200, 75)",
+          "v": 2704
+        },
+        {
+          "k": "rgb(32, 32, 29)",
+          "v": 2704
+        },
+        {
+          "k": "rgb(216, 210, 195)",
+          "v": 904
+        },
+        {
+          "k": "rgb(255, 90, 54)",
+          "v": 226
+        }
+      ],
+      "targetCount": 5,
+      "targetHeight": {
+        "min": 19,
+        "median": 40,
+        "max": 52
+      },
+      "biggestTargets": [
+        {
+          "w": 84,
+          "h": 40,
+          "r": "0px",
+          "text": "多看一点原文"
+        },
+        {
+          "w": 80,
+          "h": 40,
+          "r": "0px",
+          "text": "先离开"
+        },
+        {
+          "w": 52,
+          "h": 52,
+          "r": "18px",
+          "text": ""
+        },
+        {
+          "w": 52,
+          "h": 52,
+          "r": "18px",
+          "text": ""
+        },
+        {
+          "w": 78,
+          "h": 19,
+          "r": "0px",
+          "text": "这题我会卡住"
+        }
+      ]
+    }
+  },
+  {
+    "id": "ours-work",
+    "name": "ours-work",
+    "url": "#/work",
+    "data": {
+      "title": "I Really Know · 我真会",
+      "viewport": {
+        "w": 390,
+        "h": 844
+      },
+      "docHeight": 844,
+      "type": [
+        {
+          "k": "Inter Variable | 13px | 400 | lh 20.8px",
+          "v": 110690
+        },
+        {
+          "k": "Nunito Variable | 32px | 750 | lh 34.56px",
+          "v": 19899
+        },
+        {
+          "k": "Inter Variable | 14px | 400 | lh 21px",
+          "v": 15036
+        },
+        {
+          "k": "Inter Variable | 13px | 400 | lh 19.5px",
+          "v": 12012
+        },
+        {
+          "k": "Inter Variable | 11px | 400 | lh 17.05px",
+          "v": 9478
+        },
+        {
+          "k": "Inter Variable | 16px | 550 | lh 16px",
+          "v": 6840
+        },
+        {
+          "k": "Inter Variable | 12px | 780 | lh 18.6px",
+          "v": 6657
+        },
+        {
+          "k": "Inter Variable | 20px | 700 | lh 31px",
+          "v": 6200
+        },
+        {
+          "k": "Inter Variable | 18px | 820 | lh 27.9px",
+          "v": 1454
+        },
+        {
+          "k": "Inter Variable | 11px | 680 | lh 17.05px",
+          "v": 750
+        }
+      ],
+      "radii": [
+        {
+          "k": "18px",
+          "v": 3
+        },
+        {
+          "k": "3px",
+          "v": 3
+        },
+        {
+          "k": "24px",
+          "v": 1
+        },
+        {
+          "k": "50%",
+          "v": 1
+        },
+        {
+          "k": "12px",
+          "v": 1
+        },
+        {
+          "k": "14px",
+          "v": 1
+        }
+      ],
+      "motion": [
+        {
+          "k": "transition 0.18s, 0.18s, 0.12s cubic-bezier(0.2, 0.7, 0.2, 1), cubic-bezier(0.2, 0.7, 0.2, 1), cubic-bezier(0.2, 0.7, 0.2, 1)",
+          "v": 3
+        },
+        {
+          "k": "transition 0.18s cubic-bezier(0.2, 0.7, 0.2, 1)",
+          "v": 3
+        },
+        {
+          "k": "transition 0.12s, 0.12s, 0.12s cubic-bezier(0.2, 0.7, 0.2, 1), cubic-bezier(0.2, 0.7, 0.2, 1), cubic-bezier(0.2, 0.7, 0.2, 1)",
+          "v": 1
+        }
+      ],
+      "fixed": [
+        {
+          "tag": "nav",
+          "pos": "fixed",
+          "top": 766,
+          "bottom": 10,
+          "h": 68,
+          "w": 366,
+          "bg": "color(srgb 1 0.996078 0.980392 / 0.92)",
+          "z": "30"
+        }
+      ],
+      "bg": [
+        {
+          "k": "rgb(255, 254, 250)",
+          "v": 188880
+        },
+        {
+          "k": "rgb(228, 222, 206)",
+          "v": 65941
+        },
+        {
+          "k": "color(srgb 1 0.996078 0.980392 / 0.92)",
+          "v": 24888
+        },
+        {
+          "k": "rgb(32, 32, 29)",
+          "v": 12996
+        },
+        {
+          "k": "color(srgb 1 0.996078 0.980392 / 0.84)",
+          "v": 1936
+        }
+      ],
+      "targetCount": 1,
+      "targetHeight": {
+        "min": 40,
+        "median": 40,
+        "max": 40
+      },
+      "biggestTargets": [
+        {
+          "w": 171,
+          "h": 40,
+          "r": "16px",
+          "text": "带第一份东西来"
+        }
+      ]
+    }
+  },
+  {
+    "id": "ours-you",
+    "name": "ours-you",
+    "url": "#/you",
+    "data": {
+      "title": "I Really Know · 我真会",
+      "viewport": {
+        "w": 390,
+        "h": 844
+      },
+      "docHeight": 844,
+      "type": [
+        {
+          "k": "Inter Variable | 11px | 400 | lh 16.5px",
+          "v": 17005
+        },
+        {
+          "k": "Inter Variable | 13px | 400 | lh 19.5px",
+          "v": 12012
+        },
+        {
+          "k": "Nunito Variable | 24.2px | 750 | lh 26.1144px",
+          "v": 10606
+        },
+        {
+          "k": "Inter Variable | 20px | 700 | lh 31px",
+          "v": 6200
+        },
+        {
+          "k": "Inter Variable | 16px | 550 | lh 16px",
+          "v": 4560
+        },
+        {
+          "k": "Inter Variable | 18px | 820 | lh 27.9px",
+          "v": 1454
+        },
+        {
+          "k": "Inter Variable | 11px | 680 | lh 17.05px",
+          "v": 750
+        }
+      ],
+      "radii": [
+        {
+          "k": "18px",
+          "v": 3
+        },
+        {
+          "k": "50%",
+          "v": 2
+        },
+        {
+          "k": "24px",
+          "v": 1
+        },
+        {
+          "k": "12px",
+          "v": 1
+        },
+        {
+          "k": "16px",
+          "v": 1
+        }
+      ],
+      "motion": [
+        {
+          "k": "transition 0.18s, 0.18s, 0.12s cubic-bezier(0.2, 0.7, 0.2, 1), cubic-bezier(0.2, 0.7, 0.2, 1), cubic-bezier(0.2, 0.7, 0.2, 1)",
+          "v": 3
+        },
+        {
+          "k": "transition 0.12s, 0.12s, 0.12s cubic-bezier(0.2, 0.7, 0.2, 1), cubic-bezier(0.2, 0.7, 0.2, 1), cubic-bezier(0.2, 0.7, 0.2, 1)",
+          "v": 1
+        }
+      ],
+      "fixed": [
+        {
+          "tag": "nav",
+          "pos": "fixed",
+          "top": 766,
+          "bottom": 10,
+          "h": 68,
+          "w": 366,
+          "bg": "color(srgb 1 0.996078 0.980392 / 0.92)",
+          "z": "30"
+        }
+      ],
+      "bg": [
+        {
+          "k": "rgb(255, 254, 250)",
+          "v": 94154
+        },
+        {
+          "k": "color(srgb 1 0.996078 0.980392 / 0.92)",
+          "v": 24888
+        },
+        {
+          "k": "rgb(32, 32, 29)",
+          "v": 10716
+        },
+        {
+          "k": "color(srgb 1 0.996078 0.980392 / 0.84)",
+          "v": 1936
+        },
+        {
+          "k": "rgb(255, 90, 54)",
+          "v": 114
+        }
+      ],
+      "targetCount": 1,
+      "targetHeight": {
+        "min": 40,
+        "median": 40,
+        "max": 40
+      },
+      "biggestTargets": [
+        {
+          "w": 114,
+          "h": 40,
+          "r": "16px",
+          "text": "开始第一遍"
+        }
+      ]
+    }
+  }
+]

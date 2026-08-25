@@ -1,17 +1,14 @@
-/* ── 08 · The Outline — after Notion (89,863 ratings) ─────────────────────
-   What was taken: white on white, a grey sidebar, 5px hover rectangles, a very
-   large plain-weight page title, and the refusal to put a card around anything.
-   Depth is expressed with one hairline and nothing else. */
+/* ── 08 · 解答单 — Gauth 1,457,502 · Photomath 732,929 · Chegg 204,684 ──
+   Chegg 采样：#302D42 / #242136 深紫灰、#FFF2E9 暖白、#F0EDFE 淡紫。
+   Photomath 贡献奶油底 + 胭脂红。这一屏要能打印，所以正文按纸张排：
+   17px/1.7，圆角 14px，动效 130/220ms。 */
 html[data-ui="08"] {
-  --app: #FFFFFF; --app-2: #F7F7F5; --sheet: #FFFFFF; --hairline: #E6E4E0;
-  --ink: #191918; --ink-2: #46443F; --ink-3: #64615A;
-  --accent: #0075DE; --accent-text: #005CAF; --accent-wash: #E8F2FD;
-  --warm-signal: #F7F7F5; --on-warm: #191918;
-  --primary-button-bg: #191918; --primary-button-ink: #FFFFFF;
-  --s-radius: 5px;
+  --app: #FFF9F4; --app-2: #F3EFFB; --sheet: #FFFFFF; --hairline: #E4DCD2;
+  --ink: #1B1826; --ink-2: #453F55; --ink-3: #5B546C;
+  --accent: #B3123F; --accent-text: #94062F; --accent-wash: #FBE1E8;
+  --accent-ink: #FFF9F4;
+  --warm-signal: #302D42; --on-warm: #FFF2E9;
+  --primary-button-bg: #302D42; --primary-button-ink: #FFF2E9;
 }
-html[data-ui="08"] body { font-family: var(--font-ui); }
-html[data-ui="08"] h1, html[data-ui="08"] h2 { font-family: var(--font-ui); font-weight: 700; letter-spacing: -.03em; }
-html[data-ui="08"] .s-specimen { border-radius: 5px; box-shadow: none; }
-html[data-ui="08"] .s-self-options button, html[data-ui="08"] .s-manual-opts button { border-radius: 5px; }
-html[data-ui="08"] .s-dock-row { border-radius: 6px; }
+html[data-ui="08"] .s-step-q, html[data-ui="08"] .s-steps-sheet { font-size: 1.0625rem; line-height: 1.7; }
+html[data-ui="08"] h1, html[data-ui="08"] h2 { font-family: var(--font-display); font-weight: 800; letter-spacing: -.025em; }

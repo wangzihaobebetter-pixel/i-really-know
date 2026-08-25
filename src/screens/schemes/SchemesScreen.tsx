@@ -33,8 +33,8 @@ export default function SchemesScreen() {
         <h1 className="t-sentence">{zh ? '十个 UI 方案' : 'Ten UI schemes'}</h1>
         <p className="t-body ink-2 measure">
           {zh
-            ? '每一个都对标一个真正有受众的同类产品，拿的是它的结构：导航放哪、首页的主对象是什么、一次「过一遍」长什么样、logo 怎么处理。应用逻辑十个方案共用一份。'
-            : 'Each one is grounded in a shipped product with a real audience, and takes its structure: where navigation lives, what the home screen is made of, how one run-through is presented, how the mark is treated. All ten share one application logic.'}
+            ? '每个方案回答一个不同的产品问题，依据是一个真正有受众的同类产品。改的是结构、版式、动效和功能摆放，不是配色。应用逻辑十个方案共用一份。'
+            : 'Each scheme answers a different product question, grounded in a shipped product with a real audience. What changes is structure, type, motion and where functionality sits — not colour. All ten share one application logic.'}
         </p>
       </div>
 
@@ -50,10 +50,12 @@ export default function SchemesScreen() {
             <span className="scheme-id">{scheme.id}</span>
             <span className="scheme-body">
               <strong>{zh ? scheme.nameZh : scheme.name}</strong>
+              <span className="scheme-asks">{scheme.asksZh}</span>
               <small>{zh ? '对标 ' : 'After '}{scheme.ref} · {fmt.format(scheme.ratings)} {zh ? '条评分' : 'ratings'}</small>
               <em>{scheme.ideaZh}</em>
               <span className="scheme-axes">
-                <i>{scheme.nav}</i><i>{scheme.home}</i><i>{scheme.run}</i><i>{scheme.logo}</i>
+                <i>{scheme.nav}</i><i>{scheme.home}</i><i>{scheme.run}</i>
+                <i>{scheme.motion.fast}/{scheme.motion.slow}ms</i><i>r{scheme.radius}</i>
               </span>
             </span>
             <ArrowRight size={18} aria-hidden />

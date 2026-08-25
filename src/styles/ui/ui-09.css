@@ -1,20 +1,18 @@
-/* ── 09 · The Programme — after Headspace (973,869 ratings) ───────────────
-   What was taken: warm sand behind saturated pastel tiles, very round corners,
-   a friendly rounded face, a centred lockup, and generous vertical air. This is
-   the only scheme where the run-through is allowed to be slow on purpose. */
+/* ── 09 · 大纲 — Notion 89,863 · Notability 453,065 ──────────────────────
+   Notion 实测：UI 用 NotionInter 14/20，**正文阅读另起 Lyon Text 衬线 18/28**，
+   圆角 4–8px，hover 是一块 5px 灰矩形，没有卡片。
+   双字体是这个方案的形式支点：界面要密要小，阅读要松要大，一套字体做不到两件事。 */
 html[data-ui="09"] {
-  --app: #FFF6E6; --app-2: #F7E8CF; --sheet: #FFFFFF; --hairline: #EBD9BC;
-  --ink: #232323; --ink-2: #4C453B; --ink-3: #665D4E;
-  --accent: #FF9E2C; --accent-text: #A65200; --accent-wash: #FFEAD1;
-  --accent-ink: #2B1A00;
-  --warm-signal: #FFC97A; --on-warm: #2B1A00;
-  --primary-button-bg: #232323; --primary-button-ink: #FFF6E6;
-  --s-radius: 22px;
+  --app: #FFFFFF; --app-2: #F7F7F5; --sheet: #FFFFFF; --hairline: #E6E4E0;
+  --ink: #191918; --ink-2: #46443F; --ink-3: #64615A;
+  --accent: #0075DE; --accent-text: #005CAF; --accent-wash: #E8F2FD;
+  --warm-signal: #F7F7F5; --on-warm: #191918;
+  --primary-button-bg: #191918; --primary-button-ink: #FFFFFF;
 }
-html[data-ui="09"] body { font-family: var(--font-display); }
-html[data-ui="09"] h1, html[data-ui="09"] h2 { font-family: var(--font-display); font-weight: 700; letter-spacing: -.02em; }
-html[data-ui="09"] .s-tabs { border-top: 0; box-shadow: 0 -8px 24px -18px rgba(35, 26, 0, .6); }
-html[data-ui="09"] .s-tab[aria-current="page"] { color: var(--accent-text); }
-html[data-ui="09"] .s-guided-card { box-shadow: 0 20px 48px -28px rgba(70, 45, 0, .55); }
-html[data-ui="09"] .s-self-options button, html[data-ui="09"] .s-manual-opts button,
-html[data-ui="09"] .s-bring-line, html[data-ui="09"] .s-due-line { border-radius: 999px; }
+html[data-ui="09"] body { font-family: var(--font-ui); font-size: .9375rem; }
+html[data-ui="09"] h1, html[data-ui="09"] h2 { font-family: var(--font-ui); font-weight: 700; letter-spacing: -.03em; }
+/* The reading face, separate from the interface face. */
+html[data-ui="09"] .s-outline-src, html[data-ui="09"] .s-src, html[data-ui="09"] .anchored-text,
+html[data-ui="09"] .s-specimen-page, html[data-ui="09"] blockquote {
+  font-family: Songti SC, Georgia, serif; font-size: 1.125rem; line-height: 1.72;
+}
