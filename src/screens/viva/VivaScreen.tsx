@@ -372,6 +372,11 @@ export default function VivaScreen() {
       </section>
     );
 
+    /* Explicit rather than a fallthrough. The verdict is the one thing in this
+       product that must never appear before the student has committed one of
+       their own, so the condition that shows it is written out where it can be
+       read — and verify-no-early-verdict.mjs holds it there. */
+    if (phase !== 'revealed') return null;
     return (
       <section className="s-reveal">
         <div className="s-reveal-line" data-verdict={verdict}>
