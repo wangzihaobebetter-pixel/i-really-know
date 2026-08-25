@@ -15,7 +15,7 @@ export type RouteName =
   | 'you' | 'welcome'
   | 'class' | 'cohort' | 'studentSheet' | 'reteach'
   | 'join' | 'return'
-  | 'settings' | 'notfound';
+  | 'settings' | 'schemes' | 'notfound';
 
 /**
  * Reserved `run` session id meaning "the returning questions" rather than a
@@ -56,6 +56,10 @@ const PATTERNS: Pattern[] = [
   { name: 'reteach',      segments: ['class', ':cohortId', 'reteach'] },
   { name: 'studentSheet', segments: ['class', ':cohortId', 's', ':submissionId'] },
   { name: 'settings',     segments: ['settings'] },
+  /* v7 gallery: the ten grounded UI schemes, side by side, each switchable.
+     Off every nav — reached from Settings and by URL, like the instructor
+     screens. It is a chooser for Wang, not a product surface for a student. */
+  { name: 'schemes',      segments: ['schemes'] },
   /**
    * Alias, deliberately last. `today` is canonically `#/` (href() returns the
    * first pattern matching a name, so links stay `#/`), but `#/today` is the
@@ -146,5 +150,6 @@ export const ROUTE_GROUP: Record<RouteName, 'today' | 'work' | 'you' | 'class' |
   studentSheet: 'class',
   reteach: 'class',
   settings: 'settings',
+  schemes: 'settings',
   notfound: 'none',
 };

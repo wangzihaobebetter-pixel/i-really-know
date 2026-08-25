@@ -28,6 +28,7 @@ const YouScreen         = lazy(() => import('./screens/you/YouScreen'));
 const FollowupsScreen   = lazy(() => import('./screens/followups/FollowupsScreen'));
 
 const SettingsScreen    = lazy(() => import('./screens/settings/SettingsScreen'));
+const SchemesScreen     = lazy(() => import('./screens/schemes/SchemesScreen'));
 
 // --- Run-through + result + bring + read ----------------------------------
 const BringScreen       = lazy(() => import('./screens/bring/BringScreen'));
@@ -65,6 +66,7 @@ function Outlet() {
     case 'join': return <JoinScreen />;
     case 'return': return <ReturnScreen />;
     case 'settings':      return <SettingsScreen />;
+    case 'schemes':       return <SchemesScreen />;
     case 'class':         return <ClassScreen />;
     case 'cohort':        return <CohortScreen key={p.cohortId} />;
     case 'studentSheet':  return <StudentSheetScreen key={p.submissionId} />;

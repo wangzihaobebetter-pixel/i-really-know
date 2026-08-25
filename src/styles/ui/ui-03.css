@@ -1,59 +1,18 @@
-/* UI 03 · 深色精工 — 对标 Linear
-   Token 来自 memory/ireallyknow-v7/refs/ 里我自己抓的真实截图与 computed style。
-   区分不只在颜色：形状、字重、深度、主卡用什么材料，都按对标对象走。 */
+/* ── 03 · The Interval — after Anki (2,319 ratings; the de-facto standard) ─
+   What was taken: nothing decorative. System grey chrome, a hairline under the
+   toolbar, tabular numerals, square-ish 5px corners, and the rating row whose
+   buttons name the interval. Anki's restraint is its identity, so this file is
+   deliberately the shortest of the ten. */
 html[data-ui="03"] {
-  --app: #08090A; --app-2: #0F1011; --sheet: #141517; --hairline: #232529;
-  --ink: #E5E5E6; --ink-2: #A9AAAD; --ink-3: #8A8B8F;
-  --accent: #7B7FFF; --accent-text: #A5A8FF;
-  --warm-signal: #191B1F; --on-warm: #E5E5E6;
-  --primary-button-bg: #E5E5E6; --primary-button-ink: #141517;
-  --r-card: 10px; --r-control: 6px;
-  --scheme-press: none; --scheme-lift: 0 0 0 1px #232529;
-  --scheme-hfont: var(--font-ui); --scheme-hweight: 510; --scheme-hsize: 1.55rem;
-  --scheme-body: .875rem;
-  --accent-wash: #22243A;
-  --held-wash: #123D2A; --half-held-wash: #3A2E12; --slipped-wash: #242640;
-  --held-more-wash: #0E2E38; --underclaimed-wash: #0E2E38;
+  --app: #FFFFFF; --app-2: #F2F2F2; --sheet: #FFFFFF; --hairline: #D6D6D6;
+  --ink: #1D1D1D; --ink-2: #444444; --ink-3: #5D5D5D;
+  --accent: #2C6BED; --accent-text: #1C4FBB; --accent-wash: #E6EEFD;
+  --counter-accent: #1C4FBB;
+  --held: #14663F; --half-held: #7A4E05; --slipped: #444444;
+  --warm-signal: #F2F2F2; --on-warm: #1D1D1D;
+  --primary-button-bg: #2C6BED; --primary-button-ink: #FFFFFF;
+  --s-radius: 5px;
 }
-
-/* Type: weight and face are most of what separates these references. */
-html[data-ui="03"] h1 {
-  font-family: var(--scheme-hfont); font-weight: var(--scheme-hweight);
-  font-size: var(--scheme-hsize); letter-spacing: -.01em;
-}
-html[data-ui="03"] h2,
-html[data-ui="03"] .run-question { font-family: var(--scheme-hfont); font-weight: var(--scheme-hweight); }
-html[data-ui="03"] body { font-size: var(--scheme-body); }
-
-/* Shape + depth on every surface that carries something. */
-html[data-ui="03"] .new-room-card,
-html[data-ui="03"] .next-room-card,
-html[data-ui="03"] .today-specimen,
-html[data-ui="03"] .sample-option,
-html[data-ui="03"] .reading-v6-page,
-html[data-ui="03"] .welcome-passage,
-html[data-ui="03"] .work-piece-v5,
-html[data-ui="03"] .ending-v5,
-html[data-ui="03"] .held-voice-card {
-  border-radius: var(--r-card);
-  box-shadow: var(--scheme-lift);
-}
-html[data-ui="03"] .welcome-primary,
-html[data-ui="03"] .v5-self-options button,
-html[data-ui="03"] .btn,
-html[data-ui="03"] button.btn-primary {
-  border-radius: var(--r-control);
-  box-shadow: var(--scheme-press);
-}
-
-/* The bring card is the loudest object on Today; it takes each scheme's own
-   material rather than the shared signal yellow. */
-html[data-ui="03"] .new-room-card {
-  background: var(--warm-signal); color: var(--on-warm);
-}
-html[data-ui="03"] .new-room-card .new-room-copy small { color: var(--on-warm); opacity: .78; }
-html[data-ui="03"] .new-room-glyph { border-color: var(--on-warm); color: var(--on-warm); }
-
-/* Nav shape follows the same shape language. */
-html[data-ui="03"] .tabbar,
-html[data-ui="03"] nav { border-radius: var(--navR, 8px); background: #0F1011; }
+html[data-ui="03"] body { font-family: var(--font-ui); font-size: .9375rem; }
+html[data-ui="03"] h1, html[data-ui="03"] h2 { font-family: var(--font-ui); font-weight: 600; letter-spacing: 0; }
+html[data-ui="03"] .s-specimen, html[data-ui="03"] .s-due-line, html[data-ui="03"] .s-bring-line { border-radius: 5px; }

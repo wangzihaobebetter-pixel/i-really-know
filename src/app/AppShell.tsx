@@ -1,6 +1,8 @@
 import React, { Suspense, useEffect, useState } from 'react';
 import { useRoute, navigate, type Route } from '../router';
 import { NavRail, SettingsOrb, TabBar } from './Nav';
+import { SchemeNav } from './NavVariants';
+import { activeScheme, DEFAULT_SCHEME } from './scheme';
 import { ThemeProvider } from './theme';
 import { ToastHost, Skeleton, EmptyState, Button, useToast } from '../ui';
 import { useStore } from '../store';
@@ -58,6 +60,21 @@ function V1MigrationGate() {
 export function AppShell({ children }: { children: React.ReactNode }) {
   const route = useRoute();
   const wide = useViewport();
+  /* Read once. index.html already wrote data-ui before first paint, so the
+     scheme cannot change under a mounted tree — switching goes through a
+     reload, exactly like a theme that ships in the HTML. */
+  const scheme = React.useMemo(() => activeScheme(), []);
+  const schemed = scheme.id !== DEFAULT_SCHEME.id;
+
+  /* Publish the four structural axes on <html> so shapes.css can lay the whole
+     product out per axis instead of ten near-identical copies of the same CSS. */
+  useEffect(() => {
+    const el = document.documentElement;
+    el.setAttribute('data-nav', scheme.nav);
+    el.setAttribute('data-home', scheme.home);
+    el.setAttribute('data-run', scheme.run);
+    el.setAttribute('data-logo', scheme.logo);
+  }, [scheme]);
   const t = useT();
   const [hydrated, setHydrated] = useState(() => useStore.persist.hasHydrated());
   const immersive = IMMERSIVE.has(route.name);
@@ -69,21 +86,39 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     if (hydrated && route.name !== 'run') useStore.getState().setUi({ lastRoute: route.hash });
   }, [route.hash, route.name, hydrated]);
 
-  const showStudentNav = !immersive && !instructor;
-  const padInline = wide && showStudentNav ? `calc(var(--rail-w) + var(--gutter))` : (wide ? 'var(--gutter)' : 'var(--gutter-mobile)');
-  const padBottom = !wide && showStudentNav ? `calc(var(--tabbar-h) + env(safe-area-inset-bottom) + var(--space-6))` : 'var(--space-8)';
+  /* Duolingo, Blinkist and Headspace clear the screen for a run-through;
+     Quizlet, Anki, Speechify, Structured, Notion and Brilliant keep their
+     chrome on. That is a per-scheme decision, not a global one (§2.2 held for
+     the base product and stays the default). */
+  const showStudentNav = schemed
+    ? (!instructor && (scheme.navInRun || !immersive) && route.name !== 'welcome' && route.name !== 'join')
+    : (!immersive && !instructor);
+
+  const sideNav = schemed && (scheme.nav === 'sidebar' || scheme.nav === 'railtime');
+  const topNav = schemed && (scheme.nav === 'topbar' || scheme.nav === 'toolbar');
+  const bottomNav = schemed ? (scheme.nav === 'tabbar' || scheme.nav === 'dock') : true;
+
+  const padInline = schemed
+    ? (sideNav && showStudentNav && wide ? 'calc(var(--s-side-w) + var(--gutter))' : (wide ? 'var(--gutter)' : 'var(--gutter-mobile)'))
+    : (wide && showStudentNav ? `calc(var(--rail-w) + var(--gutter))` : (wide ? 'var(--gutter)' : 'var(--gutter-mobile)'));
+  const padBottom = schemed
+    ? (bottomNav && showStudentNav ? 'calc(var(--tabbar-h) + env(safe-area-inset-bottom) + var(--space-6))' : 'var(--space-8)')
+    : (!wide && showStudentNav ? `calc(var(--tabbar-h) + env(safe-area-inset-bottom) + var(--space-6))` : 'var(--space-8)');
+  const padTop = schemed && topNav && showStudentNav ? 'calc(var(--s-top-h) + var(--space-5))' : 'var(--space-7)';
 
   return (
     <ThemeProvider>
       <ToastHost>
         {hydrated && <V1MigrationGate />}
-        {showStudentNav && (wide ? <NavRail route={route} /> : <><TabBar route={route} />{route.name !== 'settings' && <SettingsOrb />}</>)}
+        {showStudentNav && (schemed
+          ? <SchemeNav scheme={scheme} route={route} wide={wide} />
+          : (wide ? <NavRail route={route} /> : <><TabBar route={route} />{route.name !== 'settings' && <SettingsOrb />}</>))}
         <main
           data-surface={instructor ? 'instructor' : immersive ? 'immersive' : 'student'}
           style={{
             paddingLeft: immersive ? 'var(--gutter-mobile)' : padInline,
             paddingRight: immersive ? 'var(--gutter-mobile)' : (wide ? 'var(--gutter)' : 'var(--gutter-mobile)'),
-            paddingTop: 'var(--space-7)',
+            paddingTop: padTop,
             paddingBottom: padBottom,
             minHeight: '100dvh',
           }}

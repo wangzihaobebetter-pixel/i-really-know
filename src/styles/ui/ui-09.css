@@ -1,59 +1,20 @@
-/* UI 09 · 纯黑高反差 — 对标 Speechify
-   Token 来自 memory/ireallyknow-v7/refs/ 里我自己抓的真实截图与 computed style。
-   区分不只在颜色：形状、字重、深度、主卡用什么材料，都按对标对象走。 */
+/* ── 09 · The Programme — after Headspace (973,869 ratings) ───────────────
+   What was taken: warm sand behind saturated pastel tiles, very round corners,
+   a friendly rounded face, a centred lockup, and generous vertical air. This is
+   the only scheme where the run-through is allowed to be slow on purpose. */
 html[data-ui="09"] {
-  --app: #000000; --app-2: #131313; --sheet: #1A1A1B; --hairline: #2E2E30;
-  --ink: #FFFFFF; --ink-2: #C4C4C4; --ink-3: #9E9E9E;
-  --accent: #FFFFFF; --accent-text: #FFFFFF;
-  --warm-signal: #1A1A1B; --on-warm: #FFFFFF;
-  --primary-button-bg: #FFFFFF; --primary-button-ink: #1A1A1B;
-  --r-card: 16px; --r-control: 9999px;
-  --scheme-press: none; --scheme-lift: 0 0 0 1px #2E2E30;
-  --scheme-hfont: var(--font-ui); --scheme-hweight: 400; --scheme-hsize: 2.1rem;
-  --scheme-body: 1rem;
-  --accent-wash: #1E1E1E;
-  --held-wash: #12301F; --half-held-wash: #312712; --slipped-wash: #1E1E28;
-  --held-more-wash: #0F2830; --underclaimed-wash: #0F2830;
+  --app: #FFF6E6; --app-2: #F7E8CF; --sheet: #FFFFFF; --hairline: #EBD9BC;
+  --ink: #232323; --ink-2: #4C453B; --ink-3: #665D4E;
+  --accent: #FF9E2C; --accent-text: #A65200; --accent-wash: #FFEAD1;
+  --accent-ink: #2B1A00;
+  --warm-signal: #FFC97A; --on-warm: #2B1A00;
+  --primary-button-bg: #232323; --primary-button-ink: #FFF6E6;
+  --s-radius: 22px;
 }
-
-/* Type: weight and face are most of what separates these references. */
-html[data-ui="09"] h1 {
-  font-family: var(--scheme-hfont); font-weight: var(--scheme-hweight);
-  font-size: var(--scheme-hsize); letter-spacing: -.01em;
-}
-html[data-ui="09"] h2,
-html[data-ui="09"] .run-question { font-family: var(--scheme-hfont); font-weight: var(--scheme-hweight); }
-html[data-ui="09"] body { font-size: var(--scheme-body); }
-
-/* Shape + depth on every surface that carries something. */
-html[data-ui="09"] .new-room-card,
-html[data-ui="09"] .next-room-card,
-html[data-ui="09"] .today-specimen,
-html[data-ui="09"] .sample-option,
-html[data-ui="09"] .reading-v6-page,
-html[data-ui="09"] .welcome-passage,
-html[data-ui="09"] .work-piece-v5,
-html[data-ui="09"] .ending-v5,
-html[data-ui="09"] .held-voice-card {
-  border-radius: var(--r-card);
-  box-shadow: var(--scheme-lift);
-}
-html[data-ui="09"] .welcome-primary,
-html[data-ui="09"] .v5-self-options button,
-html[data-ui="09"] .btn,
-html[data-ui="09"] button.btn-primary {
-  border-radius: var(--r-control);
-  box-shadow: var(--scheme-press);
-}
-
-/* The bring card is the loudest object on Today; it takes each scheme's own
-   material rather than the shared signal yellow. */
-html[data-ui="09"] .new-room-card {
-  background: var(--warm-signal); color: var(--on-warm);
-}
-html[data-ui="09"] .new-room-card .new-room-copy small { color: var(--on-warm); opacity: .78; }
-html[data-ui="09"] .new-room-glyph { border-color: var(--on-warm); color: var(--on-warm); }
-
-/* Nav shape follows the same shape language. */
-html[data-ui="09"] .tabbar,
-html[data-ui="09"] nav { border-radius: var(--navR, 9999px); background: #131313; }
+html[data-ui="09"] body { font-family: var(--font-display); }
+html[data-ui="09"] h1, html[data-ui="09"] h2 { font-family: var(--font-display); font-weight: 700; letter-spacing: -.02em; }
+html[data-ui="09"] .s-tabs { border-top: 0; box-shadow: 0 -8px 24px -18px rgba(35, 26, 0, .6); }
+html[data-ui="09"] .s-tab[aria-current="page"] { color: var(--accent-text); }
+html[data-ui="09"] .s-guided-card { box-shadow: 0 20px 48px -28px rgba(70, 45, 0, .55); }
+html[data-ui="09"] .s-self-options button, html[data-ui="09"] .s-manual-opts button,
+html[data-ui="09"] .s-bring-line, html[data-ui="09"] .s-due-line { border-radius: 999px; }

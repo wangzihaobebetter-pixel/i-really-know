@@ -10,6 +10,8 @@ import { detectMaterialKind } from '../../lib/analysis';
 import { packShort } from '../../packs';
 import { BottomSheet } from '../../ui';
 import { formatDate, studentDestination } from '../../lib/session-ops';
+import { activeScheme, DEFAULT_SCHEME } from '../../app/scheme';
+import { HomeLayout, type HomeData } from './layouts';
 
 function occasionText(value: string | undefined, lang: 'en' | 'zh-CN') {
   const labels: Record<string, [string, string]> = {
@@ -114,6 +116,60 @@ export default function TodayScreen() {
        that skips it is a sample of a different product. The one-question
        taster on Welcome still goes direct — one probe has nothing to read. */
     nav('read', { sessionId: session.id });
+  }
+
+  const scheme = React.useMemo(() => activeScheme(), []);
+
+  /*
+   * v7. Under a scheme, Today is composed by src/screens/today/layouts.tsx —
+   * a path, a deck, a table, a shutter, a page, a timeline, a daily hero, an
+   * outline, four tiles or a panel list. Same sessions, same due targets, same
+   * specimen; a different primary object. The base composition below is what
+   * ships when no scheme is selected.
+   */
+  if (scheme.id !== DEFAULT_SCHEME.id) {
+    const data: HomeData = {
+      lang, first, lead, unfinished, left, leadMinutes,
+      dueCount: due.length, dueSession, recent, completedExample, specimen,
+      tried: sessions
+        .filter((session) => Boolean(session.sampleId))
+        .sort((a, b) => (b.completedAt ?? b.createdAt) - (a.completedAt ?? a.createdAt)),
+      occasionText: (value) => occasionText(value, lang),
+      formatDate: (at) => formatDate(at, lang),
+      openPiece: (session) => nav(studentDestination(session), { sessionId: session.id }),
+      openFollowups: () => nav('run', { sessionId: FOLLOWUPS_ID }),
+      openBring: () => nav('bring'),
+      openPicker: () => setPickerOpen(true),
+      openWork: () => nav('work'),
+    };
+    return (
+      <div className={`s-home s-home-${scheme.home} page-enter`} data-testid="today-screen" data-scheme={scheme.id}>
+        <HomeLayout shape={scheme.home} data={data} />
+        <BottomSheet
+          open={pickerOpen}
+          onClose={() => setPickerOpen(false)}
+          title={lang === 'zh-CN' ? '挑一份真实作业' : 'Pick a real piece of work'}
+        >
+          <p className="sample-picker-lead">
+            {lang === 'zh-CN'
+              ? '都是真实学生交上去的东西，带原始出处。挑一份离你近的。'
+              : 'Every one is real student work with its source. Pick whichever sits closest to yours.'}
+          </p>
+          <div className="sample-picker">
+            {SAMPLES.map((def) => (
+              <button className="sample-option" type="button" key={def.id} onClick={() => openSample(def.id)}>
+                <span className="sample-option-top">
+                  <em>{packShort(def.packId, lang)}</em>
+                  <small>{def.probes.length} {lang === 'zh-CN' ? '问' : def.probes.length === 1 ? 'question' : 'questions'}</small>
+                </span>
+                <strong>{def.title}</strong>
+                <small>{lang === 'zh-CN' ? def.zhBlurb : def.blurb}</small>
+              </button>
+            ))}
+          </div>
+        </BottomSheet>
+      </div>
+    );
   }
 
   return (

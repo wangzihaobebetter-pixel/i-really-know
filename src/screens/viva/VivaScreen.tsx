@@ -9,6 +9,8 @@ import { describeError, score as scoreProbe } from '../../lib/llm';
 import { isSpeechSupported, startDictation, type Dictation } from '../../lib/speech';
 import { targetsFromSession } from '../../lib/session-ops';
 import type { Score, SelfGrade } from '../../types';
+import { activeScheme, DEFAULT_SCHEME } from '../../app/scheme';
+import { RunFrame, type RunSlots } from './presentations';
 
 type Phase = 'answering' | 'blankplan' | 'selfgrade' | 'scoring' | 'manualgrade' | 'revealed';
 
@@ -199,6 +201,162 @@ export default function VivaScreen() {
       : scoreError || t('run4.scoreFailed'));
   const showExchange = phase === 'answering' || phase === 'blankplan' || phase === 'revealed';
 
+  const scheme = React.useMemo(() => activeScheme(), []);
+
+  /*
+   * v7. The phase bodies below are identical under every scheme — the model
+   * call, the self-grade, the reveal and the reference are the product and do
+   * not get ten variants. What changes is the frame they sit in, chosen in
+   * src/screens/viva/presentations.tsx.
+   *
+   * Anki's rating row is the one place a scheme changes wording rather than
+   * arrangement: its buttons name the interval you are choosing, and our three
+   * self-grades already map onto exactly that. Saying "7 天后再问你" on the
+   * button is more honest than "站住了", because that is what the choice does.
+   */
+  const intervals = scheme.run === 'ratingbar';
+  const selfOptions: [SelfGrade, string][] = intervals
+    ? [
+        ['owned', lang === 'zh-CN' ? '站住了 · 7 天后再问' : 'Held · ask again in 7d'],
+        ['shaky', lang === 'zh-CN' ? '有点虚 · 3 天后再问' : 'Shaky · ask again in 3d'],
+        ['notmine', lang === 'zh-CN' ? '没站住 · 明天再问' : 'Slipped · ask again tomorrow'],
+      ]
+    : [
+        ['owned', t('v5.selfHeld')],
+        ['shaky', t('v5.selfUnsure')],
+        ['notmine', t('v5.selfSlipped')],
+      ];
+
+  /** The six phase bodies, frame-agnostic. Every scheme renders these. */
+  function PhaseBody() {
+    if (phase === 'answering') return (
+      <section className="s-dock">
+        <div className="s-dock-row">
+          {settings.voiceEnabled && speechAvailable ? (
+            <button type="button" className="s-mic" data-recording={recording} onClick={toggleVoice} aria-pressed={recording} aria-label={recording ? t('run4.voiceStop') : t('run4.voiceStart')}>
+              {recording ? <Square size={19} /> : <Mic size={22} />}
+            </button>
+          ) : <span className="s-mic is-disabled" aria-hidden><Mic size={21} /></span>}
+          <textarea
+            id="run-answer"
+            className="s-answer-input"
+            rows={1}
+            value={answer}
+            placeholder={t('v5.runPlaceholder')}
+            onChange={(event) => setAnswer(event.target.value)}
+            aria-label={t('run4.answer')}
+          />
+          <button type="button" className="s-send" onClick={commitAnswer} disabled={!answer.trim()} aria-label={t('run4.commit')}><ArrowUp size={21} /></button>
+        </div>
+        {voiceError && voiceError !== 'unsupported' && <p className="s-dock-error">{t('run4.voiceUnsupported')}</p>}
+        <div className="s-dock-meta">
+          <span>{t('v5.runSavedAfter')}</span>
+          <button type="button" onClick={() => { stopVoice(); setPhase('blankplan'); }}>{t('v5.runBlank')}</button>
+        </div>
+      </section>
+    );
+
+    if (phase === 'blankplan') return (
+      <section className="s-blank">
+        <h2>{t('run4.blankTitle')}</h2>
+        <p>{t('run4.blankBody')}</p>
+        <textarea className="control s-blank-box" rows={4} value={blankPlan} placeholder={t('run4.blankPlaceholder')} onChange={(event) => setBlankPlan(event.target.value)} autoFocus />
+        <Button size="lg" variant="primary" disabled={!blankPlan.trim()} onClick={commitBlankPlan}>{t('run4.blankCommit')}</Button>
+      </section>
+    );
+
+    if (phase === 'selfgrade') return (
+      <section className="s-self">
+        <span className="s-self-eyebrow">{t('v5.selfEyebrow')}</span>
+        <h2>{t('v5.selfTitle')}</h2>
+        <div className="s-self-options">
+          {selfOptions.map(([value, label]) => (
+            <button type="button" key={value} data-grade={value} onClick={() => void chooseSelfGrade(value)}>
+              <span>{label}</span><ArrowRight size={19} aria-hidden />
+            </button>
+          ))}
+        </div>
+        <p className="s-self-hint">{t('v5.selfHint')}</p>
+      </section>
+    );
+
+    if (phase === 'scoring') return (
+      <section className="s-scoring">
+        <span className="living-typing" aria-hidden><i /><i /><i /></span>
+        <Spinner label={t('v5.scoring')} />
+        <blockquote className="answer-quote">“{answer}”</blockquote>
+      </section>
+    );
+
+    if (phase === 'manualgrade') return (
+      <section className="s-manual">
+        <span className="s-self-eyebrow">{t('v5.manualEyebrow')}</span>
+        <h2>{t('v5.manualTitle')}</h2>
+        <p>{t('v5.manualBody')}</p>
+        <div className="s-manual-ref">
+          <p className="t-body-strong">{probe!.reference.ownedLooksLike}</p>
+          <ul className="reference-list">{probe!.reference.keyPoints.map((point, i) => <li key={i}>{point}</li>)}</ul>
+        </div>
+        <div className="s-manual-opts">
+          <button type="button" onClick={() => manualMark(3)}>{t('run4.manualHeld')}</button>
+          <button type="button" onClick={() => manualMark(1)}>{t('run4.manualHalf')}</button>
+          <button type="button" onClick={() => manualMark(0)}>{t('run4.manualSlipped')}</button>
+        </div>
+      </section>
+    );
+
+    return (
+      <section className="s-reveal">
+        <div className="s-reveal-line" data-verdict={verdict}>
+          <Mark verdict={verdict} />
+          <p>{oneLine}</p>
+        </div>
+        {scoreError && !hasJudgment && (
+          <Button variant="secondary" onClick={() => setPhase('manualgrade')}>{t('run4.markMyself')}</Button>
+        )}
+        <details className="s-reveal-details">
+          <summary>{t('v5.replyDetails')}<ChevronDown size={16} aria-hidden /></summary>
+          <div className="stack">
+            <div className="stack-tight"><span className="t-micro ink-3">{t('run4.answer')}</span><blockquote className="answer-quote">“{committed!.answer}”</blockquote></div>
+            <div className="stack-tight"><span className="t-micro ink-3">{t('run4.why')}</span><p className="t-small ink-2 measure">{probe!.whyThisProbe}</p></div>
+            <div className="stack-tight"><span className="t-micro ink-3">{t('run4.standard')}</span><ul className="reference-list">{probe!.reference.keyPoints.map((point, i) => <li key={i}>{point}</li>)}</ul></div>
+          </div>
+        </details>
+        {hasJudgment && (
+          <Button size="lg" block variant="primary" iconRight={<ArrowRight size={18} />} onClick={next}>
+            {index < total - 1 ? t('v5.replyNext') : t('v5.replyFinish')}
+          </Button>
+        )}
+      </section>
+    );
+  }
+
+  if (scheme.id !== DEFAULT_SCHEME.id) {
+    const sourceNode = source?.text ? (
+      <div className={`s-src ${phase === 'revealed' ? `is-${verdict}` : ''}`}>
+        {source.anchor
+          ? <AnchoredText text={source.text} mode={session.materialKind === 'code' ? 'code' : 'prose'} anchors={[phase === 'revealed' ? { ...source.anchor, verdict } : source.anchor]} />
+          : <p className="t-small ink-2">{source.text}</p>}
+        {source.text.length > 260 && <button type="button" className="text-action" onClick={() => setSourceOpen((value) => !value)}>{sourceOpen ? t('run4.sourceLess') : t('run4.sourceMore')}</button>}
+      </div>
+    ) : null;
+
+    const slots: RunSlots = {
+      lang, phase, index, total,
+      steps: session.probes.map((item) => ({ id: item.id, question: item.question, done: Boolean(item.committedAt) })),
+      title: session.title,
+      onLeave: () => nav('today'),
+      sourceLabel: t('v5.runSource'),
+      source: sourceNode,
+      question: probe.question,
+      guidance: t('v5.runGuidance'),
+      answer: committed.answer,
+      verdict,
+      body: <PhaseBody />,
+    };
+    return <RunFrame shape={scheme.run} slots={slots} />;
+  }
+
   return (
     <main className="run-v5 page-enter" data-testid="run-screen">
       <header className="v5-run-top">
@@ -275,11 +433,7 @@ export default function VivaScreen() {
           <span className="v5-eyebrow">{t('v5.selfEyebrow')}</span>
           <h1>{t('v5.selfTitle')}</h1>
           <div className="v5-self-options">
-            {([
-              ['owned', t('v5.selfHeld')],
-              ['shaky', t('v5.selfUnsure')],
-              ['notmine', t('v5.selfSlipped')],
-            ] as [SelfGrade, string][]).map(([value, label]) => (
+            {selfOptions.map(([value, label]) => (
               <button type="button" key={value} onClick={() => void chooseSelfGrade(value)}><span>{label}</span><ArrowRight size={20} /></button>
             ))}
           </div>

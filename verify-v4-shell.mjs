@@ -57,7 +57,12 @@ for (const route of [...STUDENT_ROUTES, 'class']) {
 }
 
 const outletCases = [...app.matchAll(/case '(\w+)':/g)].map((m) => m[1]);
-const INSTRUCTOR = new Set(['class', 'cohort', 'studentSheet', 'reteach', 'join', 'return']);
+/* `schemes` joins the instructor screens outside the student budget for the
+   same reason they are outside it: it is off every nav, unreachable except by
+   URL or from Settings, and it is a chooser for evaluating the ten v7 designs
+   rather than a surface a student is ever routed to. The nine-screen ceiling
+   the brief sets is about what a student can be made to walk through. */
+const INSTRUCTOR = new Set(['class', 'cohort', 'studentSheet', 'reteach', 'join', 'return', 'schemes']);
 const studentCases = outletCases.filter((name) => !INSTRUCTOR.has(name));
 if (studentCases.length > 9) {
   failures.push(`brief §6.4 allows nine student screens; the outlet has ${studentCases.length}: ${studentCases.join(', ')}`);

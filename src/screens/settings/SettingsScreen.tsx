@@ -1,7 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { useStore } from '../../store';
 import { PROVIDER_PRESETS } from '../../store/presets';
-import { useT } from '../../i18n';
+import { useT, useLang } from '../../i18n';
 import { useNavigate } from '../../router';
 import {
   BottomSheet, Button, Callout, Input, Segmented, Select, Sheet, Spinner, Toggle, useToast,
@@ -11,6 +11,7 @@ import type { ProviderId, Settings, StoreV2 } from '../../types';
 
 export default function SettingsScreen() {
   const t = useT();
+  const lang = useLang();
   const nav = useNavigate();
   const toast = useToast();
   const settings = useStore((s) => s.settings);
@@ -125,6 +126,24 @@ export default function SettingsScreen() {
                 ]}
               />
             </div>
+          </div>
+        </Sheet>
+      </section>
+
+      {/* v7. The scheme gallery is off every nav, like the instructor screens:
+          it is a chooser for evaluating ten designs, not a student surface. */}
+      <section className="stack-tight">
+        <h2 className="t-title">{lang === 'zh-CN' ? '外观方案' : 'Appearance schemes'}</h2>
+        <Sheet elevation={1}>
+          <div className="stack-tight">
+            <p className="t-body ink-2 measure">
+              {lang === 'zh-CN'
+                ? '十个 UI 方案，每一个对标一个真正有受众的同类产品，改的是结构不是配色。'
+                : 'Ten UI schemes, each grounded in a shipped product with a real audience. They change structure, not just colour.'}
+            </p>
+            <Button variant="secondary" onClick={() => nav('schemes')}>
+              {lang === 'zh-CN' ? '看这十个方案' : 'See the ten schemes'}
+            </Button>
           </div>
         </Sheet>
       </section>

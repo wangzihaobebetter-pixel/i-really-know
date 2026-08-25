@@ -28,7 +28,8 @@
     "verify:v4": "node verify-css-vars.mjs && node verify-router.mjs && node verify-student-links.mjs && node verify-csv.mjs && node verify-v4-shell.mjs && node verify-v4-run.mjs && node verify-v4-followups.mjs && node verify-followup-logic.mjs && node verify-v4-teacher.mjs && node verify-v4-return.mjs",
     "verify:product": "node verify-v5-product.mjs",
     "verify:routes": "node verify-routes.mjs",
-    "verify:detect": "node verify-detect.mjs"
+    "verify:detect": "node verify-detect.mjs",
+    "verify:schemes": "node shot-schemes.cjs"
   },
   "dependencies": {
     "html-to-image": "^1.11.13",
@@ -43,6 +44,7 @@
     "@types/react": "^18.3.5",
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react": "^4.3.1",
+    "pngjs": "^7.0.0",
     "puppeteer-core": "^25.8.0",
     "typescript": "^5.5.4",
     "vite": "^5.4.3"

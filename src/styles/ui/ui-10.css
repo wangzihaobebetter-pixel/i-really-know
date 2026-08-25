@@ -1,56 +1,18 @@
-/* UI 10 · 靛蓝卡片 — 对标 Quizlet
-   Token 来自 memory/ireallyknow-v7/refs/ 里我自己抓的真实截图与 computed style。
-   区分不只在颜色：形状、字重、深度、主卡用什么材料，都按对标对象走。 */
+/* ── 10 · The Tutor — after Brilliant (31,957 ratings) ────────────────────
+   What was taken: the warm-grey page with white panels, the green that only
+   ever means "correct", speech bubbles with a real tail, and the split where
+   the work sits above and the tutor talks below. */
 html[data-ui="10"] {
-  --app: #F6F7FB; --app-2: #EDEFFF; --sheet: #FFFFFF; --hairline: #D9DDE8;
-  --ink: #282E3E; --ink-2: #4A5064; --ink-3: #5C6280;
-  --accent: #4255FF; --accent-text: #3244D8;
-  --warm-signal: #4255FF; --on-warm: #FFFFFF;
-  --primary-button-bg: #282E3E; --primary-button-ink: #FFFFFF;
-  --r-card: 16px; --r-control: 10px;
-  --scheme-press: 0 4px 0 #2E3ED4; --scheme-lift: 0 2px 8px rgba(40,46,62,.10);
-  --scheme-hfont: var(--font-display); --scheme-hweight: 700; --scheme-hsize: 1.8rem;
-  --scheme-body: 1rem;
+  --app: #F5F3F1; --app-2: #EBE8E4; --sheet: #FFFFFF; --hairline: #DEDAD5;
+  --ink: #111111; --ink-2: #424242; --ink-3: #5B5B5B;
+  --accent: #17A24A; --accent-text: #0F7434; --accent-wash: #E1F4E7;
+  --warm-signal: #FFFFFF; --on-warm: #111111;
+  --primary-button-bg: #111111; --primary-button-ink: #FFFFFF;
+  --held: #0F7434; --held-wash: #E1F4E7;
+  --s-radius: 14px;
 }
-
-/* Type: weight and face are most of what separates these references. */
-html[data-ui="10"] h1 {
-  font-family: var(--scheme-hfont); font-weight: var(--scheme-hweight);
-  font-size: var(--scheme-hsize); letter-spacing: -.04em;
-}
-html[data-ui="10"] h2,
-html[data-ui="10"] .run-question { font-family: var(--scheme-hfont); font-weight: var(--scheme-hweight); }
-html[data-ui="10"] body { font-size: var(--scheme-body); }
-
-/* Shape + depth on every surface that carries something. */
-html[data-ui="10"] .new-room-card,
-html[data-ui="10"] .next-room-card,
-html[data-ui="10"] .today-specimen,
-html[data-ui="10"] .sample-option,
-html[data-ui="10"] .reading-v6-page,
-html[data-ui="10"] .welcome-passage,
-html[data-ui="10"] .work-piece-v5,
-html[data-ui="10"] .ending-v5,
-html[data-ui="10"] .held-voice-card {
-  border-radius: var(--r-card);
-  box-shadow: var(--scheme-lift);
-}
-html[data-ui="10"] .welcome-primary,
-html[data-ui="10"] .v5-self-options button,
-html[data-ui="10"] .btn,
-html[data-ui="10"] button.btn-primary {
-  border-radius: var(--r-control);
-  box-shadow: var(--scheme-press);
-}
-
-/* The bring card is the loudest object on Today; it takes each scheme's own
-   material rather than the shared signal yellow. */
-html[data-ui="10"] .new-room-card {
-  background: var(--warm-signal); color: var(--on-warm);
-}
-html[data-ui="10"] .new-room-card .new-room-copy small { color: var(--on-warm); opacity: .78; }
-html[data-ui="10"] .new-room-glyph { border-color: var(--on-warm); color: var(--on-warm); }
-
-/* Nav shape follows the same shape language. */
-html[data-ui="10"] .tabbar,
-html[data-ui="10"] nav { border-radius: var(--navR, 14px); background: #FFFFFF; }
+html[data-ui="10"] h1, html[data-ui="10"] h2 { font-family: var(--font-ui); font-weight: 700; letter-spacing: -.025em; }
+html[data-ui="10"] .s-panel-row { box-shadow: 0 6px 20px -14px rgba(0, 0, 0, .35); }
+html[data-ui="10"] .s-bubble p { font-size: 1.0625rem; }
+html[data-ui="10"] .s-split-panel { box-shadow: 0 6px 20px -14px rgba(0, 0, 0, .35); }
+html[data-ui="10"] .s-logo-mark i { background: var(--accent); }

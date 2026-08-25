@@ -1,56 +1,19 @@
-/* UI 04 · 白底克制 — 对标 Notion
-   Token 来自 memory/ireallyknow-v7/refs/ 里我自己抓的真实截图与 computed style。
-   区分不只在颜色：形状、字重、深度、主卡用什么材料，都按对标对象走。 */
+/* ── 04 · The Worked Sheet — after Gauth (1,457,029) and Photomath (732,929) ─
+   What was taken: the cream page and crimson accent, the enormous dark primary
+   action that opens the app, the pill tool row under it, and the numbered
+   solution rows that expand one at a time. */
 html[data-ui="04"] {
-  --app: #FFFFFF; --app-2: #F7F7F5; --sheet: #FFFFFF; --hairline: #E6E4E0;
-  --ink: #191918; --ink-2: #4A4A47; --ink-3: #6B6B66;
-  --accent: #0075DE; --accent-text: #0063BC;
-  --warm-signal: #E6F3FE; --on-warm: #0A3E71;
-  --primary-button-bg: #191918; --primary-button-ink: #FFFFFF;
-  --r-card: 8px; --r-control: 8px;
-  --scheme-press: none; --scheme-lift: 0 0 0 1px #E6E4E0;
-  --scheme-hfont: var(--font-ui); --scheme-hweight: 600; --scheme-hsize: 1.7rem;
-  --scheme-body: 1rem;
+  --app: #FFFAF0; --app-2: #F6EFE2; --sheet: #FFFFFF; --hairline: #E7DCC8;
+  --ink: #1A1A1A; --ink-2: #494037; --ink-3: #665A4B;
+  --accent: #BF0C34; --accent-text: #A00A2C; --accent-wash: #FBE3E8;
+  --accent-ink: #FFFAF0;
+  --warm-signal: #BF0C34; --on-warm: #FFFAF0;
+  --primary-button-bg: #1A1A1A; --primary-button-ink: #FFFAF0;
+  --s-radius: 14px;
 }
-
-/* Type: weight and face are most of what separates these references. */
-html[data-ui="04"] h1 {
-  font-family: var(--scheme-hfont); font-weight: var(--scheme-hweight);
-  font-size: var(--scheme-hsize); letter-spacing: -.04em;
-}
-html[data-ui="04"] h2,
-html[data-ui="04"] .run-question { font-family: var(--scheme-hfont); font-weight: var(--scheme-hweight); }
-html[data-ui="04"] body { font-size: var(--scheme-body); }
-
-/* Shape + depth on every surface that carries something. */
-html[data-ui="04"] .new-room-card,
-html[data-ui="04"] .next-room-card,
-html[data-ui="04"] .today-specimen,
-html[data-ui="04"] .sample-option,
-html[data-ui="04"] .reading-v6-page,
-html[data-ui="04"] .welcome-passage,
-html[data-ui="04"] .work-piece-v5,
-html[data-ui="04"] .ending-v5,
-html[data-ui="04"] .held-voice-card {
-  border-radius: var(--r-card);
-  box-shadow: var(--scheme-lift);
-}
-html[data-ui="04"] .welcome-primary,
-html[data-ui="04"] .v5-self-options button,
-html[data-ui="04"] .btn,
-html[data-ui="04"] button.btn-primary {
-  border-radius: var(--r-control);
-  box-shadow: var(--scheme-press);
-}
-
-/* The bring card is the loudest object on Today; it takes each scheme's own
-   material rather than the shared signal yellow. */
-html[data-ui="04"] .new-room-card {
-  background: var(--warm-signal); color: var(--on-warm);
-}
-html[data-ui="04"] .new-room-card .new-room-copy small { color: var(--on-warm); opacity: .78; }
-html[data-ui="04"] .new-room-glyph { border-color: var(--on-warm); color: var(--on-warm); }
-
-/* Nav shape follows the same shape language. */
-html[data-ui="04"] .tabbar,
-html[data-ui="04"] nav { border-radius: var(--navR, 8px); background: #FFFFFF; }
+html[data-ui="04"] h1, html[data-ui="04"] h2 { font-family: var(--font-display); font-weight: 800; letter-spacing: -.025em; }
+html[data-ui="04"] .s-step-num { border-radius: 999px; }
+html[data-ui="04"] .s-step[data-state="current"] .s-step-num { background: var(--accent); color: var(--accent-ink); }
+html[data-ui="04"] .s-scan-primary { box-shadow: 0 10px 30px -14px rgba(26, 26, 26, .8); }
+html[data-ui="04"] .s-scan-tools button { border-color: var(--accent-wash); color: var(--accent-text); }
+html[data-ui="04"] .s-logo-mark i { background: var(--accent); }

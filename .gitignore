@@ -7,3 +7,4 @@ verify-shots/
 shot-*.png
 .tmp-*/
 .DS_Store
+shots-v7/

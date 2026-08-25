@@ -14,7 +14,21 @@ const failures = [];
 const need = (value, re, message) => { if (!re.test(value)) failures.push(message); };
 const forbid = (value, re, message) => { if (re.test(value)) failures.push(message); };
 need(settings, /nav\('class'\)/, 'teacher half has no explicit entrance from Settings');
-need(shell, /INSTRUCTOR[\s\S]*showStudentNav\s*=\s*!immersive\s*&&\s*!instructor/, 'student navigation is not removed inside the instructor workspace');
+/* v7 · showStudentNav became a ternary: schemes decide for themselves whether
+   their chrome survives a run-through. The invariant this gate exists to hold
+   is unchanged and must survive that — no branch may leave student navigation
+   on inside the instructor workspace. So instead of matching one literal
+   expression, require every leaf of the ternary chain to carry !instructor:
+   n conditionals have n+1 leaves, so n+1 guards is the floor. */
+need(shell, /INSTRUCTOR/, 'the instructor route set is gone from the shell');
+const navAssign = shell.match(/const showStudentNav\s*=([\s\S]*?);\n/);
+if (!navAssign) failures.push('showStudentNav is no longer assigned in the shell');
+else {
+  const expr = navAssign[1];
+  const guards = (expr.match(/!instructor/g) || []).length;
+  const leaves = (expr.match(/\?/g) || []).length + 1;
+  if (guards < leaves) failures.push(`student navigation is not removed inside the instructor workspace: ${guards} !instructor guard(s) for ${leaves} branch(es)`);
+}
 need(classScreen + cohort, /parseRosterCsv|accept=["']\.csv/, 'teacher half has no roster CSV import');
 need(cohort, /MAX_COHORT_SUBMISSIONS\s*=\s*250[\s\S]*submissions\.length/, 'repeated imports can grow a local cohort without a bound');
 need(cohort, /studentLink|createStudentTicket|copyShareLink/, 'each student needs a self-contained share link');

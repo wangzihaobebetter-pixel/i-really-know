@@ -1,56 +1,20 @@
-/* UI 07 · 靛紫学术 — 对标 Khan Academy
-   Token 来自 memory/ireallyknow-v7/refs/ 里我自己抓的真实截图与 computed style。
-   区分不只在颜色：形状、字重、深度、主卡用什么材料，都按对标对象走。 */
+/* ── 07 · The Daily — after Blinkist (153,947 ratings) ────────────────────
+   What was taken: the mint page with a honey hero, a serif display face for
+   the one thing that matters today, the DAY 1…12 grid, and the horizontal
+   shelf of spines underneath. */
 html[data-ui="07"] {
-  --app: #FFFFFF; --app-2: #EBF1FD; --sheet: #FFFFFF; --hairline: #DDE3F0;
-  --ink: #21242C; --ink-2: #4A4C53; --ink-3: #63666E;
-  --accent: #5753FA; --accent-text: #4340D6;
-  --warm-signal: #EBF1FD; --on-warm: #21242C;
-  --primary-button-bg: #21242C; --primary-button-ink: #FFFFFF;
-  --r-card: 12px; --r-control: 8px;
-  --scheme-press: none; --scheme-lift: 0 1px 3px rgba(33,36,44,.12);
-  --scheme-hfont: var(--font-ui); --scheme-hweight: 700; --scheme-hsize: 1.65rem;
-  --scheme-body: .9375rem;
+  --app: #EFF5F3; --app-2: #E1EBE7; --sheet: #FFFFFF; --hairline: #CBD9D3;
+  --ink: #033049; --ink-2: #2F5468; --ink-3: #48697A;
+  --accent: #0E9E5B; --accent-text: #0A7042; --accent-wash: #DCF0E5;
+  --warm-signal: #FDBE21; --on-warm: #033049;
+  --primary-button-bg: #033049; --primary-button-ink: #FFFFFF;
+  --held: #0A7042; --held-wash: #DCF0E5;
+  --s-radius: 12px;
 }
-
-/* Type: weight and face are most of what separates these references. */
-html[data-ui="07"] h1 {
-  font-family: var(--scheme-hfont); font-weight: var(--scheme-hweight);
-  font-size: var(--scheme-hsize); letter-spacing: -.04em;
+html[data-ui="07"] h1, html[data-ui="07"] h2,
+html[data-ui="07"] .s-chapter-q, html[data-ui="07"] .s-daily-hero strong {
+  font-family: Songti SC, Georgia, var(--font-display); font-weight: 500; letter-spacing: -.01em;
 }
-html[data-ui="07"] h2,
-html[data-ui="07"] .run-question { font-family: var(--scheme-hfont); font-weight: var(--scheme-hweight); }
-html[data-ui="07"] body { font-size: var(--scheme-body); }
-
-/* Shape + depth on every surface that carries something. */
-html[data-ui="07"] .new-room-card,
-html[data-ui="07"] .next-room-card,
-html[data-ui="07"] .today-specimen,
-html[data-ui="07"] .sample-option,
-html[data-ui="07"] .reading-v6-page,
-html[data-ui="07"] .welcome-passage,
-html[data-ui="07"] .work-piece-v5,
-html[data-ui="07"] .ending-v5,
-html[data-ui="07"] .held-voice-card {
-  border-radius: var(--r-card);
-  box-shadow: var(--scheme-lift);
-}
-html[data-ui="07"] .welcome-primary,
-html[data-ui="07"] .v5-self-options button,
-html[data-ui="07"] .btn,
-html[data-ui="07"] button.btn-primary {
-  border-radius: var(--r-control);
-  box-shadow: var(--scheme-press);
-}
-
-/* The bring card is the loudest object on Today; it takes each scheme's own
-   material rather than the shared signal yellow. */
-html[data-ui="07"] .new-room-card {
-  background: var(--warm-signal); color: var(--on-warm);
-}
-html[data-ui="07"] .new-room-card .new-room-copy small { color: var(--on-warm); opacity: .78; }
-html[data-ui="07"] .new-room-glyph { border-color: var(--on-warm); color: var(--on-warm); }
-
-/* Nav shape follows the same shape language. */
-html[data-ui="07"] .tabbar,
-html[data-ui="07"] nav { border-radius: var(--navR, 10px); background: #FFFFFF; }
+html[data-ui="07"] .s-daily-eyebrow, html[data-ui="07"] .s-chapter-eyebrow { color: var(--accent-text); font-weight: 700; }
+html[data-ui="07"] .s-tab[aria-current="page"] { color: var(--accent-text); }
+html[data-ui="07"] .s-daily-spine { border-left: 4px solid var(--accent); }
