@@ -26,7 +26,7 @@ b=Image.new("RGB",(W,H),"#F4F2ED"); d=ImageDraw.Draw(b)
 d.text((PAD,30),"我真会 · v7 R2 — 十个方案，每个回答一个不同的产品问题",font=f_title,fill="#1B1A17")
 d.text((PAD,88),"依据是 45 个真实产品里筛出来的同类，每个附 App Store 评分人数。改的是结构、版式、动效、功能摆放——不是配色。",font=f_lead,fill="#55524D")
 d.text((PAD,116),"左＝今天（首页）  右＝过一遍（口试中）      45 对两两比较：平均差异 60.6%，最接近的一对 24.4%",font=f_lead,fill="#7A756C")
-d.text((PAD,140),"共同地基：逃生口 ≥44×44 且与提交同级 · 练习屏常驻「这题问得不对」· 最小字号 12px · 等待态给三段状态线",font=f_lead,fill="#0B6079")
+d.text((PAD,140),"共同地基（十个方案共用，不是某一个方案的卖点）：进第一问之前先声明「说不清是正常状态」· 逃生口 ≥44×44 且与提交同级 · 练习屏常驻「这题问得不对」· 最小字号 12px · 等待态给三段状态线",font=f_lead,fill="#0B6079")
 
 for k,(sid,name,ref,ratings,ask,idea,axes) in enumerate(S):
     col,row=k%COLS,k//COLS
