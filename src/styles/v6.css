@@ -593,7 +593,11 @@
   margin: 0; padding: 0; border: 0; background: transparent; box-shadow: none;
   font-size: .75rem; line-height: 1.6;
 }
-.work-preview > small { color: var(--ink-3); font-size: .6875rem; }
+/* --ink-3 on --app-2 is 4.08:1 — the dashed box is darker than the page, so
+   the tertiary ink that passes on --app does not pass here. Caught by walking
+   both themes on every screen this round changed. */
+.work-preview > small { color: var(--ink-2); font-size: .6875rem; }
+.work-preview figcaption { color: var(--ink-2); }
 
 /* The shelf card gets the same treatment as everything else that holds work. */
 .work-piece-v5 { box-shadow: var(--lift-2); }
@@ -679,3 +683,30 @@
    The box gives up those pixels; nobody has ever wanted a taller empty
    textarea, and it still grows with content. */
 .material-v5 textarea { min-height: 148px; }
+
+/* =========================== Result: your words first ==================== */
+
+/*
+ * The result page was already right in structure — the student's own sentence
+ * is the hero, the marked page follows, the held state reads green. What was
+ * wrong is the same thing that was wrong on 你: the eyebrow, a two-line
+ * display headline and the source line ran for ~600px before the first thing
+ * the person actually did appeared on screen.
+ *
+ * The takeaway keeps its weight — it is the one-sentence verdict §6.1 asks for
+ * — but it stops being a poster.
+ */
+.result-takeaway::before { width: 42px; height: 6px; margin-bottom: 18px; }
+.result-takeaway h1 {
+  font-size: clamp(1.45rem, 5.8vw, 1.8rem);
+  max-width: 20ch;
+}
+.result-takeaway p { margin-top: 8px; font-size: .75rem; }
+
+.held-voice-card { padding: 19px; }
+.held-voice-card blockquote { font-size: 1.125rem; line-height: 1.45; }
+
+@media (min-width: 1024px) {
+  .result-takeaway h1 { font-size: clamp(1.9rem, 2.4vw, 2.35rem); max-width: 24ch; }
+  .held-voice-card blockquote { font-size: 1.3rem; }
+}
