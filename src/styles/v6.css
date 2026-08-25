@@ -597,3 +597,51 @@
 
 /* The shelf card gets the same treatment as everything else that holds work. */
 .work-piece-v5 { box-shadow: var(--lift-2); }
+
+/* ============================ You: a book, not a page ==================== */
+
+/*
+ * §6.2 #11 promises 「攒一本你自己说过、并且站住了的话」 — a book a student
+ * could reread the night before a viva. Three things stopped it reading as
+ * one, all measurable on a 390px screen:
+ *
+ *  1. Three lines of display type and a subtitle ran before the first of the
+ *     student's own sentences. The promise of this tab is the sentences.
+ *  2. One quote card was 220px tall at 88% width, so exactly one was ever
+ *     visible: a carousel of one, which reads as a slideshow, not a stack.
+ *  3. 「你对自己的判断」 sat in a full white card under a 1.4rem display
+ *     heading, competing with the words. That is the calibration idea, and
+ *     §8-2 is explicit that it must not be the main visual.
+ */
+.you-v5 .return-surface-opening { padding-top: clamp(8px, 2vh, 16px); }
+.you-v5 .return-surface-opening h1 { font-size: clamp(1.5rem, 6.2vw, 1.9rem); max-width: 14ch; }
+.you-v5 .return-surface-opening p { margin-top: 8px; font-size: .8125rem; }
+
+/* Show the edge of the next card. A stack you can see past is a book. */
+.voice-bank-scroll blockquote {
+  flex: 0 0 min(76%, 330px);
+  min-height: 176px;
+  gap: 14px;
+  padding: 18px;
+  box-shadow: var(--lift-2);
+}
+.voice-bank-scroll blockquote > span { font-size: 1rem; line-height: 1.5; }
+.voice-bank-scroll blockquote cite { font-size: .6875rem; opacity: .85; }
+
+/* The read on yourself: one line and a rule, under the words rather than
+   beside them. Still present, still honest, no longer the hero. */
+.read-yourself-v5 {
+  padding: 15px 0 0;
+  border: 0; border-top: 1px solid var(--hairline); border-radius: 0;
+  background: transparent;
+}
+.read-yourself-v5 h2 {
+  margin-top: 6px; font-family: var(--font-ui);
+  font-size: .9375rem; font-weight: 640; line-height: 1.5; letter-spacing: 0;
+  max-width: 34ch; color: var(--ink-2);
+}
+.read-yourself-v5 .v5-eyebrow { font-size: .625rem; }
+
+@media (min-width: 1024px) {
+  .voice-bank-scroll blockquote { flex: 0 0 min(46%, 380px); }
+}
