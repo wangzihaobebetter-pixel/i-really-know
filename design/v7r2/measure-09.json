@@ -1,0 +1,284 @@
+{
+ "09@390-run": {
+  "viewport": 390,
+  "navClass": "no-print s-side",
+  "navBox": {
+   "w": 390,
+   "h": 73
+  },
+  "question": {
+   "width": 358,
+   "fontSize": 32,
+   "charsPerLine": 20
+  },
+  "rowCount": 4,
+  "rowsUnder44": 0,
+  "rowHeights": [
+   44,
+   44,
+   44,
+   44
+  ],
+  "horizontalOverflow": 0
+ },
+ "09@390-today": {
+  "viewport": 390,
+  "navClass": "no-print s-side",
+  "navBox": {
+   "w": 390,
+   "h": 73
+  },
+  "question": {
+   "width": 358,
+   "fontSize": 33.6,
+   "charsPerLine": 19
+  },
+  "rowCount": 7,
+  "rowsUnder44": 3,
+  "rowHeights": [
+   44,
+   44,
+   44,
+   44,
+   34,
+   32,
+   32
+  ],
+  "horizontalOverflow": 0
+ },
+ "01@390-run": {
+  "viewport": 390,
+  "navClass": "no-print s-dock",
+  "navBox": {
+   "w": 244,
+   "h": 60
+  },
+  "question": null,
+  "rowCount": 0,
+  "rowsUnder44": 0,
+  "rowHeights": [],
+  "horizontalOverflow": 0
+ },
+ "01@390-today": {
+  "viewport": 390,
+  "navClass": "no-print s-dock",
+  "navBox": {
+   "w": 244,
+   "h": 60
+  },
+  "question": {
+   "width": 358,
+   "fontSize": 25.6,
+   "charsPerLine": 25
+  },
+  "rowCount": 0,
+  "rowsUnder44": 0,
+  "rowHeights": [],
+  "horizontalOverflow": 0
+ },
+ "02@390-run": {
+  "viewport": 390,
+  "navClass": "no-print s-topbar",
+  "navBox": {
+   "w": 390,
+   "h": 56
+  },
+  "question": null,
+  "rowCount": 0,
+  "rowsUnder44": 0,
+  "rowHeights": [],
+  "horizontalOverflow": 0
+ },
+ "02@390-today": {
+  "viewport": 390,
+  "navClass": "no-print s-topbar",
+  "navBox": {
+   "w": 390,
+   "h": 56
+  },
+  "question": {
+   "width": 358,
+   "fontSize": 23.2,
+   "charsPerLine": 28
+  },
+  "rowCount": 0,
+  "rowsUnder44": 0,
+  "rowHeights": [],
+  "horizontalOverflow": 0
+ },
+ "04@390-run": {
+  "viewport": 390,
+  "navClass": "no-print s-topbar",
+  "navBox": {
+   "w": 390,
+   "h": 56
+  },
+  "question": {
+   "width": 358,
+   "fontSize": 21.6,
+   "charsPerLine": 30
+  },
+  "rowCount": 0,
+  "rowsUnder44": 0,
+  "rowHeights": [],
+  "horizontalOverflow": 0
+ },
+ "04@390-today": {
+  "viewport": 390,
+  "navClass": "no-print s-topbar",
+  "navBox": {
+   "w": 390,
+   "h": 56
+  },
+  "question": {
+   "width": 358,
+   "fontSize": 24,
+   "charsPerLine": 27
+  },
+  "rowCount": 0,
+  "rowsUnder44": 0,
+  "rowHeights": [],
+  "horizontalOverflow": 0
+ },
+ "09@1440-run": {
+  "viewport": 1440,
+  "navClass": "no-print s-side",
+  "navBox": {
+   "w": 232,
+   "h": 900
+  },
+  "question": {
+   "width": 860,
+   "fontSize": 32,
+   "charsPerLine": 49
+  },
+  "rowCount": 4,
+  "rowsUnder44": 4,
+  "rowHeights": [
+   32,
+   32,
+   32,
+   32
+  ],
+  "horizontalOverflow": 0
+ },
+ "09@1440-today": {
+  "viewport": 1440,
+  "navClass": "no-print s-side",
+  "navBox": {
+   "w": 232,
+   "h": 900
+  },
+  "question": {
+   "width": 860,
+   "fontSize": 33.6,
+   "charsPerLine": 47
+  },
+  "rowCount": 7,
+  "rowsUnder44": 7,
+  "rowHeights": [
+   32,
+   32,
+   32,
+   32,
+   34,
+   32,
+   32
+  ],
+  "horizontalOverflow": 0
+ },
+ "01@1440-run": {
+  "viewport": 1440,
+  "navClass": "no-print s-dock",
+  "navBox": {
+   "w": 244,
+   "h": 60
+  },
+  "question": null,
+  "rowCount": 0,
+  "rowsUnder44": 0,
+  "rowHeights": [],
+  "horizontalOverflow": 0
+ },
+ "01@1440-today": {
+  "viewport": 1440,
+  "navClass": "no-print s-dock",
+  "navBox": {
+   "w": 244,
+   "h": 60
+  },
+  "question": {
+   "width": 860,
+   "fontSize": 25.6,
+   "charsPerLine": 61
+  },
+  "rowCount": 0,
+  "rowsUnder44": 0,
+  "rowHeights": [],
+  "horizontalOverflow": 0
+ },
+ "02@1440-run": {
+  "viewport": 1440,
+  "navClass": "no-print s-topbar",
+  "navBox": {
+   "w": 1440,
+   "h": 56
+  },
+  "question": null,
+  "rowCount": 0,
+  "rowsUnder44": 0,
+  "rowHeights": [],
+  "horizontalOverflow": 0
+ },
+ "02@1440-today": {
+  "viewport": 1440,
+  "navClass": "no-print s-topbar",
+  "navBox": {
+   "w": 1440,
+   "h": 56
+  },
+  "question": {
+   "width": 860,
+   "fontSize": 23.2,
+   "charsPerLine": 67
+  },
+  "rowCount": 0,
+  "rowsUnder44": 0,
+  "rowHeights": [],
+  "horizontalOverflow": 0
+ },
+ "04@1440-run": {
+  "viewport": 1440,
+  "navClass": "no-print s-topbar",
+  "navBox": {
+   "w": 1440,
+   "h": 56
+  },
+  "question": {
+   "width": 860,
+   "fontSize": 21.6,
+   "charsPerLine": 72
+  },
+  "rowCount": 0,
+  "rowsUnder44": 0,
+  "rowHeights": [],
+  "horizontalOverflow": 0
+ },
+ "04@1440-today": {
+  "viewport": 1440,
+  "navClass": "no-print s-topbar",
+  "navBox": {
+   "w": 1440,
+   "h": 56
+  },
+  "question": {
+   "width": 860,
+   "fontSize": 24,
+   "charsPerLine": 65
+  },
+  "rowCount": 0,
+  "rowsUnder44": 0,
+  "rowHeights": [],
+  "horizontalOverflow": 0
+ }
+}

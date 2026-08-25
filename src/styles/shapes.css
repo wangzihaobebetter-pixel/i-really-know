@@ -84,7 +84,7 @@ nav.s-dock {
   box-shadow: var(--e2);
 }
 nav.s-dock .s-logo { margin-right: 4px; }
-.s-dock-btn { position: relative; display: grid; place-items: center; width: 42px; height: 42px; border-radius: 999px; color: var(--ink-3); text-decoration: none; }
+.s-dock-btn { position: relative; display: grid; place-items: center; width: 44px; height: 44px; border-radius: 999px; color: var(--ink-3); text-decoration: none; }
 .s-dock-btn[aria-current="page"] { background: var(--app-2); color: var(--ink); }
 
 /* ══ Nav · time rail (06) ═══════════════════════════════════════════════ */
@@ -137,6 +137,19 @@ nav.s-dock .s-logo { margin-right: 4px; }
   .s-side-kids { display: none; }
   .s-side-head { display: none; }
   .s-side { grid-auto-flow: column; align-items: center; justify-content: space-around; }
+  /* Below 900px the sidebar stops being a sidebar and becomes the bottom bar —
+     measured at 390 it is a 390x61 strip. A 32px row is a defensible sidebar
+     row on a desktop (Notion's are smaller still); it is not a defensible
+     bottom-bar target on a phone. Measured before this rule: 7 of 7 rows under
+     the 44px floor. */
+  .s-side-row { min-height: 44px; padding-inline: 10px; }
+  /* Same floor for the outline tree itself, which on scheme 09 is the whole
+     home screen. This is the measured cost of choosing a tree on a phone: the
+     rows were 34/32/32 and the tree 205px; at the touch floor it is 132px of
+     rows alone. Scheme 09 is not cheap on a 390px screen, and this is the
+     number that says so rather than an adjective. */
+  .s-outline-row { min-height: 44px; }
+  .s-outline-row .s-outline-name, .s-outline-row .s-outline-toggle { min-height: 44px; }
   .s-side-foot { margin-top: 0; }
 }
 
@@ -452,7 +465,11 @@ nav.s-dock .s-logo { margin-right: 4px; }
 .s-run-card-top { grid-template-columns: auto auto 1fr; }
 .s-run-card-top .s-flag { justify-self: end; }
 .s-run-rating-top .s-flag { margin-left: auto; }
-.s-run-reader-top button { display: grid; place-items: center; width: 36px; height: 36px; border: 0; background: none; color: var(--ink); cursor: pointer; }
+/* Scoped to the leave button. Unscoped, this also squeezed the flag button —
+   which carries a text label, not an icon — into a 36px box, so "这题问得不对"
+   rendered outside its own border and pushed the document 2px wider than the
+   viewport at 390. Measured, not guessed: the span's right edge was 392. */
+.s-run-reader-top > button:first-child { display: grid; place-items: center; width: 36px; height: 36px; border: 0; background: none; color: var(--ink); cursor: pointer; }
 .s-run-reader-top span:nth-child(2) { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .s-reader-surface { padding: var(--space-6) 0; font-size: 1.0625rem; line-height: 1.9; }
 .s-reader-label { display: block; margin-bottom: 10px; font-size: var(--t-micro); letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); }
