@@ -710,3 +710,93 @@
   .result-takeaway h1 { font-size: clamp(1.9rem, 2.4vw, 2.35rem); max-width: 24ch; }
   .held-voice-card blockquote { font-size: 1.3rem; }
 }
+
+/* ===================== the room this run-through is for =================== */
+
+/*
+ * §6.2 #1 — every run-through is framed by an occasion and a date, and that
+ * frame belongs where the person is answering, not only on the result they
+ * see afterwards. The product's whole sentence is 「先在这里听到难问，再去那间
+ * 房里听到」; the room is the reason any of this is happening.
+ *
+ * Sized to be read once and then sit in peripheral vision. It must never
+ * compete with the question — that is the thing on this screen.
+ */
+.v5-run-frame {
+  margin: 2px 0 0; padding: 0;
+  color: var(--ink-3); font-size: .6875rem; font-weight: 640;
+  letter-spacing: .04em; text-transform: uppercase;
+}
+:lang(zh-CN) .v5-run-frame { letter-spacing: .02em; text-transform: none; font-size: .75rem; }
+
+/* ==================== the three tabs, composed for a laptop =============== */
+
+/*
+ * At 1440x900 the tabs had 33% / 33% / 24% of the viewport carrying any ink:
+ * one column of stacked cards hugging the left rail, the right third empty and
+ * ~450px dead below. This is the same fault fixed on the first screen in round
+ * one — and I fixed it only there, never applying it to the three screens a
+ * person actually lives in.
+ *
+ * The split is not decorative. Left is what you DO (the promise, the card that
+ * takes your work, the way in). Right is EVIDENCE (the specimen, a finished
+ * piece, your own sentences). Action and proof, side by side, which is the
+ * same arrangement the welcome screen already uses.
+ *
+ * Everything is scoped to >=1024px. Below that not one property changes.
+ */
+@media (min-width: 1024px) {
+  .today-v5,
+  .work-v5,
+  .you-v5 {
+    /* `.col-read` caps these at --col-read (860px), which beat the width below
+       and squeezed the two columns into 394px + 414px in the middle of a
+       1440px screen — the composition was right and the container was not. */
+    max-width: none;
+    width: min(100%, 1180px);
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+    column-gap: clamp(32px, 3.6vw, 56px);
+    /* Centre the composition instead of letting it stop a third of the way
+       down a 900px screen. The same ink spread over two columns scores LOWER
+       on a viewport-coverage metric than the old stacked column did, which is
+       the round-one lesson again: that number measures spread, not quality.
+       Judge it by eye; the number is only there to catch a regression. */
+    align-content: center;
+    min-height: calc(100dvh - var(--space-8) - var(--space-7));
+  }
+
+  /* Header and opening span both columns; everything else picks a side. */
+  .today-v5 > .product-wordmark,
+  .work-v5 > .product-wordmark,
+  .you-v5 > .product-wordmark { grid-column: 1 / -1; }
+
+  .today-v5 > .today-opening,
+  .work-v5 > .return-surface-opening,
+  .you-v5 > .return-surface-opening { grid-column: 1; }
+
+  /* Left: the way in. */
+  .today-v5 > .new-room-card,
+  .today-v5 > .next-room-card,
+  .today-v5 > .bring-quiet,
+  .work-v5 > .work-empty-v5,
+  .you-v5 > .read-yourself-v5 { grid-column: 1; }
+
+  /* Right: what the product has to show for itself. */
+  .today-v5 > .today-specimen,
+  .today-v5 > .today-kept,
+  .today-v5 > .today-recent,
+  .work-v5 > .work-shelf-v5,
+  .work-v5 > .work-tried-v5,
+  .you-v5 > .voice-bank-v5,
+  .you-v5 > .patterns-v5 { grid-column: 2; grid-row: 2 / span 20; align-self: start; }
+
+  /* The closing line sits under everything, quietly. */
+  .you-v5 > .no-comparison-v5 { grid-column: 1 / -1; }
+
+  /* The specimen gets room to be read rather than glanced at. */
+  .today-v5 > .today-specimen { margin-top: 0; }
+  /* Room to be read rather than glanced at, now that it has a column. */
+  .today-v5 > .today-specimen .specimen-page { max-height: 232px; }
+  .work-v5 > .work-shelf-v5 { margin-top: 0; }
+  .you-v5 > .voice-bank-v5 { margin-top: 0; }
+}
