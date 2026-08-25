@@ -99,15 +99,22 @@ export default function YouScreen() {
         </section>
       )}
 
+      {/*
+        Calibration, demoted here too (VERDICT.md §3.3 row 1). The trail of
+        self-estimate-vs-verdict reads is still computed and still here, but it
+        is folded: this tab opens on the person's own words, and the diagnostic
+        is something they can choose to open, not a claim the product makes at
+        them. Nothing in `divergence()` or the stored probe data changed.
+      */}
       {latestRead && (
-        <section className="read-yourself-v5">
-          <span className="v5-eyebrow">{t('you4.read')}</span>
+        <details className="read-yourself-v5">
+          <summary><span className="v5-eyebrow">{t('you4.read')}</span></summary>
           <h2>{readSentence}</h2>
           <div className="read-dots-v5" aria-label={t('you4.read')}>
             {reads.slice(0, 8).reverse().map(({ session, read }) => <span key={session.id} data-direction={read.direction} title={formatDate(session.completedAt ?? session.createdAt, lang)} />)}
           </div>
           <button type="button" onClick={() => nav('work')}>{lang === 'zh-CN' ? '打开每一次' : 'Open each run-through'}<ArrowRight size={17} /></button>
-        </section>
+        </details>
       )}
 
       {patterns.length > 0 && (

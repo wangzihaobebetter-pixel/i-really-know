@@ -78,7 +78,21 @@ async function waitForDownload(previous, timeoutMs = 20000) {
     await page.evaluate(() => document.fonts.ready);
     evidence.welcome = await shot(page, '01-mobile-welcome.png');
     const welcomeText = await text(page);
-    check(welcomeText.includes('Hear the question here'), 'cold start did not state the value proposition');
+    /*
+     * Updated 2026-08-25 with the repositioning, not around it. The old
+     * assertion pinned the retired headline "Hear the question here…"; the
+     * product is now stated as a rehearsal — "Before they ask you, let me ask
+     * you first." Asserting the old sentence would have forced the copy back.
+     */
+    check(welcomeText.includes('let me ask you first'), 'cold start did not state the rehearsal value proposition');
+    /*
+     * VERDICT.md (2026-08-25) §3.2 ③, hard constraint. Three shipped
+     * competitors already own "verify" — VivaProof's own headline is "Verify
+     * understanding in the AI era." — so the word may not return to our first
+     * screen in either language. This tightens an existing gate; per §3.3 row 4
+     * no new verify-*.mjs file may be added, and none was.
+     */
+    check(!/verif(y|ies|ied|ication)/i.test(welcomeText) && !welcomeText.includes('验证'), 'the retired "verify" positioning came back to the cold start');
     check((await page.$$('.welcome-primary')).length === 1, 'cold start did not expose one primary action');
 
     await clickText(page, 'Find the hard question');

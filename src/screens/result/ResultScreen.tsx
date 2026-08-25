@@ -217,21 +217,6 @@ export default function ResultScreen() {
         </section>
       )}
 
-      {read && (
-        <section className="self-read-v5">
-          <h2>{t('v5.readTitle')}</h2>
-          <p>{readLine}</p>
-          <details>
-            <summary>{lang === 'zh-CN' ? '看刚才的两边' : 'See both sides'}</summary>
-            <div className="self-read-pair">
-              <div><span>{lang === 'zh-CN' ? '你当时觉得' : 'You expected'}</span><strong>{read.claimed}</strong></div>
-              <ArrowRight size={18} aria-hidden />
-              <div><span>{lang === 'zh-CN' ? '实际站住' : 'Actually held'}</span><strong>{read.defended}</strong></div>
-            </div>
-          </details>
-        </section>
-      )}
-
       {scheduled > 0 && (
         <section className="return-promise-v5">
           <span aria-hidden><RotateCcw size={21} /></span>
@@ -240,6 +225,29 @@ export default function ResultScreen() {
             <p>{t('v5.comingBackBody')}</p>
           </div>
         </section>
+      )}
+
+      {/*
+        Calibration, demoted. VERDICT.md (2026-08-25) §3.3 row 1: the gap
+        between what the person expected to hold and what held is an INTERNAL
+        diagnostic, not the thing this product sells. It is still computed by
+        `divergence()` and still stored on every probe — nothing was deleted —
+        but it no longer occupies a section heading above the fold. A person
+        finishing a rehearsal needs to know what did not come out clearly; a
+        number about how wrong their self-estimate was is a researcher's
+        interest, and in the literature it is a negative effect in exactly the
+        cohort that most needs help. Folded closed, below the return promise.
+      */}
+      {read && (
+        <details className="self-read-v5">
+          <summary>{t('v5.readTitle')}</summary>
+          <p>{readLine}</p>
+          <div className="self-read-pair">
+            <div><span>{lang === 'zh-CN' ? '你当时觉得' : 'You expected'}</span><strong>{read.claimed}</strong></div>
+            <ArrowRight size={18} aria-hidden />
+            <div><span>{lang === 'zh-CN' ? '实际站住' : 'Actually held'}</span><strong>{read.defended}</strong></div>
+          </div>
+        </details>
       )}
 
       {!session.probes.some((probe) => probe.ai) && (

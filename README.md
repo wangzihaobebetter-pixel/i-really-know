@@ -1,6 +1,8 @@
 # I Really Know / 我真会
 
-**Learning verification, not learning acceleration.**
+**A rehearsal before the room — not a certificate for anyone else.**
+
+Before they ask you, this asks you first. The output is for the person who ran it; nothing here is designed to be handed to a third party as evidence.
 
 Bring a piece of work you have already written and name the room you are preparing for. The app reads it visibly, asks 4–7 questions that cannot be answered by copying, records your own read before showing any judgement, and brings loose links back from a different angle.
 
@@ -22,6 +24,8 @@ Eleven real student artifacts ship, each with a source URL, hand-written probes 
 
 - Never writes, rewrites or improves submitted work.
 - Never claims to detect AI or authorship.
+- Never positions itself as proof for a third party. A run-through is a rehearsal the student runs on themselves.
+- The gap between the self-estimate and the verdict is kept and computed, but it is an internal diagnostic — never a headline, never a first-screen claim.
 - No student scores, percentages, rankings or peer comparison.
 - Self-assessment is recorded before any model or manual judgement.
 - No account, analytics or application backend.
