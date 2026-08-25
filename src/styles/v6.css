@@ -645,3 +645,37 @@
 @media (min-width: 1024px) {
   .voice-bank-scroll blockquote { flex: 0 0 min(46%, 380px); }
 }
+
+/* ========================= Bring: acknowledge the work =================== */
+
+/*
+ * Handing work over is where this product's promise starts — 「我会认真读」 —
+ * and the only response to a paste was a character counter ticking up. A form
+ * that takes something without acknowledging it stays a form. Every fact in
+ * this line already existed: the locally detected discipline, the question
+ * count for the chosen pace, and what happens next.
+ */
+.bring-ack {
+  display: flex; align-items: flex-start; gap: 9px;
+  margin-top: 12px; padding: 11px 13px;
+  border-radius: 12px 20px 12px 12px;
+  color: var(--ink-2); background: var(--held-wash);
+  font-size: .8125rem; line-height: 1.5;
+  animation: v6-ack-in 420ms var(--spring) both;
+}
+.bring-ack-dot {
+  width: 8px; height: 8px; flex: none; margin-top: 6px;
+  border-radius: 50%; background: var(--held);
+}
+@keyframes v6-ack-in {
+  from { transform: translateY(6px); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) { .bring-ack { animation: none; } }
+
+/* The acknowledgement has to land ABOVE the fold, or it is not an
+   acknowledgement. With the textarea at its old height it rendered at y=853 on
+   a 390x844 screen — nine pixels past the edge, which is the same as absent.
+   The box gives up those pixels; nobody has ever wanted a taller empty
+   textarea, and it still grows with content. */
+.material-v5 textarea { min-height: 148px; }

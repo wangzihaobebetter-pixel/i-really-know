@@ -7,7 +7,7 @@ import { BottomSheet, Button, FileDrop, Input } from '../../ui';
 import { detectPack, packLabel, PACKS } from '../../packs';
 import { detectMaterialKind, titleFromMaterial } from '../../lib/analysis';
 import { buildFeaturedSampleSession } from '../../samples';
-import { PRESET_DIFFICULTY } from '../../store/presets';
+import { PRESET_COUNTS, PRESET_DIFFICULTY } from '../../store/presets';
 import type { PackId, RunPreset } from '../../types';
 
 const OCCASIONS = ['lab', 'defense', 'review', 'exam', 'other'] as const;
@@ -143,6 +143,29 @@ export default function BringScreen() {
         <label className="visually-hidden" htmlFor="bring-material">{t('bring4.material')}</label>
         <textarea id="bring-material" value={material} maxLength={50000} placeholder={t('bring4.materialHint')} onChange={(event) => setMaterial(event.target.value)} />
         <div className="material-v5-foot"><span>{t('v5.bringPrivacy')}</span><span>{material.length.toLocaleString()}</span></div>
+        {/*
+          Handing your work over is where this product's promise starts —
+          「我会认真读」 — and the only response to a paste was a character
+          counter ticking up. A form that takes something without acknowledging
+          it stays a form.
+
+          It has to sit directly under the textarea. Placed after the material
+          section it rendered at y=977 on a 390x844 screen — 133px below the
+          fold, immediately after the one action guaranteed to leave the
+          person's eyes on the box they just filled. An acknowledgement nobody
+          sees is not an acknowledgement.
+
+          Every fact in it already existed: the locally detected discipline,
+          the question count for the chosen pace, and what happens next.
+        */}
+        {material.trim().length >= 80 && (
+          <p className="bring-ack" role="status">
+            <span className="bring-ack-dot" aria-hidden />
+            {lang === 'zh-CN'
+              ? `接住了。按${packLabel(packId, lang)}来考，大约 ${PRESET_COUNTS[pace]} 问 —— 我会先当着你的面读一遍。`
+              : `Got it. ${PRESET_COUNTS[pace]} questions or so, asked as ${packLabel(packId, lang)} — and I read it in front of you first.`}
+          </p>
+        )}
         <FileDrop
           accept={['.txt', '.md', '.py', '.js', '.ts', '.tsx', '.java', '.c', '.cpp', '.ipynb', 'text/*']}
           label={material ? (title || t('bring4.material')) : 'TXT · MD · CODE · IPYNB'}
