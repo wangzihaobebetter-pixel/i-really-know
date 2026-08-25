@@ -86,11 +86,6 @@ export function buildSampleSession(def: SampleDef, lang: 'en' | 'zh-CN' = 'en'):
 
   const session: Session = {
     id: sampleSessionId(def.id),
-    /* §6.2 #1 wants every run-through framed by an occasion. A sample had
-       none, so the frame on the answering screen came out empty — and "just
-       checking" is the honest name for what a sample run actually is, not a
-       placeholder. It is one of the occasions the brief itself lists. */
-    occasion: 'other',
     title: def.title,
     packId: def.packId,
     material: def.material,

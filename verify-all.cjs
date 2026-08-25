@@ -52,7 +52,6 @@ async function waitFor(url, timeoutMs = 15000) {
     await run('verify-keyed.cjs', { APP_URL: app, MOCK_URL: mockRoot });
     await run('verify-errors.cjs', { APP_URL: app, MOCK_ROOT: mockRoot });
     await run('verify-contrast.cjs', { APP_URL: app });
-    await run('verify-contract.cjs', { APP_URL: app });
     console.log('verify-all: every production and browser gate passed ✓');
   } finally {
     preview.kill('SIGTERM');

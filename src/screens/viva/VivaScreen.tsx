@@ -7,7 +7,7 @@ import { AnchoredText, Button, Mark, Sheet, Spinner } from '../../ui';
 import { verdictOf } from '../../lib/analysis';
 import { describeError, score as scoreProbe } from '../../lib/llm';
 import { isSpeechSupported, startDictation, type Dictation } from '../../lib/speech';
-import { formatDate, targetsFromSession } from '../../lib/session-ops';
+import { targetsFromSession } from '../../lib/session-ops';
 import type { Score, SelfGrade } from '../../types';
 
 type Phase = 'answering' | 'blankplan' | 'selfgrade' | 'scoring' | 'manualgrade' | 'revealed';
@@ -199,33 +199,12 @@ export default function VivaScreen() {
       : scoreError || t('run4.scoreFailed'));
   const showExchange = phase === 'answering' || phase === 'blankplan' || phase === 'revealed';
 
-  const occasionLabels: Record<string, [string, string]> = {
-    lab: ['Lab meeting', '组会'], defense: ['Defence', '答辩'], review: ['Code review', '代码评审'],
-    exam: ['Exam', '考试'], other: ['Just checking', '就想看看'],
-  };
-  const occasionName = session.occasion
-    ? (occasionLabels[session.occasion]?.[lang === 'zh-CN' ? 1 : 0] ?? session.occasion)
-    : '';
-  const occasionDate = session.occasionAt ? formatDate(session.occasionAt, lang) : '';
-  const occasionFrame = [occasionName, occasionDate].filter(Boolean).join(' · ');
-
   return (
     <main className="run-v5 page-enter" data-testid="run-screen">
       <header className="v5-run-top">
         <button type="button" className="run-leave" onClick={() => nav('today')}><ArrowLeft size={17} />{t('v5.runLeave')}</button>
         <span className="visually-hidden">{t('run4.questionOf', { n: index + 1, total })}</span>
       </header>
-
-      {/*
-        §6.2 #1: every run-through is framed by an occasion and a date. That
-        frame was printed on the result and nowhere else — and the product's
-        whole sentence is 「先在这里听到难问，再去那间房里听到」, so the room is
-        the point. It was missing from the one screen where the person is
-        actually afraid. Quiet on purpose: it must not compete with the
-        question. A sample has no date, so it shows only the occasion rather
-        than a dangling separator.
-      */}
-      {occasionFrame && <p className="v5-run-frame">{occasionFrame}</p>}
 
       <div className="v5-run-progress" style={{ gridTemplateColumns: `repeat(${Math.max(1, total)}, minmax(20px, 1fr))` }} aria-label={t('run4.questionOf', { n: index + 1, total })}>
         {session.probes.map((item, itemIndex) => (

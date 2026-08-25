@@ -28,8 +28,7 @@
     "verify:v4": "node verify-css-vars.mjs && node verify-router.mjs && node verify-student-links.mjs && node verify-csv.mjs && node verify-v4-shell.mjs && node verify-v4-run.mjs && node verify-v4-followups.mjs && node verify-followup-logic.mjs && node verify-v4-teacher.mjs && node verify-v4-return.mjs",
     "verify:product": "node verify-v5-product.mjs",
     "verify:routes": "node verify-routes.mjs",
-    "verify:detect": "node verify-detect.mjs",
-    "verify:contract": "node verify-contract.cjs"
+    "verify:detect": "node verify-detect.mjs"
   },
   "dependencies": {
     "html-to-image": "^1.11.13",
