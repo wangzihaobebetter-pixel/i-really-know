@@ -100,6 +100,23 @@ const diff = (a, b) => {
   const rows = [];
   const contrastFailures = [];
   const duplicates = [];
+  const smallTargets = [];
+
+  /* The sheet prints "逃生口 ≥44×44 且与提交同级" as a foundation shared by all
+     ten. Until now that was checked on one scheme by hand. The two controls in
+     the answer dock — the escape hatch and whatever commits the answer — are
+     asserted on every scheme, at the phone width, because a foundation that is
+     only true on the scheme it was written for is not a foundation. The flag
+     button is deliberately out of scope: it is a secondary affordance at 32px
+     in all ten, and raising it would change chrome density everywhere. */
+  const measureTargets = () => page.evaluate(() => {
+    const vis = (el) => { const r = el.getBoundingClientRect(); const cs = getComputedStyle(el); return r.width > 0 && r.height > 0 && cs.visibility !== 'hidden'; };
+    const pick = (sel) => [...document.querySelectorAll(sel)].filter(vis)[0] || null;
+    const box = (el, label) => el ? { label, w: Math.round(el.getBoundingClientRect().width), h: Math.round(el.getBoundingClientRect().height) } : null;
+    const escape = pick('.s-stuck');
+    const commit = pick('.s-honest-commit') || pick('.s-send') || pick('.v5-send') || pick('.s-mic');
+    return [box(escape, 'escape hatch'), box(commit, 'commit')].filter(Boolean);
+  });
 
   /* Scheme 04 printed "还剩 5 问" twice: once on the persistent bar, once again
      under the body, because the bar copy was added after the wrapper already
@@ -204,6 +221,9 @@ const diff = (a, b) => {
     if (surface === 'run') {
       const lines = await countProgressLines();
       if (lines.length > 1) duplicates.push(`${id}/run prints the remaining count ${lines.length} times: ${lines.join(' | ')}`);
+      for (const target of await measureTargets()) {
+        if (target.w < 44 || target.h < 44) smallTargets.push(`${id}/run ${target.label} is ${target.w}×${target.h} — under the 44×44 floor the sheet claims for all ten`);
+      }
     }
     for (const [selector, label] of CHECKS) {
       const m = await page.evaluate(`(${MEASURE})(${JSON.stringify(selector)})`);
@@ -281,15 +301,16 @@ const diff = (a, b) => {
   const avg = pairs.reduce((acc, p) => acc + (p.today + p.run + p.self) / 3, 0) / pairs.length;
   const closest = [...pairs].sort((x, y) => Math.max(x.today, x.run) - Math.max(y.today, y.run)).slice(0, 3);
 
-  writeFileSync(`${OUT}/report.json`, JSON.stringify({ pairs, min, avg, contrastFailures, duplicates, errors }, null, 2));
+  writeFileSync(`${OUT}/report.json`, JSON.stringify({ pairs, min, avg, contrastFailures, duplicates, smallTargets, errors }, null, 2));
   console.log(`shot-schemes: ${rows.length} screenshots in ${OUT}/`);
   console.log(`shot-schemes: ${pairs.length} pairs · mean difference ${avg.toFixed(1)}% · closest pair ${min.toFixed(1)}%`);
   for (const c of closest) console.log(`  closest: ${c.a} vs ${c.b} — today ${c.today.toFixed(1)}% · run ${c.run.toFixed(1)}% · self ${c.self.toFixed(1)}%`);
   if (errors.length) { console.error(`  ✗ ${errors.length} page error(s):`); [...new Set(errors)].slice(0, 6).forEach((e) => console.error(`    ${e}`)); }
   for (const f of contrastFailures) console.error(`  ✗ ${f}`);
   for (const f of duplicates) console.error(`  ✗ ${f}`);
+  for (const f of smallTargets) console.error(`  ✗ ${f}`);
   await browser.close();
-  const bad = errors.length > 0 || contrastFailures.length > 0 || duplicates.length > 0 || min < 20;
+  const bad = errors.length > 0 || contrastFailures.length > 0 || duplicates.length > 0 || smallTargets.length > 0 || min < 20;
   if (min < 20) console.error(`  ✗ closest pair differs by only ${min.toFixed(1)}% — that is a re-skin, not a redesign`);
   process.exit(bad ? 1 : 0);
 })();

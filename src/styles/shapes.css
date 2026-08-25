@@ -355,7 +355,10 @@ nav.s-dock .s-logo { margin-right: 4px; }
 .s-src.is-defended { --anchor-tint: var(--held-wash); }
 .s-dock { display: grid; gap: 8px; }
 .s-dock-row { display: grid; grid-template-columns: auto 1fr auto; align-items: end; gap: 8px; padding: 7px; background: var(--sheet); border: 1px solid var(--hairline); border-radius: 20px; }
-.s-mic, .s-send { display: grid; place-items: center; width: 42px; height: 42px; border-radius: 999px; border: 0; cursor: pointer; }
+/* 44, not 42. The sheet prints the 44px floor as a foundation shared by all
+   ten, and shot-schemes now asserts it on every scheme's run screen — it failed
+   on seven of them at 42 before this line changed. */
+.s-mic, .s-send { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 999px; border: 0; cursor: pointer; }
 .s-mic { background: var(--app-2); color: var(--ink); }
 .s-mic[data-recording="true"] { background: var(--accent); color: var(--accent-ink); }
 .s-mic.is-disabled { opacity: .35; cursor: default; }
@@ -684,7 +687,6 @@ nav.s-dock .s-logo { margin-right: 4px; }
 .s-run-spoken .s-mic { width: 72px; height: 72px; background: var(--accent); color: var(--accent-ink); }
 .s-run-spoken .s-mic svg { width: 30px; height: 30px; }
 .s-run-spoken .s-answer-input { width: 100%; text-align: center; font-size: var(--t-small); }
-.s-run-spoken .s-send { width: 44px; height: 44px; }
 
 /* ── 04 · honest home + run ─────────────────────────────────────────────── */
 .s-honest-h1 { font-size: 1.5rem; font-weight: 700; line-height: 1.35; }
