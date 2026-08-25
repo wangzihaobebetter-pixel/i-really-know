@@ -1,0 +1,56 @@
+/* UI 06 · 薄荷与蜜 — 对标 Blinkist
+   Token 来自 memory/ireallyknow-v7/refs/ 里我自己抓的真实截图与 computed style。
+   区分不只在颜色：形状、字重、深度、主卡用什么材料，都按对标对象走。 */
+html[data-ui="06"] {
+  --app: #EFF5F3; --app-2: #E1EBE7; --sheet: #FFFFFF; --hairline: #CBD9D3;
+  --ink: #033049; --ink-2: #33556A; --ink-3: #4E6C7E;
+  --accent: #0E9E5B; --accent-text: #0B7E49;
+  --warm-signal: #FDBE21; --on-warm: #033049;
+  --primary-button-bg: #033049; --primary-button-ink: #FFFFFF;
+  --r-card: 12px; --r-control: 8px;
+  --scheme-press: none; --scheme-lift: 0 2px 0 #CBD9D3;
+  --scheme-hfont: var(--font-display); --scheme-hweight: 500; --scheme-hsize: 1.8rem;
+  --scheme-body: 1rem;
+}
+
+/* Type: weight and face are most of what separates these references. */
+html[data-ui="06"] h1 {
+  font-family: var(--scheme-hfont); font-weight: var(--scheme-hweight);
+  font-size: var(--scheme-hsize); letter-spacing: -.01em;
+}
+html[data-ui="06"] h2,
+html[data-ui="06"] .run-question { font-family: var(--scheme-hfont); font-weight: var(--scheme-hweight); }
+html[data-ui="06"] body { font-size: var(--scheme-body); }
+
+/* Shape + depth on every surface that carries something. */
+html[data-ui="06"] .new-room-card,
+html[data-ui="06"] .next-room-card,
+html[data-ui="06"] .today-specimen,
+html[data-ui="06"] .sample-option,
+html[data-ui="06"] .reading-v6-page,
+html[data-ui="06"] .welcome-passage,
+html[data-ui="06"] .work-piece-v5,
+html[data-ui="06"] .ending-v5,
+html[data-ui="06"] .held-voice-card {
+  border-radius: var(--r-card);
+  box-shadow: var(--scheme-lift);
+}
+html[data-ui="06"] .welcome-primary,
+html[data-ui="06"] .v5-self-options button,
+html[data-ui="06"] .btn,
+html[data-ui="06"] button.btn-primary {
+  border-radius: var(--r-control);
+  box-shadow: var(--scheme-press);
+}
+
+/* The bring card is the loudest object on Today; it takes each scheme's own
+   material rather than the shared signal yellow. */
+html[data-ui="06"] .new-room-card {
+  background: var(--warm-signal); color: var(--on-warm);
+}
+html[data-ui="06"] .new-room-card .new-room-copy small { color: var(--on-warm); opacity: .78; }
+html[data-ui="06"] .new-room-glyph { border-color: var(--on-warm); color: var(--on-warm); }
+
+/* Nav shape follows the same shape language. */
+html[data-ui="06"] .tabbar,
+html[data-ui="06"] nav { border-radius: var(--navR, 12px); background: #FFFFFF; }
