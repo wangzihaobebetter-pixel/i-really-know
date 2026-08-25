@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { ArrowRight, Plus } from 'lucide-react';
 import { selectRealSessions, useStore } from '../../store';
 import { useNavigate, useRoute } from '../../router';
@@ -6,6 +6,9 @@ import { useLang, useT } from '../../i18n';
 import { Button } from '../../ui';
 import { verdictOf } from '../../lib/analysis';
 import { PieceDetail } from './WorkDetailScreen';
+import { DEMO_SAMPLES, buildWorkedSession } from '../../samples';
+import { AnchoredText } from '../../ui';
+import type { TextAnchor } from '../../ui';
 import { formatDate } from '../../lib/session-ops';
 
 interface PieceGroup { key: string; title: string; sessions: ReturnType<typeof useStore.getState>['sessions'] }
@@ -21,6 +24,53 @@ export default function WorkScreen() {
      keyless student, who had just finished a whole run-through, looking at
      "这里还没有你的东西". They get their own shelf, named for what they are. */
   const sessions = all.filter((session) => !session.sampleId);
+  /*
+   * The empty state used to be a hollow ring, a sentence and a button — it
+   * described the shelf instead of showing what goes on it. Measured against
+   * `main`, this whole screen was 0.0% different above the noise floor after
+   * twelve rounds.
+   *
+   * What goes there instead is a finished piece: a real excerpt with the marks
+   * a completed run-through leaves on it — green where the student held, and
+   * the other states where they did not. It is the answer to "what will be
+   * here", shown rather than promised, and it is built from a sample that
+   * already ships with worked outcomes, so nothing is invented.
+   */
+  const preview = useMemo(() => {
+    const def = DEMO_SAMPLES[0];
+    if (!def) return null;
+    const worked = buildWorkedSession(def, lang);
+    const locatable = worked.probes
+      .filter((probe) => probe.anchor.placed && probe.anchor.start !== undefined && probe.anchor.end !== undefined);
+    /* Anchor the window on a mark the student HELD. The first three anchors in
+       document order happened to be two slipped and one underclaimed, so the
+       preview said "1 held" underneath a page showing nothing held — §6.2 #4
+       asks for the held states to carry at least equal weight, and a caption
+       that disagrees with the picture is worse than no picture. */
+    const heldFirst = locatable.find((probe) => ['defended', 'underclaimed'].includes(verdictOf(probe)));
+    const start = heldFirst ?? locatable[0];
+    if (!start) return null;
+    const placed = [start, ...locatable.filter((probe) => probe !== start)]
+      .sort((a, b) => a.anchor.start! - b.anchor.start!)
+      .filter((probe) => probe.anchor.start! >= Math.max(0, start.anchor.start! - 200))
+      .slice(0, 3);
+    const first = placed[0];
+    const from = Math.max(0, worked.material.lastIndexOf('\n', first.anchor.start!) + 1);
+    const to = Math.min(worked.material.length, (placed[placed.length - 1].anchor.end ?? first.anchor.end!) + 200);
+    return {
+      title: def.title,
+      kind: worked.materialKind,
+      text: worked.material.slice(from, to),
+      anchors: placed.map((probe) => ({
+        id: probe.id,
+        start: probe.anchor.start! - from,
+        end: probe.anchor.end! - from,
+        verdict: verdictOf(probe),
+      })).filter((a) => a.start >= 0) as TextAnchor[],
+      held: worked.probes.filter((probe) => ['defended', 'underclaimed'].includes(verdictOf(probe))).length,
+    };
+  }, [lang]);
+
   const tried = all
     .filter((session) => session.sampleId && session.status === 'complete')
     .sort((a, b) => (b.completedAt ?? b.createdAt) - (a.completedAt ?? a.createdAt));
@@ -47,9 +97,23 @@ export default function WorkScreen() {
 
       {!pieces.length ? (
         <section className="work-empty-v5">
-          <span className="empty-loop" aria-hidden><i /></span>
           <h2>{lang === 'zh-CN' ? '这里还没有你的东西。' : 'None of your work is here yet.'}</h2>
           <p>{t('work4.empty')}</p>
+          {preview && (
+            <figure className="work-preview">
+              <figcaption>
+                {lang === 'zh-CN' ? '一份过完一遍之后长这样' : 'A piece looks like this once it has been through'}
+              </figcaption>
+              <div className="work-preview-page">
+                <AnchoredText text={preview.text} mode={preview.kind === 'code' ? 'code' : 'prose'} anchors={preview.anchors} />
+              </div>
+              <small>
+                {lang === 'zh-CN'
+                  ? `${preview.title} · ${preview.held} 处站住了`
+                  : `${preview.title} · ${preview.held} held`}
+              </small>
+            </figure>
+          )}
           <Button variant="primary" icon={<Plus size={17} />} onClick={() => nav('bring')}>{t('work4.bring')}</Button>
         </section>
       ) : (
