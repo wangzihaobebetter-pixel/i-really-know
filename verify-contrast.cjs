@@ -102,7 +102,13 @@ async function chooseTheme(page, theme) {
         ['sentence', '.welcome-v5-copy h1'],
         ['body', '.welcome-v5-copy p'],
         ['source label', '.welcome-passage > span'],
-        ['source excerpt', '.welcome-passage p'],
+        /* v6: the welcome card stopped being a single <p> of quoted text and
+           became a real window of the student's page, rendered by AnchoredText.
+           Rewritten rather than dropped — this is still the largest block of
+           body text on the first screen and still has to be readable. Prose
+           samples render as .md-p, code as .md-code, so both are measured. */
+        ['source excerpt', '.welcome-page-window .md-p, .welcome-page-window .md-code'],
+        ['source mark', '.welcome-page-window mark'],
         ['own-work action', '.welcome-v5-top > button'],
         ['primary action', '.welcome-primary'],
       ], rows);

@@ -18,10 +18,9 @@
  */
 
 :root {
-  /* A half-step down for the page only. Cards keep --sheet, so every surface
-     now has somewhere to sit. Ink tokens are untouched. */
-  --app: #F0EBDF;
-  --app-2: #E4DECE;
+  /* The page-colour step itself lives in tokens.css, with the two ink values
+     it forced. It cannot live here: this :root block loads after tokens.css at
+     equal specificity, so it would also override [data-theme="slate"]. */
   /* Depth vocabulary. Soft and warm — a shadow with blue in it reads as
      software, and this product is trying not to. */
   --lift-1: 0 1px 2px rgba(56, 48, 33, .06), 0 0 0 1px var(--hairline);

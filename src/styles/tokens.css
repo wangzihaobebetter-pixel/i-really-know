@@ -18,15 +18,21 @@
 
 :root {
   /* --- Surfaces: a sunlit studio by default; the document remains calm. --- */
-  --app: #F6F3EA;
-  --app-2: #ECE7DB;
+  /* v6: the page sits half a step under the sheet so cards read as floating
+     rather than flat. The previous pair (#F6F3EA / #ECE7DB) put --ink-3 and
+     --accent-text at 4.52:1 and 4.56:1 — passing by a hair — so darkening the
+     page here required darkening those two inks below, and BOTH belong in this
+     file. A later `:root` block in another stylesheet would have overridden
+     [data-theme="slate"] as well, which is exactly the bug this replaces. */
+  --app: #F0EBDF;
+  --app-2: #E4DECE;
   --sheet: #FFFEFA;
   --hairline: #D8D2C3;
 
   /* --- Ink --- */
   --ink: #20201D;
   --ink-2: #55524D;
-  --ink-3: #726F68;
+  --ink-3: #6C6961;   /* 4.61:1 on --app */
 
   /* --- Axis A · demonstrated (FABLE §6 vocabulary) ---
      held / half-held / slipped / held-more-than-you-thought.
@@ -46,7 +52,7 @@
      The blue action colour drops; the primary button is INK on paper.
      Accent (terracotta) is for brand, links, active tab, reading bar, focus. */
   --accent: #FF5A36;
-  --accent-text: #C93C20;
+  --accent-text: #C0381D;  /* 4.62:1 on --app */
   --accent-ink: #20201D;
   --counter-accent: #3B63F3;
   --warm-signal: #F5C84B;
