@@ -101,6 +101,7 @@ const diff = (a, b) => {
   const contrastFailures = [];
   const duplicates = [];
   const smallTargets = [];
+  const selfOptions = {};
 
   /* The sheet prints "逃生口 ≥44×44 且与提交同级" as a foundation shared by all
      ten. Until now that was checked on one scheme by hand. The two controls in
@@ -109,6 +110,15 @@ const diff = (a, b) => {
      only true on the scheme it was written for is not a foundation. The flag
      button is deliberately out of scope: it is a secondary affordance at 32px
      in all ten, and raising it would change chrome density everywhere. */
+  /* The self-read is the one step the product exists for: the student commits a
+     stance before any judgment appears. Its options are measured on every
+     scheme too — reported, not enforced, until the numbers are known. */
+  const measureSelfOptions = () => page.evaluate(() => {
+    const vis = (el) => { const r = el.getBoundingClientRect(); return r.width > 0 && r.height > 0; };
+    return [...document.querySelectorAll('.s-self-options button, .v5-self-options button')].filter(vis)
+      .map((el) => { const r = el.getBoundingClientRect(); return { w: Math.round(r.width), h: Math.round(r.height) }; });
+  });
+
   const measureTargets = () => page.evaluate(() => {
     const vis = (el) => { const r = el.getBoundingClientRect(); const cs = getComputedStyle(el); return r.width > 0 && r.height > 0 && cs.visibility !== 'hidden'; };
     const pick = (sel) => [...document.querySelectorAll(sel)].filter(vis)[0] || null;
@@ -218,6 +228,14 @@ const diff = (a, b) => {
     const file = `${OUT}/${id}-${surface}.png`;
     await page.screenshot({ path: file });
     rows.push({ id, surface, file });
+    if (surface === 'self') {
+      const options = await measureSelfOptions();
+      selfOptions[id] = options;
+      if (!options.length) smallTargets.push(`${id}/self shows no self-read options — the step the product exists for did not render`);
+      for (const option of options) {
+        if (option.w < 44 || option.h < 44) smallTargets.push(`${id}/self option is ${option.w}×${option.h} — under the 44×44 floor`);
+      }
+    }
     if (surface === 'run') {
       const lines = await countProgressLines();
       if (lines.length > 1) duplicates.push(`${id}/run prints the remaining count ${lines.length} times: ${lines.join(' | ')}`);
@@ -301,7 +319,7 @@ const diff = (a, b) => {
   const avg = pairs.reduce((acc, p) => acc + (p.today + p.run + p.self) / 3, 0) / pairs.length;
   const closest = [...pairs].sort((x, y) => Math.max(x.today, x.run) - Math.max(y.today, y.run)).slice(0, 3);
 
-  writeFileSync(`${OUT}/report.json`, JSON.stringify({ pairs, min, avg, contrastFailures, duplicates, smallTargets, errors }, null, 2));
+  writeFileSync(`${OUT}/report.json`, JSON.stringify({ pairs, min, avg, contrastFailures, duplicates, smallTargets, selfOptions, errors }, null, 2));
   console.log(`shot-schemes: ${rows.length} screenshots in ${OUT}/`);
   console.log(`shot-schemes: ${pairs.length} pairs · mean difference ${avg.toFixed(1)}% · closest pair ${min.toFixed(1)}%`);
   for (const c of closest) console.log(`  closest: ${c.a} vs ${c.b} — today ${c.today.toFixed(1)}% · run ${c.run.toFixed(1)}% · self ${c.self.toFixed(1)}%`);
