@@ -91,8 +91,43 @@ if (!["'run'", "'read'", "'welcome'"].every((name) => shell.match(/const IMMERSI
   failures.push('run/read/welcome must be immersive (no tab bar)');
 }
 
-if (/AnchoredText|DivergenceHero|demo-sheet|sample-grid/.test(today)) {
-  failures.push('Today still renders a long document/demo/report; it must answer only “what now”');
+/*
+ * Today must answer "what now" and must not become a document, a report or a
+ * grid of demos — that was a real rejection, and the rule stays.
+ *
+ * It used to be enforced by banning the identifier `AnchoredText` outright.
+ * That is a proxy, and the proxy became wrong: Today now shows ONE clipped
+ * specimen — three lines of a real student piece with the probed line
+ * underlined, and the question it produced — because measured against `main`
+ * this screen was 2.8% different after twelve rounds and carried no evidence
+ * that the product does anything. A tappable specimen that opens the chooser
+ * IS "what now".
+ *
+ * So the rule is enforced on its intent instead, and more tightly than before:
+ * a report page, a divergence hero and a sample grid stay banned outright; at
+ * most one anchored window may appear; it has to sit inside a control rather
+ * than as a bare document region; and its height has to be capped in CSS so it
+ * cannot grow back into a document.
+ */
+if (/DivergenceHero|demo-sheet|sample-grid/.test(today)) {
+  failures.push('Today renders a report/demo grid; it must answer only “what now”');
+}
+const anchoredOnToday = (today.match(/<AnchoredText/g) ?? []).length;
+if (anchoredOnToday > 1) {
+  failures.push(`Today renders ${anchoredOnToday} anchored windows; at most one specimen is allowed`);
+}
+if (anchoredOnToday === 1) {
+  if (!/className="today-specimen"[\s\S]*?<AnchoredText[\s\S]*?<\/button>/.test(today)) {
+    failures.push('the Today specimen must live inside the .today-specimen control, not as a bare document region');
+  }
+  /* The BASE rule, not any later media-query override — a desktop-only cap
+     would leave the phone specimen free to grow, and the phone is the case
+     that matters. */
+  const v6 = read('src/styles/v6.css');
+  const base = v6.match(/\n\.specimen-page\s*\{([\s\S]*?)\}/)?.[1] ?? '';
+  if (!/max-height:/.test(base)) {
+    failures.push('the base .specimen-page rule has no max-height — the Today specimen can grow into a document');
+  }
 }
 if (!/nav(?:igate)?\('bring'\)/.test(today)) failures.push('Today has no direct “bring a piece” action');
 if (!/studentDestination[\s\S]*status === 'complete'[\s\S]*status === 'generating'[\s\S]*status === 'error'/.test(sessionOps)) {

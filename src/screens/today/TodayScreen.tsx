@@ -4,6 +4,9 @@ import { selectDueTargets, selectRealSessions, useStore } from '../../store';
 import { useNavigate, FOLLOWUPS_ID } from '../../router';
 import { useLang, useT } from '../../i18n';
 import { SAMPLES, buildSampleSession, sampleSessionId } from '../../samples';
+import { AnchoredText } from '../../ui';
+import type { TextAnchor } from '../../ui';
+import { detectMaterialKind } from '../../lib/analysis';
 import { packShort } from '../../packs';
 import { BottomSheet } from '../../ui';
 import { formatDate, studentDestination } from '../../lib/session-ops';
@@ -29,6 +32,51 @@ export default function TodayScreen() {
   const upsertSession = useStore((state) => state.upsertSession);
   const lastId = useStore((state) => state.ui.lastSessionId);
   const [pickerOpen, setPickerOpen] = useState(false);
+
+  /*
+   * The specimen on Today.
+   *
+   * Measured against `main`, this screen was 2.8% different after twelve
+   * rounds of work — and it is where a returning person lands, so it was the
+   * only screen most people ever saw. What was on it: a promise, a card asking
+   * for their work, and a thin outlined row offering a sample. No evidence
+   * that any of it does anything.
+   *
+   * Every mature competitor screenshotted into memory/ireallyknow-v6/refs/
+   * puts the product WORKING above the fold. This is ours, made of the same
+   * material the app is made of: a real excerpt from a real student paper with
+   * the probed line already underlined, and underneath it the actual question
+   * that line produced. It is the shortest honest answer to "what is this".
+   *
+   * It rotates by day so a returning student does not meet the same specimen
+   * every morning — day-of-year, not random, so it is stable within a session
+   * and identical across a reload.
+   */
+  const specimen = React.useMemo(() => {
+    const pool = SAMPLES.filter((item) => item.probes.length > 0);
+    if (!pool.length) return null;
+    const day = Math.floor(Date.now() / 86_400_000);
+    const def = pool[day % pool.length];
+    const probe = def.probes[0];
+    const at = def.material.indexOf(probe.quote);
+    if (at < 0) return null;
+    /* Start exactly AT the probed line so the underline is the first thing in
+       the window. Starting at the paragraph — never mind 90 characters before
+       it — pushed the mark past the fade and off the fold, which left the card
+       showing an excerpt with no evidence that anything had been done to it.
+       A leading ellipsis keeps it honest about being a window. */
+    const from = at;
+    const to = Math.min(def.material.length, at + probe.quote.length + 240);
+    const prefix = from > 0 ? '…' : '';
+    return {
+      id: def.id,
+      pack: def.packId,
+      text: prefix + def.material.slice(from, to),
+      kind: detectMaterialKind(def.material),
+      anchors: [{ id: 'specimen', start: prefix.length, end: prefix.length + probe.quote.length, verdict: 'none' as const }] as TextAnchor[],
+      question: lang === 'zh-CN' ? probe.zh.question : probe.question,
+    };
+  }, [lang]);
 
   const real = sessions.filter((session) => !session.sampleId);
   const recent = [...real].sort((a, b) => (b.completedAt ?? b.createdAt) - (a.completedAt ?? a.createdAt));
@@ -145,7 +193,27 @@ export default function TodayScreen() {
         </button>
       )}
 
-      {first && !completedExample && (
+      {first && !completedExample && specimen && (
+        <button className="today-specimen" type="button" onClick={() => setPickerOpen(true)} aria-label={specimen.question}>
+          <span className="specimen-head">
+            <em>{packShort(specimen.pack, lang)}</em>
+            <small>{lang === 'zh-CN' ? '一份真实学生作业' : 'A real student piece'}</small>
+          </span>
+          <span className="specimen-page">
+            <AnchoredText text={specimen.text} mode={specimen.kind === 'code' ? 'code' : 'prose'} anchors={specimen.anchors} />
+          </span>
+          <span className="specimen-ask">
+            <i aria-hidden />
+            <strong>{specimen.question}</strong>
+          </span>
+          <span className="specimen-go">
+            {lang === 'zh-CN' ? '换一份，或者就从这份开始' : 'Pick another, or start with this one'}
+            <ArrowRight size={17} aria-hidden />
+          </span>
+        </button>
+      )}
+
+      {first && !completedExample && !specimen && (
         <button className="sample-invitation" type="button" onClick={() => setPickerOpen(true)}>
           <span>{lang === 'zh-CN' ? '还不想交自己的？先过一份真实作业' : 'Not ready to bring yours? Try a real piece first'}</span>
           <ArrowRight size={17} aria-hidden />

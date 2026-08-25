@@ -458,3 +458,105 @@
 .welcome-live-demo { align-content: stretch; }
 .welcome-live-demo .welcome-passage { display: flex; flex-direction: column; min-height: 0; }
 .welcome-page-window { flex: 1 1 auto; min-height: 0; max-height: none; }
+
+/* ============================ Today: the specimen ======================== */
+
+/*
+ * Measured against `main`, Today was 2.8% different after twelve rounds — and
+ * it is the screen a returning person lands on, so for most people it was the
+ * only screen. It carried a promise, a card asking for their work, and a thin
+ * outlined row offering a sample: nothing on it evidenced that the product
+ * does anything.
+ *
+ * Every competitor in memory/ireallyknow-v6/refs/ puts the product working
+ * above the fold. This is ours and it is not a mascot or a screenshot: it is a
+ * real excerpt from a real student paper with the probed line underlined, and
+ * the actual question that line produced. The shortest honest answer to "what
+ * is this", made of the same material the app is made of.
+ */
+.today-specimen {
+  display: grid; gap: 0; margin-top: 14px; padding: 0; overflow: hidden;
+  border: 1px solid var(--hairline); border-radius: 18px 30px 18px 18px;
+  background: var(--sheet); box-shadow: var(--lift-2);
+  text-align: left; cursor: pointer;
+  transition: transform var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease);
+}
+.today-specimen:active { transform: translateY(2px); }
+
+.specimen-head {
+  display: flex; align-items: center; gap: 9px;
+  padding: 13px 16px 0;
+}
+.specimen-head em {
+  padding: 3px 9px; border-radius: var(--r-pill);
+  color: var(--ink); background: var(--accent-wash);
+  font-size: .6875rem; font-style: normal; font-weight: 740;
+}
+.specimen-head small { color: var(--ink-3); font-size: .6875rem; }
+
+/* The page. Clipped with a fade so it reads as a window onto something longer
+   rather than as a truncated paragraph. */
+.specimen-page {
+  display: block; position: relative; max-height: 124px; overflow: hidden;
+  margin: 10px 16px 0; padding-left: 13px;
+  border-left: 3px solid var(--accent);
+  -webkit-mask-image: linear-gradient(180deg, #000 0, #000 62%, transparent 100%);
+          mask-image: linear-gradient(180deg, #000 0, #000 62%, transparent 100%);
+}
+.specimen-page .md-p, .specimen-page .md-li {
+  margin: 0 0 .5em; color: var(--ink-2); font-size: .8125rem; line-height: 1.6;
+}
+.specimen-page .md-code {
+  margin: 0; padding: 0; border: 0; background: transparent; box-shadow: none;
+  font-size: .75rem; line-height: 1.6;
+}
+.specimen-page .anchor-none {
+  text-decoration-color: var(--accent);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+
+/* The question that line produced. This is the payload — it gets the weight. */
+.specimen-ask {
+  display: grid; grid-template-columns: 3px 1fr; gap: 12px; align-items: start;
+  margin: 4px 16px 0; padding: 14px 0 0;
+  border-top: 1px solid var(--hairline);
+}
+.specimen-ask i {
+  width: 3px; align-self: stretch; min-height: 100%;
+  border-radius: 3px; background: var(--warm-signal);
+}
+.specimen-ask strong {
+  font-size: .9375rem; font-weight: 700; line-height: 1.45; color: var(--ink);
+  text-wrap: pretty;
+}
+
+.specimen-go {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-top: 14px; padding: 11px 16px;
+  border-top: 1px solid var(--hairline);
+  color: var(--ink-3); background: var(--app-2); font-size: .75rem;
+}
+
+@media (min-width: 1024px) {
+  .specimen-page { max-height: 172px; }
+  .specimen-ask strong { font-size: 1rem; }
+}
+@media (prefers-reduced-motion: reduce) { .today-specimen { transition: none; } }
+
+
+/* The first screen has to fit promise + proof above the fold, so the empty
+   state's headline gives up a step and the bring card gives up its padding.
+   Both are still the largest things on the page; they were simply sized as if
+   nothing had to follow them. */
+.today-v5 .today-opening { padding-block: clamp(10px, 2.5vh, 20px) 14px; }
+.today-v5 .today-opening h1 { font-size: clamp(1.55rem, 6.4vw, 1.95rem); max-width: 15ch; }
+.today-v5 .today-opening p { margin-top: 9px; font-size: .8125rem; }
+.new-room-card { padding: 17px; gap: 11px; }
+.new-room-copy strong { font-size: 1.0625rem; }
+.new-room-card .new-room-action,
+.new-room-card > .new-room-action { min-height: 46px; }
+
+@media (min-width: 1024px) {
+  .today-v5 .today-opening h1 { font-size: clamp(2rem, 2.5vw, 2.5rem); max-width: 17ch; }
+}
