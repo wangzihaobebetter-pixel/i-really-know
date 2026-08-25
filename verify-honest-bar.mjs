@@ -15,6 +15,10 @@
  *   3. The blank-plan step writes `blankPlan` as its own field, not only as a
  *      prefix inside the answer text.
  *   4. The result screen renders the stuck-but-planned column.
+ *   5. `.run-leave` — the way out of the whole run-through — is also >=44px,
+ *      and the bar holding it is sticky. Brilliant holds [Go back 44x44] in
+ *      one place across every onboarding screen; ours used to scroll away on
+ *      exactly the long questions a student most wants out of (P29).
  */
 import { readFileSync } from 'node:fs';
 import { execSync } from 'node:child_process';
@@ -43,6 +47,24 @@ for (const file of cssFiles) {
 }
 if (!sawFloor) failures.push('no rule declares a min-height/min-width floor on .s-stuck');
 
+let leaveFloor = false;
+let leaveSticky = false;
+for (const file of cssFiles) {
+  const css = readFileSync(file, 'utf8');
+  for (const [, selector, body] of css.matchAll(/([^{}]+)\{([^}]*)\}/g)) {
+    if (/(^|[\s,>])\.run-leave\b/.test(selector)) {
+      const hit = body.match(/(?:^|;)\s*min-height\s*:\s*([\d.]+)px/);
+      if (hit) {
+        if (Number(hit[1]) < MIN_PX) failures.push(`${file}: ".run-leave" sets min-height: ${hit[1]}px — the way out of the run may not go under ${MIN_PX}px`);
+        else leaveFloor = true;
+      }
+    }
+    if (/(^|[\s,>])\.v5-run-top\b/.test(selector) && /position\s*:\s*sticky/.test(body)) leaveSticky = true;
+  }
+}
+if (!leaveFloor) failures.push('no rule declares a min-height floor on .run-leave');
+if (!leaveSticky) failures.push('.v5-run-top is no longer sticky — the way out scrolls away on a long question');
+
 const viva = readFileSync('src/screens/viva/VivaScreen.tsx', 'utf8');
 if (!/saveAnswer\([^)]*\{\s*blankPlan:/.test(viva)) {
   failures.push('VivaScreen: the blank step no longer stores blankPlan as its own field');
@@ -63,4 +85,4 @@ if (failures.length) {
   for (const f of failures) console.error(`  ✗ ${f}`);
   process.exit(1);
 }
-console.log(`verify-honest-bar: escape target ≥${MIN_PX}px, plan stored, column rendered ✓`);
+console.log(`verify-honest-bar: both escapes ≥${MIN_PX}px and standing, plan stored, column rendered ✓`);

@@ -341,7 +341,18 @@
   margin-inline: auto;
   padding-bottom: 158px;
 }
-.v5-run-top { min-height: 44px; display: flex; align-items: center; justify-content: space-between; }
+/* ── P29 · the escape is standing, at the level of the whole run-through ───
+   Brilliant holds [Go back 44×44] in the same place and the same size across
+   every onboarding screen (design/v7r2/OBSERVED-2.md §一.2); Khan holds its
+   action bar the same way. Ours was a 80×40 control in a header that scrolled
+   away on a long question — so on exactly the screens where a student is most
+   likely to want out, the way out was gone. Sticky, and 44px like everything
+   else that has to be tappable. */
+.v5-run-top {
+  position: sticky; top: 0; z-index: 3;
+  min-height: 44px; display: flex; align-items: center; justify-content: space-between;
+  background: var(--app);
+}
 .v5-run-progress { width: min(100%, 250px); display: grid; gap: 6px; margin: 7px 0 24px auto; }
 .v5-run-progress span { width: auto; height: 5px; border-radius: 5px; background: var(--hairline); }
 .v5-run-progress span[data-state="done"] { background: var(--held); }

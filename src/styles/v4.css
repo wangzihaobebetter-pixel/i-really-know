@@ -87,7 +87,7 @@
 /* Run-through */
 .run-screen { width: min(100%, 720px); min-height: calc(100dvh - var(--space-8)); margin: 0 auto; display: grid; align-content: start; gap: var(--space-6); padding-bottom: max(var(--space-7), env(safe-area-inset-bottom)); }
 .run-topbar { min-height: 44px; display: flex; justify-content: space-between; align-items: center; }
-.run-leave { min-height: 40px; display: inline-flex; align-items: center; gap: 7px; border: 0; background: transparent; color: var(--ink-3); padding: 0 8px 0 0; cursor: pointer; }
+.run-leave { min-height: 44px; display: inline-flex; align-items: center; gap: 7px; border: 0; background: transparent; color: var(--ink-3); padding: 0 8px 0 0; cursor: pointer; }
 .run-progress { display: grid; grid-template-columns: repeat(auto-fit, minmax(12px, 1fr)); gap: 5px; }
 .run-progress span { height: 4px; border-radius: 5px; background: var(--hairline); }
 .run-progress span[data-state="done"] { background: var(--held); }
