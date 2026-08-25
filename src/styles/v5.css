@@ -354,6 +354,30 @@
   background: var(--app);
 }
 .v5-run-progress { width: min(100%, 250px); display: grid; gap: 6px; margin: 7px 0 24px auto; }
+
+/* P28 — the one screen that is spent before any question is asked. It says the
+   thing a student would otherwise have to discover by failing: that not being
+   able to explain something is the expected state here, and that pressing "I am
+   stuck" produces a result rather than a blank. Brilliant spends a full
+   onboarding screen on exactly this (design/v7r2/OBSERVED-2.md §一). It is a
+   reading screen, so it is set at reading measure, and its one action is the
+   same 44px floor as every other commit in the run. */
+.run-prime {
+  display: grid; gap: var(--space-4);
+  max-width: 34rem; margin: clamp(24px, 9vh, 88px) 0 0;
+}
+.run-prime-title { font-size: var(--t-sentence); line-height: 1.25; color: var(--ink); margin: 0; }
+.run-prime-body { font-size: var(--t-body); line-height: 1.6; color: var(--ink); margin: 0; }
+.run-prime-stuck {
+  font-size: var(--t-body); line-height: 1.6; color: var(--ink-2); margin: 0;
+  border-left: 2px solid var(--hairline); padding-left: var(--space-4);
+}
+.run-prime-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-4); margin-top: var(--space-3); }
+.run-prime-later {
+  min-height: 44px; min-width: 44px; display: inline-flex; align-items: center;
+  border: 0; background: transparent; color: var(--ink-3);
+  font-size: var(--t-small); cursor: pointer; padding: 0 4px;
+}
 .v5-run-progress span { width: auto; height: 5px; border-radius: 5px; background: var(--hairline); }
 .v5-run-progress span[data-state="done"] { background: var(--held); }
 .v5-run-progress span[data-state="current"] { width: auto; background: var(--accent); }

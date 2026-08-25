@@ -275,6 +275,10 @@ export interface Settings {
 
 export interface UiState {
   firstOpenSeen: boolean;
+  /* When the student was told, before ever seeing a probe, that not being able
+     to explain something is the normal state here (P28). Set once, never reset:
+     the declaration is only useful before the first stumble. */
+  stuckPrimeSeenAt?: number;
   lastRoute?: string;
   keyBannerDismissedAt?: number;
   migratedV1?: boolean;

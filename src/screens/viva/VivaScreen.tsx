@@ -22,6 +22,8 @@ export default function VivaScreen() {
   const session = useStore(selectSession(sessionId));
   const settings = useStore((state) => state.settings);
   const hasKey = useStore(selectHasKey);
+  const ui = useStore((state) => state.ui);
+  const setUi = useStore((state) => state.setUi);
   const updateSession = useStore((state) => state.updateSession);
   const updateProbe = useStore((state) => state.updateProbe);
   const finalizeSession = useStore((state) => state.finalizeSession);
@@ -35,6 +37,7 @@ export default function VivaScreen() {
   const [scoreError, setScoreError] = useState('');
   const [recording, setRecording] = useState(false);
   const [voiceError, setVoiceError] = useState('');
+  const [primeAcked, setPrimeAcked] = useState(false);
   const dictation = useRef<Dictation | null>(null);
   const usedVoice = useRef(false);
   const startedAt = useRef(Date.now());
@@ -202,6 +205,39 @@ export default function VivaScreen() {
         <p>{t('common.state.notfound.title')}</p>
         <Button onClick={() => nav('today')}>{t('common.state.notfound.action')}</Button>
       </div>
+    );
+  }
+
+  /*
+   * P28. Brilliant spends an entire onboarding screen, before the student has
+   * seen a single question, saying "I'm here to help if you ever get stuck."
+   * Admitting you cannot explain something costs two things: the operation
+   * (how big the button is — fixed in e381be3) and the anticipation (what this
+   * product will think of you). Only the first was ever addressed here. This
+   * screen addresses the second, once, at the only moment it is free: before
+   * the first probe of the first run-through, when nothing has gone wrong yet.
+   */
+  const freshRun = session.probes.every((item) => !item.committedAt);
+  const showPrime = !primeAcked && !ui.stuckPrimeSeenAt && freshRun;
+  if (showPrime) {
+    return (
+      <main className="run-v5 page-enter" data-testid="run-prime">
+        <header className="v5-run-top">
+          <button type="button" className="run-leave" onClick={() => nav('today')}><ArrowLeft size={17} />{t('v5.runLeave')}</button>
+        </header>
+        <section className="run-prime">
+          <h1 className="run-prime-title">{t('v5.primeTitle')}</h1>
+          <p className="run-prime-body">{t('v5.primeBody')}</p>
+          <p className="run-prime-stuck">{t('v5.primeStuck')}</p>
+          <div className="run-prime-actions">
+            <Button
+              data-testid="run-prime-go"
+              onClick={() => { setUi({ stuckPrimeSeenAt: Date.now() }); setPrimeAcked(true); }}
+            >{t('v5.primeGo')}</Button>
+            <button type="button" className="run-prime-later" onClick={() => nav('today')}>{t('v5.primeLater')}</button>
+          </div>
+        </section>
+      </main>
     );
   }
 
