@@ -693,7 +693,6 @@ nav.s-dock .s-logo { margin-right: 4px; }
 .s-run-honest-top strong { color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .s-honest-q { margin: var(--space-6) 0 var(--space-5); font-size: 1.35rem; line-height: 1.4; font-weight: 650; }
 .s-honest-src { padding: var(--space-5); background: var(--app-2); border-radius: var(--s-radius); margin-bottom: var(--space-5); }
-.s-honest-left { margin-top: var(--space-5); font-size: var(--t-small); color: var(--ink-2); }
 /* In this scheme the escape and the submit are peers, on one row. */
 .s-run-honest .s-dock-meta { display: grid; grid-template-columns: 1fr auto 1fr; gap: var(--space-4); }
 .s-run-honest .s-stuck { justify-self: start; min-width: 128px; }

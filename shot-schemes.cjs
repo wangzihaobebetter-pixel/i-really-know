@@ -99,13 +99,112 @@ const diff = (a, b) => {
 
   const rows = [];
   const contrastFailures = [];
+  const duplicates = [];
+
+  /* Scheme 04 printed "还剩 5 问" twice: once on the persistent bar, once again
+     under the body, because the bar copy was added after the wrapper already
+     had one. Any scheme can regress the same way — the run wrapper and the
+     shared dock are written in different files — so the count of visible
+     progress lines is asserted on every scheme, not just the one that broke. */
+  
+  const countProgressLines = () => page.evaluate(() => {
+    const re = /(还剩\s*\d+|\b\d+\s+(?:questions?\s+)?left\b)/;
+    const seen = [];
+    const walk = (node) => {
+      for (const child of node.children) {
+        if (!child.children.length) {
+          const text = (child.textContent || '').trim();
+          if (re.test(text) && text.length < 40) seen.push(text);
+        } else walk(child);
+      }
+    };
+    walk(document.body);
+    return seen;
+  });
+  /* P28 put a declaration screen in front of the first probe of a fresh
+     run-through. It is a real surface, so it gets shot on its own (surface
+     'prime'); on every other run surface it has to be acknowledged first, or
+     the sheet would show ten copies of the same interstitial where the
+     run-through is supposed to be. */
+  /* The flag lives in the persisted store in IndexedDB ('irk-v2'), not in the
+     synchronous localStorage slice — that one only carries theme and language.
+     Editing the wrong one is how the first run of this pass produced nine
+     copies of the run screen labelled 'prime'. */
+  const readPrimeFlag = () => page.evaluate(async () => {
+    const raw = await new Promise((resolve) => {
+      const open = indexedDB.open('keyval-store');
+      open.onsuccess = () => {
+        const db = open.result;
+        const req = db.transaction('keyval', 'readonly').objectStore('keyval').get('irk-v2');
+        req.onsuccess = () => resolve(req.result ?? null);
+        req.onerror = () => resolve(null);
+      };
+      open.onerror = () => resolve(null);
+    });
+    if (!raw) return null;
+    try { return JSON.parse(raw)?.state?.ui?.stuckPrimeSeenAt ?? null; } catch { return null; }
+  });
+
+  const forgetPrimeOnce = async () => {
+    await page.evaluate(async () => {
+      const raw = await new Promise((resolve) => {
+        const open = indexedDB.open('keyval-store');
+        open.onsuccess = () => {
+          const db = open.result;
+          const req = db.transaction('keyval', 'readonly').objectStore('keyval').get('irk-v2');
+          req.onsuccess = () => resolve(req.result ?? null);
+          req.onerror = () => resolve(null);
+        };
+        open.onerror = () => resolve(null);
+      });
+      if (!raw) return;
+      const parsed = JSON.parse(raw);
+      if (parsed?.state?.ui) delete parsed.state.ui.stuckPrimeSeenAt;
+      await new Promise((resolve) => {
+        const open = indexedDB.open('keyval-store');
+        open.onsuccess = () => {
+          const db = open.result;
+          const tx = db.transaction('keyval', 'readwrite');
+          tx.objectStore('keyval').put(JSON.stringify(parsed), 'irk-v2');
+          tx.oncomplete = () => resolve();
+          tx.onerror = () => resolve();
+        };
+        open.onerror = () => resolve();
+      });
+    });
+  };
+
+  /* zustand persists through idb-keyval asynchronously, so the click that set
+     this flag can still be in flight when the next scheme tries to clear it:
+     the clear reads the pre-write value, writes it back, and the app's write
+     then lands on top. That race is what made the prime shot come out right on
+     odd schemes and wrong on even ones. Clear, read back, retry. */
+  const forgetPrime = async () => {
+    for (let attempt = 0; attempt < 6; attempt += 1) {
+      await forgetPrimeOnce();
+      if ((await readPrimeFlag()) === null) return;
+      await new Promise((r) => setTimeout(r, 250));
+    }
+    console.error('shot-schemes: could not clear the prime flag — the prime shots would be run screens');
+    process.exit(1);
+  };
+
   const shoot = async (id, surface, hash) => {
     await page.goto(`${BASE}/?ui=${id}${hash}`, { waitUntil: 'networkidle0' });
     await settle(page);
     await new Promise((r) => setTimeout(r, 350));
+    if (surface !== 'prime' && (await page.$('[data-testid="run-prime"]'))) {
+      await page.click('[data-testid="run-prime-go"]');
+      await settle(page);
+      await new Promise((r) => setTimeout(r, 350));
+    }
     const file = `${OUT}/${id}-${surface}.png`;
     await page.screenshot({ path: file });
     rows.push({ id, surface, file });
+    if (surface === 'run') {
+      const lines = await countProgressLines();
+      if (lines.length > 1) duplicates.push(`${id}/run prints the remaining count ${lines.length} times: ${lines.join(' | ')}`);
+    }
     for (const [selector, label] of CHECKS) {
       const m = await page.evaluate(`(${MEASURE})(${JSON.stringify(selector)})`);
       if (!m) continue;
@@ -121,6 +220,17 @@ const diff = (a, b) => {
        not reload the document — which is how the first run of this script
        reported ten identical screenshots. */
     await shoot(id, 'today', '#/');
+    /* Land on the run route first, then clear the flag and reload. Clearing it
+       from the Today page loses a race with the store's own persist write
+       (AppShell records lastRoute on every non-run route), which restored the
+       flag on alternating iterations and produced five run screens labelled
+       'prime'. */
+    await page.goto(`${BASE}/?ui=${id}&pass=clear#/run/${sessionId}`, { waitUntil: 'networkidle0' });
+    await forgetPrime();
+    /* The URL shoot() navigates to must differ from the one above, or Chrome
+       treats it as a same-document hash navigation, the app never re-hydrates,
+       and the in-memory copy of the flag survives the IndexedDB clear. */
+    await shoot(id, 'prime', `#/run/${sessionId}`);
     await shoot(id, 'run', `#/run/${sessionId}`);
   }
 
@@ -171,14 +281,15 @@ const diff = (a, b) => {
   const avg = pairs.reduce((acc, p) => acc + (p.today + p.run + p.self) / 3, 0) / pairs.length;
   const closest = [...pairs].sort((x, y) => Math.max(x.today, x.run) - Math.max(y.today, y.run)).slice(0, 3);
 
-  writeFileSync(`${OUT}/report.json`, JSON.stringify({ pairs, min, avg, contrastFailures, errors }, null, 2));
+  writeFileSync(`${OUT}/report.json`, JSON.stringify({ pairs, min, avg, contrastFailures, duplicates, errors }, null, 2));
   console.log(`shot-schemes: ${rows.length} screenshots in ${OUT}/`);
   console.log(`shot-schemes: ${pairs.length} pairs · mean difference ${avg.toFixed(1)}% · closest pair ${min.toFixed(1)}%`);
   for (const c of closest) console.log(`  closest: ${c.a} vs ${c.b} — today ${c.today.toFixed(1)}% · run ${c.run.toFixed(1)}% · self ${c.self.toFixed(1)}%`);
   if (errors.length) { console.error(`  ✗ ${errors.length} page error(s):`); [...new Set(errors)].slice(0, 6).forEach((e) => console.error(`    ${e}`)); }
   for (const f of contrastFailures) console.error(`  ✗ ${f}`);
+  for (const f of duplicates) console.error(`  ✗ ${f}`);
   await browser.close();
-  const bad = errors.length > 0 || contrastFailures.length > 0 || min < 20;
+  const bad = errors.length > 0 || contrastFailures.length > 0 || duplicates.length > 0 || min < 20;
   if (min < 20) console.error(`  ✗ closest pair differs by only ${min.toFixed(1)}% — that is a re-skin, not a redesign`);
   process.exit(bad ? 1 : 0);
 })();

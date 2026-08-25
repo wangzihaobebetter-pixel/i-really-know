@@ -341,7 +341,15 @@ export default function VivaScreen() {
           <button type="button" className="s-stuck" onClick={() => { stopVoice(); setPhase('blankplan'); }}>
             {t('v5.runBlank')}
           </button>
-          <span className="s-left">{lang === 'zh-CN' ? `还剩 ${Math.max(0, total - index)} 问` : `${Math.max(0, total - index)} left`}</span>
+          {/* Two schemes state where you are in their own chrome — 06 as an
+              agenda line with a time estimate, 07 as a closed set in the header.
+              Printing the dock copy as well put "还剩 5 问" on the screen twice.
+              The dock count is the default; a wrapper that already says it opts
+              out here rather than each wrapper dropping its own line, because
+              the wrapper versions carry more (minutes, today's total). */}
+          {scheme.run !== 'agenda' && scheme.run !== 'set' && (
+            <span className="s-left">{lang === 'zh-CN' ? `还剩 ${Math.max(0, total - index)} 问` : `${Math.max(0, total - index)} left`}</span>
+          )}
           {/* Scheme 04 spells the commit out in words on the same row, so the two
               actions are literally the same size. Other schemes keep the arrow. */}
           {scheme.run === 'honest' && (

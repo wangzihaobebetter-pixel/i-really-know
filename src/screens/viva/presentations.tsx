@@ -364,7 +364,6 @@ function SpokenRun({ s }: { s: RunSlots }) {
 /* 04 · The bar. "I'm stuck" is the same size as "Submit", and what is left is
    a plain sentence rather than a strip you have to count. */
 function HonestRun({ s }: { s: RunSlots }) {
-  const left = Math.max(0, s.total - s.index);
   return (
     <main className="s-run s-run-honest" data-testid="run-screen">
       <header className="s-run-honest-top">
@@ -374,8 +373,11 @@ function HonestRun({ s }: { s: RunSlots }) {
       </header>
       {showsQuestion(s) && <h1 className="s-honest-q">{s.question}</h1>}
       {s.source && <div className="s-honest-src">{s.source}</div>}
+      {/* The plain-language count belongs on the persistent bar next to the two
+          equal-weight actions — that is what scheme 04 is — and VivaScreen
+          renders it there inside s.body. A second copy under the body printed
+          "还剩 5 问" twice on the same screen. */}
       <div className="s-honest-body">{s.body}</div>
-      <p className="s-honest-left">{zh(s) ? `还剩 ${left} 问` : `${left} question${left === 1 ? '' : 's'} left`}</p>
     </main>
   );
 }
