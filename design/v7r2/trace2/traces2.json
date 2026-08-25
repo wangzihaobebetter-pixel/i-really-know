@@ -1,0 +1,199 @@
+[
+  {
+    "id": "brilliant-daily",
+    "url": "https://brilliant.org/daily-problems/",
+    "note": "ok",
+    "steps": [
+      {
+        "label": "A · daily problems index",
+        "text": [
+          "Sign in",
+          "Your personal tutor for math and coding",
+          "A world-class tutor for every home. Built by top learning experts from MIT and Harvard.",
+          "I’m a learner",
+          "I’m a parent or teacher"
+        ],
+        "buttons": [
+          "Sign in [84×40]",
+          "Pause [40×40]",
+          "I’m a learner [342×56]",
+          "I’m a parent or teacher [342×56]"
+        ]
+      },
+      {
+        "label": "B · opened via \"Get started\"",
+        "text": [
+          "What motivates you to learn?",
+          "Excelling in school",
+          "Professional growth",
+          "Staying sharp",
+          "Helping my child learn",
+          "Continue"
+        ],
+        "buttons": [
+          "Go back [44×44]",
+          "Excelling in school [169×228]",
+          "Professional growth [169×228]",
+          "Staying sharp [169×228]",
+          "Helping my child learn [169×228]",
+          "Continue [350×48]"
+        ]
+      },
+      {
+        "label": "C1 · onboarding step (continue)",
+        "text": [
+          "How do you want me to sound?",
+          "Turn up your volume if you can’t hear me.",
+          "Melodic",
+          "Deep",
+          "Voice on",
+          "Continue"
+        ],
+        "buttons": [
+          "Go back [44×44]",
+          "Melodic [142×228]",
+          "Deep [142×228]",
+          "Continue [350×48]"
+        ]
+      },
+      {
+        "label": "C2 · onboarding step (continue)",
+        "text": [
+          "I’m here to help if you ever get stuck.",
+          "Continue"
+        ],
+        "buttons": [
+          "Go back [44×44]",
+          "mute [46×46]",
+          "Continue [350×48]"
+        ]
+      },
+      {
+        "label": "C3 · onboarding step (continue)",
+        "text": [
+          "How old are you?",
+          "Continue"
+        ],
+        "buttons": [
+          "Go back [44×44]",
+          "mute [46×46]",
+          "Terms and Privacy Policy [24×24]",
+          "Continue [350×48]"
+        ]
+      },
+      {
+        "label": "C4 · onboarding step (continue)",
+        "text": [
+          "How old are you?",
+          "Continue"
+        ],
+        "buttons": [
+          "Go back [44×44]",
+          "mute [46×46]",
+          "Terms and Privacy Policy [24×24]",
+          "Continue [350×48]"
+        ]
+      },
+      {
+        "label": "C5 · onboarding step (continue)",
+        "text": [
+          "How old are you?",
+          "Continue"
+        ],
+        "buttons": [
+          "Go back [44×44]",
+          "mute [46×46]",
+          "Terms and Privacy Policy [24×24]",
+          "Continue [350×48]"
+        ]
+      },
+      {
+        "label": "C6 · onboarding step (continue)",
+        "text": [
+          "How old are you?",
+          "Continue"
+        ],
+        "buttons": [
+          "Go back [44×44]",
+          "mute [46×46]",
+          "Terms and Privacy Policy [24×24]",
+          "Continue [350×48]"
+        ]
+      },
+      {
+        "label": "Z · declared transitions in force",
+        "text": [
+          "0.2s ease ×1",
+          "0.1s, 0.1s ease-out, ease-out ×1"
+        ],
+        "buttons": []
+      }
+    ]
+  },
+  {
+    "id": "notion-public-page",
+    "url": "https://www.notion.com/templates",
+    "note": "ok",
+    "steps": [
+      {
+        "label": "A · loaded on 390px",
+        "text": [
+          "Get Notion free",
+          "Marketplace",
+          "Consultants",
+          "Work smarter with Notion experts",
+          "Get personalized 1:1 help for your Notion setup from certified Consulting Partners coverin",
+          "Explore →",
+          "AI skills",
+          "Save yourself the prompt",
+          "AI skills that remember the instructions, standards, and formats you use again and again.",
+          "Top creator",
+          "Teka",
+          "We're a tech and systems company designing the next-gen tools for how we think, create, an"
+        ],
+        "buttons": [
+          "Toggle main menu [44×44]",
+          "Marketplace [126×38]",
+          " [170×41]",
+          " [170×41]",
+          " [170×41]",
+          " [170×41]",
+          " [170×41]",
+          "Search template gallery [28×28]",
+          " [32×36]",
+          " [32×36]",
+          "Close [44×44]",
+          " [32×36]",
+          " [32×36]",
+          "Close [44×44]"
+        ]
+      },
+      {
+        "label": "B · type on a phone viewport",
+        "text": [
+          "h2 NotionInter 18px/28px 700",
+          "h2 NotionInter 32px/40px 700",
+          "p NotionInter 15px/20px 400",
+          "p NotionInter 14px/20px 400",
+          "p NotionInter 12px/16px 400",
+          "p NotionInter 12px/16px 500",
+          "li NotionInter 12px/16px 500",
+          "li NotionInter 16px/24px 400"
+        ],
+        "buttons": []
+      },
+      {
+        "label": "Z · declared transitions in force",
+        "text": [
+          "0.2s cubic-bezier(0.42, 0, 1, 1) ×36",
+          "0.15s, 0.15s ease-in-out, ease-in-out ×31",
+          "0.15s ease ×19",
+          "0.3s ease ×1",
+          "0.1s ease-out ×1",
+          "0.1s ease-in-out ×1"
+        ],
+        "buttons": []
+      }
+    ]
+  }
+]
