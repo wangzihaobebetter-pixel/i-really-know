@@ -65,7 +65,7 @@
    places in their own work — never a score. It ticks rather than appears. */
 .reading-v6-count {
   flex: none; padding: 4px 10px; border-radius: var(--r-pill);
-  color: var(--ink); background: var(--warm-signal);
+  color: var(--on-warm); background: var(--warm-signal);
   font-size: .6875rem; font-weight: 760; font-variant-numeric: tabular-nums;
   animation: v6-count-in 420ms var(--spring) both;
 }
@@ -115,10 +115,13 @@
   text-decoration-thickness: 2px;
   text-underline-offset: 3px;
 }
+/* The wash is the signal yellow, which does not flip between themes, so the
+   letters riding it have to be --on-warm for the frames where it is opaque
+   enough to matter. Without that the mark lands as light-on-yellow in slate. */
 @keyframes v6-mark-land {
-  0%   { background: color-mix(in srgb, var(--warm-signal) 62%, transparent); text-decoration-color: transparent; }
-  60%  { background: color-mix(in srgb, var(--warm-signal) 34%, transparent); }
-  100% { background: transparent; text-decoration-color: var(--accent); }
+  0%   { background: color-mix(in srgb, var(--warm-signal) 62%, transparent); color: var(--on-warm); text-decoration-color: transparent; }
+  60%  { background: color-mix(in srgb, var(--warm-signal) 34%, transparent); color: var(--on-warm); }
+  100% { background: transparent; color: inherit; text-decoration-color: var(--accent); }
 }
 
 .reading-v6-beam {
@@ -448,6 +451,7 @@
    signal the reading pass uses for the same event. */
 .welcome-live-demo.is-question .welcome-page-window .anchor-none {
   background: color-mix(in srgb, var(--warm-signal) 55%, transparent);
+  color: var(--on-warm);
 }
 /* Let the page fill the row it owns instead of leaving ~230px under it: the
    window shows more of the student's work, which is the point of it. */

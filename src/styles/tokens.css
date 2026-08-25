@@ -56,6 +56,11 @@
   --accent-ink: #20201D;
   --counter-accent: #3B63F3;
   --warm-signal: #F5C84B;
+  /* Ink that sits ON --warm-signal. The signal yellow is deliberately the same
+     in both themes; --ink is not. Anything lettered on the yellow must use
+     this, or it flips to light-on-yellow in slate (1.32:1, measured on the
+     pace selector). Fixed on purpose, in both themes. */
+  --on-warm: #20201D;
   --primary-button-bg: #20201D;
   --primary-button-ink: #FFFEFA;
   --danger: #B3261E;
@@ -164,6 +169,7 @@
 /* Slate — opt-in dark. Calibrated for the same contrast floor. */
 [data-theme="slate"] {
   --app: #17181B;
+  --on-warm: #20201D;
   --app-2: #1F2125;
   --sheet: #202226;
   --hairline: #33363C;

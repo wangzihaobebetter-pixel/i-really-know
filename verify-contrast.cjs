@@ -125,7 +125,13 @@ async function chooseTheme(page, theme) {
           <span class="bg-held">Held wash</span><span class="bg-half-held">Half wash</span>
           <span class="bg-slipped">Slipped wash</span><span class="bg-held-more">Steadier wash</span>
           <div class="next-room-card"><span class="next-room-top">Room date</span><span class="next-room-copy"><small>Saved place</small></span></div>
-          <div class="held-voice-card"><span>Own words label</span><small>Source line</small></div>`;
+          <div class="held-voice-card"><span>Own words label</span><small>Source line</small></div>
+          <!-- Ink on the signal yellow. --warm-signal is identical in both
+               themes while --ink flips, so every surface painted warm and
+               lettered with --ink was light-on-yellow in slate: the pace
+               selector measured 1.32:1. --on-warm exists for exactly this and
+               is sampled here so the pair cannot drift apart again. -->
+          <span class="warm-fixture" style="background:var(--warm-signal);color:var(--on-warm);padding:4px 8px">On warm</span>`;
         document.body.appendChild(fixture);
       });
       await measureSet(page, theme, 'state-tokens', [
@@ -136,6 +142,7 @@ async function chooseTheme(page, theme) {
         ['slipped wash', '#contrast-fixtures .bg-slipped'], ['steadier wash', '#contrast-fixtures .bg-held-more'],
         ['room meta', '#contrast-fixtures .next-room-top'], ['room detail', '#contrast-fixtures .next-room-copy small'],
         ['own-words label', '#contrast-fixtures .held-voice-card > span'], ['own-words source', '#contrast-fixtures .held-voice-card small'],
+        ['ink on warm signal', '#contrast-fixtures .warm-fixture'],
       ], rows);
     }
 
