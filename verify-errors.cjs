@@ -97,6 +97,16 @@ async function testConnection(page, model) {
     await page.waitForSelector('[data-testid="read-screen"]');
     await page.waitForFunction(() => document.body.innerText.includes('Start the questions'), { timeout: 30000 });
     await clickText(page, 'Start the questions');
+    /* P28. The declaration screen sits between "Start the questions" and the
+       first probe for anyone who has not seen it. This walk is about scoring-failure recovery, so it
+       passes through rather than asserting on it — verify-e2e.cjs owns the
+       assertions about what it says. */
+    await page.waitForFunction(() => Boolean(
+      document.querySelector('[data-testid="run-prime"]') || document.querySelector('[data-testid="run-screen"]')
+    ), { timeout: 15000 });
+    if (await page.$('[data-testid="run-prime"]')) {
+      await page.click('[data-testid="run-prime-go"]');
+    }
     await page.waitForSelector('[data-testid="run-screen"]');
     await setNth(page, '.v5-answer-input', 0, 'The schedule changes because a missed answer resets the target to the one-day stage.');
     await page.click('.v5-send');

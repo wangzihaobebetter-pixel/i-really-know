@@ -72,6 +72,16 @@ async function bodyText(page) { return page.evaluate(() => document.body.innerTe
     await page.waitForSelector('[data-testid="read-screen"]', { timeout: 10000 });
     await page.waitForFunction(() => document.body.innerText.includes('Start the questions'), { timeout: 15000 });
     await clickText(page, 'Start the questions');
+    /* P28. The declaration screen sits between "Start the questions" and the
+       first probe for anyone who has not seen it. This walk is about a keyed end-to-end run, so it
+       passes through rather than asserting on it — verify-e2e.cjs owns the
+       assertions about what it says. */
+    await page.waitForFunction(() => Boolean(
+      document.querySelector('[data-testid="run-prime"]') || document.querySelector('[data-testid="run-screen"]')
+    ), { timeout: 15000 });
+    if (await page.$('[data-testid="run-prime"]')) {
+      await page.click('[data-testid="run-prime-go"]');
+    }
     await page.waitForSelector('[data-testid="run-screen"]');
 
     for (let i = 0; i < 4; i += 1) {

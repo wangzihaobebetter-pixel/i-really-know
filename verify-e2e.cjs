@@ -85,7 +85,21 @@ async function waitForDownload(previous, timeoutMs = 20000) {
     await page.waitForFunction(() => document.body.innerText.includes('The answer is not sitting in the excerpt'));
     check((await text(page)).includes('Not answerable by copying'), 'welcome did not demonstrate the non-copyable mechanism');
     await clickText(page, 'Try this one question');
+    /* P28. A first-time student meets the declaration before the first probe,
+       not while already stuck. It is a real screen on the path, so the walk has
+       to go through it — and assert what it says, or the screen could degrade
+       to an empty interstitial and this test would still pass. */
+    await page.waitForSelector('[data-testid="run-prime"]', { timeout: 10000 });
+    const primeText = await text(page);
+    check(primeText.includes('Not being able to explain it is the normal state here'),
+      'the pre-run declaration no longer says being stuck is the normal state');
+    check(primeText.includes('I am stuck'),
+      'the pre-run declaration no longer names the escape hatch it is promising');
+    evidence.prime = await shot(page, '02-mobile-prime.png');
+    await page.click('[data-testid="run-prime-go"]');
     await page.waitForSelector('[data-testid="run-screen"]', { timeout: 10000 });
+    check((await page.$$('[data-testid="run-prime"]')).length === 0,
+      'the declaration screen survived its own acknowledgement');
     evidence.question = await shot(page, '02-mobile-question.png');
     check((await page.$$('.run-question')).length === 1, 'run-through showed more or fewer than one question');
 

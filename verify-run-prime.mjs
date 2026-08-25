@@ -57,6 +57,18 @@ if (!zhStuck.some((line) => /我卡住了/.test(line))) failures.push('i18n v5: 
 if (!zhStuck.some((line) => /I am stuck/.test(line))) failures.push('i18n v5: the English prime screen never names "I am stuck"');
 
 /* 5. The 44px floor, on both the commit and the way out. */
+/* The commit itself: measured at 114x40 in the browser before this floor was
+   added, because the shared .btn default is 40px. The one action on a screen
+   about not being afraid to press things does not get to be the small one. */
+const go = css.match(/\.run-prime-go\s*\{([^}]*)\}/);
+if (!go) failures.push('v5.css: .run-prime-go has no rule — the commit falls back to the 40px .btn default, under the 44px floor');
+else {
+  const hit = go[1].match(/(?:^|;)\s*min-height\s*:\s*([\d.]+)px/);
+  if (!hit) failures.push('v5.css: .run-prime-go declares no min-height floor');
+  else if (Number(hit[1]) < MIN_PX) failures.push(`v5.css: .run-prime-go sets min-height: ${hit[1]}px — under the ${MIN_PX}px floor`);
+}
+if (!/className="run-prime-go"/.test(viva)) failures.push('VivaScreen: the prime commit no longer carries .run-prime-go, so the 44px floor does not reach it');
+
 const later = css.match(/\.run-prime-later\s*\{([^}]*)\}/);
 if (!later) failures.push('v5.css: .run-prime-later has no rule — the way out of the prime screen is unstyled');
 else {

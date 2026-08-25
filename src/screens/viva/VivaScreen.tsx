@@ -38,6 +38,13 @@ export default function VivaScreen() {
   const [recording, setRecording] = useState(false);
   const [voiceError, setVoiceError] = useState('');
   const [primeAcked, setPrimeAcked] = useState(false);
+  /* Hooks and the values the effects below read must be evaluated on every
+     render, above every early return: the phase effect reads needsStance, so
+     leaving it below the guards made it a temporal-dead-zone crash the moment
+     any guard returned first ("Cannot access 'needsStance' before
+     initialization" — caught in the browser, not by tsc). */
+  const scheme = React.useMemo(() => activeScheme(), []);
+  const needsStance = scheme.run === 'card';
   const dictation = useRef<Dictation | null>(null);
   const usedVoice = useRef(false);
   const startedAt = useRef(Date.now());
@@ -231,6 +238,9 @@ export default function VivaScreen() {
           <p className="run-prime-stuck">{t('v5.primeStuck')}</p>
           <div className="run-prime-actions">
             <Button
+              variant="primary"
+              size="lg"
+              className="run-prime-go"
               data-testid="run-prime-go"
               onClick={() => { setUi({ stuckPrimeSeenAt: Date.now() }); setPrimeAcked(true); }}
             >{t('v5.primeGo')}</Button>
@@ -249,8 +259,6 @@ export default function VivaScreen() {
       : scoreError || t('run4.scoreFailed'));
   const showExchange = phase === 'answering' || phase === 'blankplan' || phase === 'revealed';
 
-  const scheme = React.useMemo(() => activeScheme(), []);
-  const needsStance = scheme.run === 'card';
 
   /*
    * v7. The phase bodies below are identical under every scheme — the model

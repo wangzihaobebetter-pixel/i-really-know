@@ -363,8 +363,14 @@
    reading screen, so it is set at reading measure, and its one action is the
    same 44px floor as every other commit in the run. */
 .run-prime {
-  display: grid; gap: var(--space-4);
-  max-width: 34rem; margin: clamp(24px, 9vh, 88px) 0 0;
+  /* A screen with one thing to say and one thing to press should not leave
+     half the phone empty under it: measured at 390x844 the first cut put the
+     action at 50% height with ~390px of nothing below. Fill the viewport and
+     let the copy sit in the optical middle, with the action directly under the
+     sentence it belongs to. */
+  display: grid; gap: var(--space-4); align-content: center;
+  min-height: calc(100dvh - 132px);
+  max-width: 34rem; margin: 0;
 }
 .run-prime-title { font-size: var(--t-sentence); line-height: 1.25; color: var(--ink); margin: 0; }
 .run-prime-body { font-size: var(--t-body); line-height: 1.6; color: var(--ink); margin: 0; }
@@ -373,6 +379,7 @@
   border-left: 2px solid var(--hairline); padding-left: var(--space-4);
 }
 .run-prime-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-4); margin-top: var(--space-3); }
+.run-prime-go { min-height: 44px; min-width: 44px; }
 .run-prime-later {
   min-height: 44px; min-width: 44px; display: inline-flex; align-items: center;
   border: 0; background: transparent; color: var(--ink-3);
