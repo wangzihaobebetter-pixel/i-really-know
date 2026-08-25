@@ -13,8 +13,8 @@ import {
   antepartumSample, contraceptionSample, motorOilSample, plantCompetitionSample,
 } from './defs-a';
 import {
-  gamblingSample, graphSample, planckSample, pubertySample, tuberculosisSample,
-  vicarSample,
+  gamblingSample, graphSample, planckSample, pubertySample, ssProofSample,
+  tuberculosisSample, vicarSample,
 } from './defs-b';
 
 export type { SampleDef } from './kit';
@@ -22,24 +22,26 @@ export type { SampleDef } from './kit';
 /**
  * Ordered so the first entry is the one the home screen demonstrates.
  *
- * There is NO CHEMISTRY AND NO MATHEMATICS SAMPLE, on purpose.
- * `research/ireallyknow/01` §7.1 searched for a genuine student-submitted
- * chemistry lab report and found none: the best candidate turned out to be an
- * instructor-authored template bylined "Joe Student", dated 2010, instructor
- * "Dr. Know It All". Mathematics has the same problem from the other side —
- * MICUSP, the corpus every other sample here draws on, carries no mathematics
- * papers at all, and the write-ups that surface elsewhere sit behind
- * study-note resellers with no usable licence.
+ * There is NO CHEMISTRY SAMPLE, on purpose. `research/ireallyknow/01` §7.1
+ * searched for a genuine student-submitted chemistry lab report and found
+ * none: the best candidate turned out to be an instructor-authored template
+ * bylined "Joe Student", dated 2010, instructor "Dr. Know It All". Shipping it
+ * would have been exactly the v2 error, so the gap is stated on every build
+ * rather than filled with invention. The chemistry pack still works the moment
+ * a student brings their own work — what is missing is the no-key
+ * demonstration, not the capability.
  *
- * Shipping an invented sample would have been exactly the v2 error. The gaps
- * are stated rather than filled, and `verify-samples` prints them on every
- * build. Both packs still work the moment a student brings their own work —
- * what is missing is the no-key demonstration, not the capability.
+ * Mathematics WAS in that position and no longer is. MICUSP carries no
+ * mathematics papers, but it does carry a graduate student reviewing somebody
+ * else's optimality proof (IOE.G2.02.1), which is precisely the situation the
+ * math pack's seven dimensions were written for — hypotheses, proof strategy,
+ * step justification, provenance. A near-miss with a real artifact behind it
+ * beats a perfect fabrication.
  */
 export const SAMPLES: SampleDef[] = [
   antepartumSample, graphSample, tuberculosisSample, gamblingSample,
   contraceptionSample, motorOilSample, planckSample, plantCompetitionSample,
-  vicarSample, pubertySample,
+  vicarSample, pubertySample, ssProofSample,
 ];
 
 /** The one cold-start sample is deliberately Marcus-shaped and localized. */

@@ -10,6 +10,7 @@ import tuberculosis from './material/stats-tuberculosis.md?raw';
 import planck from './material/phys-planck.md?raw';
 import vicar from './material/essay-vicar.md?raw';
 import puberty from './material/epi-puberty.md?raw';
+import ssProof from './material/math-ssproof.md?raw';
 
 export const graphSample: SampleDef = {
   id: 'cs-graph-c',
@@ -712,6 +713,153 @@ export const pubertySample: SampleDef = {
     {
       quote: 'all psychological variables thought to be associated with depression',
       note: '"All" is doing a great deal of work. Adjusting for everything measured is not the same as adjusting for everything that matters.',
+    },
+  ],
+};
+
+/**
+ * Mathematics & proof. The pack ships seven hand-written dimensions and had
+ * nothing to probe, and MICUSP — the corpus every other sample here draws on —
+ * carries no mathematics papers. This is the honest near-miss: a second-year
+ * graduate student writing about somebody else's optimality proof, which is
+ * exactly the situation the math pack's dimensions are built for. He states
+ * the hypotheses, describes the case analysis, admits he did not find the
+ * proof simple, and ends on a conditional whose antecedent he never checked.
+ *
+ * Note for anyone extending this: MICUSP's transcription replaces every
+ * equation with the literal words "Formula here", which the material keeps as
+ * [公式]. That is the same pipeline warning already recorded on phys-planck —
+ * the most probe-worthy content in a quantitative submission is often in an
+ * equation a text extractor drops.
+ */
+export const ssProofSample: SampleDef = {
+  id: 'math-ssproof',
+  title: 'Review of Zheng: Optimality of (S, s) Policies',
+  packId: 'math',
+  material: ssProof,
+  level: 'graduate',
+  blurb: 'He can retell the proof and cannot say which hypothesis is load-bearing. The last sentence is an "if" whose antecedent he never checked.',
+  zhBlurb: '他能把这个证明复述下来，却说不出哪一条前提在真正承重。全文最后一句是一个「如果」，而那个前件他从来没有核对过。',
+  preset: 'quick',
+  difficulty: 'defense',
+  source: {
+    url: 'https://micusp.elicorpora.info/view?pid=IOE.G2.02.1',
+    corpus: 'MICUSP — Michigan Corpus of Upper-level Student Papers',
+    who: 'Industrial and Operational Engineering · Second Year Graduate · Report',
+    markers: 'A review of a proof rather than a proof, which is why it suits this pack: every claim it makes about the argument is checkable against the argument. The closing sentence is a conditional the writer never discharges, and the "intuitively, this would never happen optimally" line is an intuition doing load-bearing work inside a relaxation.',
+    terms: 'Copyright the Regents of the University of Michigan; Fair Use statement on the site — freely available for study, research and teaching. Excerpt for analysis only.',
+    originalLength: '609 words',
+  },
+  probes: [
+    {
+      dimensionId: 'hypotheses',
+      kind: 'concept',
+      quote: 'it holds for the case with fixed-plus linear ordering costs and quasiconvex holding and shortage costs',
+      question: 'Drop quasiconvexity and keep everything else. Which step of the argument is the first one that stops working?',
+      whyThisProbe: 'Listing a theorem\'s hypotheses is transcription; knowing which line consumes each one is understanding. The review states them and never uses them again.',
+      keyPoints: [
+        'Quasiconvexity is what makes the cost function have a single well-behaved minimising region rather than several.',
+        'Without it, the pair (S*, s*) need not bound one region, so the case analysis loses its exhaustiveness.',
+        'Fixed-plus-linear ordering is what makes reordering lumpy and creates the s-to-S gap in the first place.',
+      ],
+      ownedLooksLike: 'Ties one hypothesis to one step and says what that step could no longer conclude.',
+      surfaceLooksLike: 'Repeats the list of conditions.',
+      zh: {
+        question: '把拟凸性去掉，其余条件都保留。整个论证里，第一个走不下去的步骤是哪一步？',
+        whyThisProbe: '把定理的前提列出来是转写；知道哪一行用掉了哪一条前提才是理解。这篇综述把它们列了一遍，之后再没用过。',
+        keyPoints: [
+          '拟凸性保证成本函数只有一个性质良好的最小值区域，而不是好几个。',
+          '没有它，(S*, s*) 未必能框住某一个区域，于是那套分情况讨论就不再穷尽。',
+          '固定加线性的订货成本才是让补货变成一次性的、并造出 s 到 S 那段间隔的原因。',
+        ],
+        ownedLooksLike: '把某一条前提连到某一个步骤上，并说出那一步会因此得不出什么结论。',
+        surfaceLooksLike: '把条件清单再念一遍。',
+      },
+    },
+    {
+      dimensionId: 'strategy',
+      kind: 'method',
+      quote: 'earlier proofs of the optimality of a stationary (S, s) policy were unnecessarily tedious because their authors depended upon the results of the finite-horizon case',
+      question: 'What specifically does the infinite horizon let you stop worrying about — and what does it cost you in exchange?',
+      whyThisProbe: 'The review reports the strategic move as an improvement with no price. A strategy that costs nothing is usually one the writer has not examined.',
+      keyPoints: [
+        'The finite-horizon route drags in end-of-horizon effects, so it can only characterise the form of an optimal policy.',
+        'The infinite horizon buys stationarity: one policy for all time, no terminal condition to carry.',
+        'The price is that costs must be made bounded — which is exactly why the average-cost model needs a relaxation later.',
+      ],
+      ownedLooksLike: 'Names stationarity as the gain and boundedness as the price, and connects the price to the relaxation further down the paper.',
+      surfaceLooksLike: 'Says the infinite-horizon proof is simpler.',
+      zh: {
+        question: '无限期这个设定，具体让你不必再操心什么 —— 而作为交换，它让你付出了什么？',
+        whyThisProbe: '综述把这个策略选择说成一个没有代价的改进。一个不要代价的策略，通常是作者没有细看过的策略。',
+        keyPoints: [
+          '有限期那条路会把期末效应拖进来，所以它只能刻画最优策略的「形式」，而不是最优策略本身。',
+          '无限期换来的是平稳性：一个策略管所有时刻，不必再带着终端条件。',
+          '代价是必须让成本有界 —— 这正是后面平均成本模型需要做松弛的原因。',
+        ],
+        ownedLooksLike: '说出所得是平稳性、代价是有界性，并把这个代价和文章后面那个松弛连起来。',
+        surfaceLooksLike: '说无限期的证明比较简单。',
+      },
+    },
+    {
+      dimensionId: 'justification',
+      kind: 'blindspot',
+      quote: 'he relaxes the problem to one where inventory can in fact take on values greater than S and thus allowing for negative orders. However, he is quick to point out that intuitively, this would never happen optimally.',
+      question: 'An intuition is standing in the middle of a proof here. What would have to be shown to replace it — and until that is shown, what exactly has been proved?',
+      whyThisProbe: 'This is the one place in the review where the writer repeats an author\'s intuition as if it settled something. It is also the only step whose gap he could have found by reading carefully.',
+      keyPoints: [
+        'The relaxation enlarges the feasible set, so the relaxed optimum is a bound on the original, not equal to it.',
+        'What must be shown is that the relaxed optimum never uses the added actions — then the bound is attained.',
+        'Until then the result is about the relaxed problem, which is a weaker claim than the one being reviewed.',
+      ],
+      ownedLooksLike: 'Distinguishes the relaxed problem from the original and says what closes the gap.',
+      surfaceLooksLike: 'Agrees that negative orders would obviously never be optimal.',
+      zh: {
+        question: '这里有一个直觉站在证明的正中间。要把它换掉，需要证明什么 —— 在那之前，这里到底证明了什么？',
+        whyThisProbe: '这是全篇唯一一处，作者把别人的直觉当成把事情定下来的东西复述了一遍。而这也是他只要读得再细一点就能发现的缺口。',
+        keyPoints: [
+          '松弛把可行集放大了，所以松弛后的最优值只是原问题的一个界，不等于原问题的最优值。',
+          '需要证明的是：松弛后的最优解从不使用那些新增的动作 —— 这样这个界才被取到。',
+          '在此之前，这个结果讲的是松弛问题，比被综述的那个命题弱。',
+        ],
+        ownedLooksLike: '把松弛问题和原问题分开，并说出什么能补上这个缺口。',
+        surfaceLooksLike: '附和说负订货显然不可能是最优的。',
+      },
+    },
+    {
+      dimensionId: 'provenance',
+      kind: 'provenance',
+      quote: "if Zheng's claim that all previous attempts at proofs of the infinite horizon (S, s) model rely on finite horizon results, then this paper is indeed significant",
+      question: 'Your last sentence is a conditional. Did you check the antecedent — and if you did not, what is the review actually asserting?',
+      whyThisProbe: 'The paper\'s entire significance judgement is hung on an unverified premise, taken from the author being reviewed. The honest answer is available to anyone who noticed they wrote "if".',
+      keyPoints: [
+        'The antecedent is a claim about the whole prior literature, sourced from the paper under review.',
+        'A reviewer who does not check it is relaying the author\'s self-assessment, not evaluating it.',
+        'Saying so plainly is a stronger review than asserting significance.',
+      ],
+      ownedLooksLike: 'Owns that the premise came from the reviewed author and names what checking it would involve.',
+      surfaceLooksLike: 'Restates that the paper is significant.',
+      zh: {
+        question: '你最后一句是一个条件句。那个前件你核对过吗 —— 如果没有，这篇综述实际上在断言什么？',
+        whyThisProbe: '整篇文章对「重要性」的判断，挂在一个没被核实的前提上，而这个前提来自被综述的作者本人。只要注意到自己写了「如果」，诚实的答案就在手边。',
+        keyPoints: [
+          '这个前件是关于整片既有文献的断言，出处是被综述的那篇论文自己。',
+          '不去核对的综述者，转述的是作者的自我评价，而不是在评价它。',
+          '把这一点直说出来，比断言它重要是一篇更强的综述。',
+        ],
+        ownedLooksLike: '承认这个前提来自被综述的作者，并说出核对它需要做什么。',
+        surfaceLooksLike: '重复一遍这篇论文很重要。',
+      },
+    },
+  ],
+  fragilities: [
+    {
+      quote: 'intuitively, this would never happen optimally',
+      note: 'An intuition inside a relaxation. It may well be true; nothing in the review establishes it.',
+    },
+    {
+      quote: "Personally, I didn't find Zheng's proofs to be simple",
+      note: 'The most honest sentence in the paper, and the one the probes can build on — a reader who says where they lost the thread can usually be led back to it.',
     },
   ],
 };

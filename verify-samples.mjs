@@ -144,9 +144,9 @@ for (const file of readdirSync('src/packs').filter((f) => f.endsWith('.ts') && !
 
 console.log(`verify-samples: ${zhChecked} probes carry Simplified Chinese for everything the student reads`);
 
-console.log('verify-samples: NOTE — no chemistry and no mathematics sample ships. research/ireallyknow/01 §7.1 found');
-console.log('  no genuine student-submitted chemistry lab report, and MICUSP carries no');
-console.log('  mathematics papers. Both gaps are stated, not fabricated.');
+console.log('verify-samples: NOTE — no chemistry sample ships. research/ireallyknow/01 §7.1 found no');
+console.log('  genuine student-submitted chemistry lab report; the best candidate was an');
+console.log('  instructor template bylined "Joe Student". The gap is stated, not fabricated.');
 
 if (!checked) {
   console.error('verify-samples: parsed 0 anchors — the parser is out of date.');
