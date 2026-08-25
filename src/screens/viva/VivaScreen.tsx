@@ -8,7 +8,7 @@ import { verdictOf } from '../../lib/analysis';
 import { describeError, score as scoreProbe } from '../../lib/llm';
 import { isSpeechSupported, startDictation, type Dictation } from '../../lib/speech';
 import { targetsFromSession } from '../../lib/session-ops';
-import type { Score, SelfGrade } from '../../types';
+import type { Probe, Score, SelfGrade } from '../../types';
 import { activeScheme, DEFAULT_SCHEME } from '../../app/scheme';
 import { RunFrame, type RunSlots } from './presentations';
 
@@ -119,7 +119,7 @@ export default function VivaScreen() {
     setRecording(true);
   }
 
-  function saveAnswer(value: string) {
+  function saveAnswer(value: string, extra: Partial<Probe> = {}) {
     if (!session || !probe) return;
     stopVoice();
     updateProbe(session.id, probe.id, {
@@ -127,6 +127,7 @@ export default function VivaScreen() {
       answerMode: usedVoice.current ? 'voice' : 'text',
       committedAt: Date.now(),
       timeUsedSec: Math.max(0, Math.round((Date.now() - startedAt.current) / 1000)),
+      ...extra,
     });
     setAnswer(value.trim());
     setPhase('selfgrade');
@@ -147,7 +148,9 @@ export default function VivaScreen() {
     const value = lang === 'zh-CN'
       ? `这题我会卡住。我会这样弄清楚：${blankPlan.trim()}`
       : `I would blank on this. I would find out by: ${blankPlan.trim()}`;
-    saveAnswer(value);
+    // The plan is stored as its own field as well as inside the answer text, so
+    // the result page can show it as a positive outcome rather than a blank.
+    saveAnswer(value, { blankPlan: blankPlan.trim() });
   }
 
   async function chooseSelfGrade(grade: SelfGrade) {

@@ -352,3 +352,40 @@ export function titleFromMaterial(material: string): string {
 }
 
 export const asScore = (n: number): Score => (Math.max(0, Math.min(3, Math.round(n))) as Score);
+
+/* ---------- the honest bar · scheme 04 (design/v7r2/SCHEMES-V2.md §04) ------
+ *
+ * A student who says "I would blank on this, and here is how I would find out"
+ * has not failed the question. They have given the one answer this product most
+ * wants to be able to trust. Grouping them under `undefended` with the students
+ * who guessed would erase exactly the distinction the product sells.
+ *
+ * These two prefixes are the literals written by `commitBlankPlan` before the
+ * `blankPlan` field existed. They are matched, not re-written: history stays as
+ * it was recorded.
+ */
+const LEGACY_BLANK_PREFIXES = ['这题我会卡住。我会这样弄清楚：', 'I would blank on this. I would find out by: '];
+
+/** The plan the student wrote at the blank step, or undefined if they answered. */
+export function blankPlanOf(probe: Probe): string | undefined {
+  if (probe.blankPlan?.trim()) return probe.blankPlan.trim();
+  const answer = probe.answer?.trim();
+  if (!answer) return undefined;
+  for (const prefix of LEGACY_BLANK_PREFIXES) {
+    if (answer.startsWith(prefix)) {
+      const rest = answer.slice(prefix.length).trim();
+      if (rest) return rest;
+    }
+  }
+  return undefined;
+}
+
+/** Probes the student took the escape on AND said how they would close the gap. */
+export function stuckButPlanned(probes: Probe[]): { probe: Probe; index: number; plan: string }[] {
+  const out: { probe: Probe; index: number; plan: string }[] = [];
+  probes.forEach((probe, index) => {
+    const plan = blankPlanOf(probe);
+    if (plan) out.push({ probe, index, plan });
+  });
+  return out;
+}

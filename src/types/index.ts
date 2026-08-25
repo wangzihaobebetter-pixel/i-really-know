@@ -116,6 +116,26 @@ export interface Probe {
    * and the product can say so.
    */
   preStance?: 'holds' | 'unsure';
+
+  /**
+   * The sentence the student wrote at the "I would blank on this" step.
+   *
+   * Measured on our own build, that escape was 78x19px next to a 52x52 submit:
+   * the interface made inventing an answer cheaper than admitting a gap, and an
+   * invented answer is the one thing this product cannot tolerate. Khan ships
+   * [Skip 44x40] beside [Check 130x40]; Elevate ships [Skip][Submit] at equal
+   * width. Two independent products, 650k ratings.
+   *
+   * Storing the plan as its own field, rather than only as a text prefix on
+   * `answer`, is what lets the result page count it as a POSITIVE outcome
+   * instead of a failed question. Knowing how you would find out is a real
+   * answer; it is simply a different one from being able to defend the claim.
+   *
+   * Sessions recorded before this field existed carry the plan inside `answer`
+   * behind a known prefix; `stuckButPlanned` falls back to that, so no stored
+   * history is rewritten.
+   */
+  blankPlan?: string;
 }
 
 export interface Fragility {

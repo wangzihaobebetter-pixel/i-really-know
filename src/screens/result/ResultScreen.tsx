@@ -5,7 +5,7 @@ import { useNavigate, useRoute, FOLLOWUPS_ID } from '../../router';
 import { useLang, useT } from '../../i18n';
 import { AnchoredText, Button, Mark, Sheet } from '../../ui';
 import type { TextAnchor } from '../../ui';
-import { countVerdicts, divergence, verdictOf } from '../../lib/analysis';
+import { countVerdicts, divergence, stuckButPlanned, verdictOf } from '../../lib/analysis';
 import { formatDate, targetsFromSession } from '../../lib/session-ops';
 import type { Probe, ResultTicket, Verdict } from '../../types';
 import { resultLink } from '../../lib/student-links';
@@ -98,6 +98,7 @@ export default function ResultScreen() {
   const heldWords = session.probes
     .map((probe, index) => ({ probe, index }))
     .filter(({ probe }) => ['defended', 'underclaimed'].includes(verdictOf(probe)) && probe.answer?.trim());
+  const stuck = useMemo(() => stuckButPlanned(session?.probes ?? []), [session]);
   const attemptWord = session.probes
     .map((probe, index) => ({ probe, index }))
     .find(({ probe }) => probe.answer?.trim());
@@ -193,6 +194,28 @@ export default function ResultScreen() {
           return probe ? <div className="marked-margin"><ProbeRow probe={probe} /></div> : null;
         })()}
       </section>
+
+      {/*
+        Scheme 04 · the honest bar (design/v7r2/SCHEMES-V2.md §04, DECISION.md §1).
+        Taking the escape and writing down how you would find out is a POSITIVE
+        result for this product, so it gets its own column instead of being
+        filed under the questions the student could not defend. Verdicts are
+        untouched: this reads alongside them, it does not reclassify anything.
+      */}
+      {stuck.length > 0 && (
+        <section className="result-stuck-v5">
+          <h2>{t('v5.stuckTitle')}</h2>
+          <p>{t(stuck.length === 1 ? 'v5.stuckLead' : 'v5.stuckLeadMany', { n: stuck.length })}</p>
+          <ul>
+            {stuck.map(({ probe, index, plan }) => (
+              <li key={probe.id}>
+                <small>{t('v5.stuckFrom', { n: index + 1 })}</small>
+                <p>{leadQuote(plan)}</p>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       {read && (
         <section className="self-read-v5">

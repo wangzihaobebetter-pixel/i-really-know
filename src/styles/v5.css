@@ -573,6 +573,19 @@
 .self-read-v5 details { margin-top: 13px; }
 .self-read-v5 summary { color: var(--ink-3); font-size: .75rem; cursor: pointer; }
 .self-read-v5 .self-read-pair { margin-top: 13px; }
+/* ── 04 · the honest bar · the escape read as a result, not a gap ──────────
+   A student who wrote down how they would close the gap gave a real answer.
+   It reads in the same paper card vocabulary as the self-read fold above it,
+   deliberately NOT in the verdict palette: this column is orthogonal to the
+   marks, and colouring it green or amber would put it back on that axis. */
+.result-stuck-v5 { padding: 19px; border: 1px solid var(--hairline); border-radius: 22px 9px 22px 22px; background: var(--paper-2); }
+.result-stuck-v5 h2 { font-size: 1rem; }
+.result-stuck-v5 > p { max-width: 42ch; margin-top: 8px; color: var(--ink-2); font-size: .875rem; line-height: 1.5; }
+.result-stuck-v5 ul { list-style: none; display: grid; gap: 13px; padding: 0; margin: 15px 0 0; }
+.result-stuck-v5 li { padding-inline-start: 13px; border-inline-start: 2px solid var(--hairline); }
+.result-stuck-v5 li small { display: block; color: var(--ink-3); font-size: .75rem; }
+.result-stuck-v5 li p { margin-top: 4px; color: var(--ink); font-size: .875rem; line-height: 1.5; }
+
 .return-promise-v5 { display: grid; grid-template-columns: 50px 1fr; gap: 13px; align-items: center; padding: 15px; border-radius: 22px 9px 22px 22px; background: #EEE8FF; }
 .return-promise-v5 > span { width: 48px; height: 48px; display: grid; place-items: center; border-radius: 18px 8px 18px 18px; color: #463E78; background: #D8CDFC; }
 .return-promise-v5 h2 { font-size: .9375rem; }
